@@ -1,5 +1,5 @@
 ##NXTLib
-####LEGO NXT API for Windows
+#####LEGO NXT API for Windows
 
 The purpose of this library is to code a solution for **wireless live control** of the brick from a Windows device and to make the programming process simpler for NXT targeting on Windows.
 
