@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nxtlib", "nxtlib\nxtlib.csproj", "{42C3D5D5-EDFD-4917-A353-4A25B23D78CC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "commandtester", "tests\commandtester\commandtester.csproj", "{099515E8-14DD-4A00-9012-17B383DE7E1C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{42C3D5D5-EDFD-4917-A353-4A25B23D78CC} = {42C3D5D5-EDFD-4917-A353-4A25B23D78CC}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
