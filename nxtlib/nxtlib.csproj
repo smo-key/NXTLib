@@ -48,7 +48,6 @@
     <Compile Include="src\ActiveSensor.cs" />
     <Compile Include="src\Connect\Bluetooth.cs" />
     <Compile Include="src\Brick.cs" />
-    <Compile Include="src\Connect\Comm.cs" />
     <Compile Include="src\DigitalSensor.cs" />
     <Compile Include="src\Motor.cs" />
     <Compile Include="src\PassiveSensor.cs" />
@@ -60,6 +59,9 @@
     <Compile Include="src\Sensors\SoundSensor.cs" />
     <Compile Include="src\Sensors\TouchSensor.cs" />
     <Compile Include="src\Sensors\UltrasonicSensor.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram1.cd" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
