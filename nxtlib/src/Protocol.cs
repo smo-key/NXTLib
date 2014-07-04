@@ -1287,12 +1287,34 @@ namespace NXTLib
         }
 
         /// <summary>
+        /// [NXTLib] Checks if a file exists.
+        /// </summary>
+        /// <param name="filename">The name of the file to read, as a string.
+        ///   The extension must be included.</param>
+        /// <returns>True if exists and no error.</returns>
+        public bool DoesExist(string filename)
+        {
+            try
+            {
+                FindFileReply? reply = FindFirst(filename);
+                if (!reply.HasValue) { return false; }
+                if (!reply.Value.fileFound) { return false; }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                error = ex.Message;
+                return false;
+            }
+        }
+
+        /// <summary>
         /// [Native] Open a file for reading.  When finished reading, the handle MUST be closed with 
         /// the Close() command.  If an error occurs, this handle will be closed automatically.
         /// </summary>
         /// <param name="filename">The name of the file to read, as a string.
         ///   The extension must be included.  The possible file extensions are: 
-        /// Program (.rxe), Graphic (.ric), Sound (.rso), and Datalog (.rdt).</param>
+        /// Program (.rxe), Graphic (.ric), Sound (.rso), Datalog (.rdt), and Text (.txt).</param>
         /// <returns>The reply as struct NXTOpenReadReply.</returns>
         public NXTOpenReadReply? OpenRead(string filename)
         {
@@ -1339,10 +1361,10 @@ namespace NXTLib
         /// [Native] Open a file for writing.  When finished writing, the handle MUST be closed with 
         /// the Close() command.  If an error occurs, this handle will be closed automatically.
         /// </summary>
-        /// <param name="filename">The name of the file to read, as a string.
+        /// <param name="filename">The name of the file to write, as a string.
         ///   The extension must be included.  The possible file extensions are: 
         /// Firmware (.rfw), Program (.rxe), OnBrick Program (.rpg), TryMe Program (.rtm),
-        ///  Sound (.rso), and Graphic (.ric).</param>
+        ///  Sound (.rso), Graphic (.ric), and Text (.txt).</param>
         /// <param name="filesize">The size of the file to be written.</param>
         /// <returns>The handle used in the write session.  Use this handle with the Close() command.</returns>
         public byte? OpenWrite(string filename, UInt32 filesize)
@@ -1350,7 +1372,7 @@ namespace NXTLib
             try
             {
                 if (ValidateFilename(filename, new string[] { ".rfw", ".rxe", ".ric",
-                    ".rso", ".rtm", ".rpg",".txt" }) == false)
+                    ".rso", ".rtm", ".rpg", ".txt" }) == false)
                 {
                     return null;
                 }
@@ -1598,7 +1620,7 @@ namespace NXTLib
         {
             try
             {
-                ValidateFilename(pattern);
+                if (!ValidateFilename(pattern)) { return null; };
 
                 byte[] request = new byte[22];
                 request[0] = 0x01;
@@ -1648,6 +1670,17 @@ namespace NXTLib
                 {
                     throw new Exception(error);
                 }
+            
+                result.fileFound = true;
+                result.handle = reply[3];
+                result.fileName = Encoding.ASCII.GetString(reply, 4, 20).TrimEnd('\0');
+                result.fileSize = GetUInt32(reply, 24);
+
+                if (result.fileName == "")
+                {
+                    throw new Exception("[NXT] File not found.");
+                }
+
             }
             catch (Exception ex)
             {
@@ -1665,10 +1698,6 @@ namespace NXTLib
                 return null;
             }
 
-            result.fileFound = true;
-            result.handle = reply[3];
-            result.fileName = Encoding.ASCII.GetString(reply, 4, 20).TrimEnd('\0');
-            result.fileSize = GetUInt32(reply, 24);
             return result;
         }
 
