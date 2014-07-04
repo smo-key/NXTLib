@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("NXTLib Command Tester")]
-[assembly: AssemblyDescription("Test NXTLib on your NXT!")]
+[assembly: AssemblyTitle("nxtlibtester")]
+[assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("commandtester")]
-[assembly: AssemblyCopyright("Copyright © 2014 Arthur Pachachura")]
+[assembly: AssemblyCompany("Hewlett-Packard Company")]
+[assembly: AssemblyProduct("nxtlibtester")]
+[assembly: AssemblyCopyright("Copyright © Hewlett-Packard Company 2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("31054e4e-3107-4818-938a-3532e14e7bf4")]
+[assembly: Guid("09325000-652e-46e1-9c35-85efe6c19fd5")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.3")]
-[assembly: AssemblyFileVersion("1.3")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]

@@ -17,6 +17,14 @@ namespace NXTLib
         private static UsbCommunication usb = new UsbCommunication(NXT_WINUSB_GUID);
 
         /// <summary>
+        /// <para>The communication protocols specific to USB.</para>
+        /// </summary>
+        public USB()
+        {
+            
+        }
+
+        /// <summary>
         /// <para>Useless when connecting via USB.</para>
         /// </summary>
         /// <returns>Always true.</returns>
