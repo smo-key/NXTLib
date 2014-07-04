@@ -15,7 +15,6 @@ namespace NXTLib
     /// <summary>
     /// <para>Class representing a motor.</para>
     /// </summary>
-    /// <seealso cref="NxtMotorSync"/>
     public class Motor : Pollable
     {
         /// <summary>

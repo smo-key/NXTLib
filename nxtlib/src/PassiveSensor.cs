@@ -10,8 +10,8 @@ namespace NXTLib
         /// <summary>
         /// <para>Constructor for all NXT Passive sensors.</para>
         /// </summary>
-        /// <param name="sensorType">Sensor type.</param>
-        /// <param name="sensorMode">Sensor mode.</param>
+        /// <param name="type">Sensor type.</param>
+        /// <param name="mode">Sensor mode.</param>
         public PassiveSensor(Protocol.SensorType type, Protocol.SensorMode mode)
             : base(type, mode)
         {

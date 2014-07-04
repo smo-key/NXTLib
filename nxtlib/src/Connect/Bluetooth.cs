@@ -48,6 +48,7 @@ namespace NXTLib
         /// <summary> 
         /// Connect to the device via Bluetooth.
         /// </summary>
+        /// <returns>Returns true if operation was a success, false otherwise.  If false, check LastError.</returns>
         public override bool Connect()
         {
             try
@@ -120,7 +121,7 @@ namespace NXTLib
         /// </summary>
         /// <param name="request">The request, as a byte array.</param>
         /// <returns>Returns true if operation was a success, false otherwise.  If false, check LastError.</returns>
-        internal override bool Send(byte[] request)
+        public override bool Send(byte[] request)
         {
             try
             {
@@ -149,7 +150,7 @@ namespace NXTLib
         /// Recieves the reply from the NXT.
         /// </summary>
         /// <returns>Returns the reply from the NXT, as a byte array.</returns>
-        internal override byte[] RecieveReply()
+        public override byte[] RecieveReply()
         {
             try
             {
@@ -171,16 +172,6 @@ namespace NXTLib
                 error = ex.Message;
                 return null;
             }
-        }
-
-        internal string error;
-
-        /// <summary> 
-        /// The last error that occured.
-        /// </summary>
-        public string LastError
-        {
-            get { return error; }
         }
         
     }

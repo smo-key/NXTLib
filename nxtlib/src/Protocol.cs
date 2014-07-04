@@ -17,10 +17,10 @@ namespace NXTLib
         { }
 
         public abstract bool Connect();
-        internal abstract bool Send(byte[] request);
+        public abstract bool Send(byte[] request);
         public abstract bool Disconnect();
-        internal abstract byte[] RecieveReply();
-        private string error;
+        public abstract byte[] RecieveReply();
+        internal string error;
         public virtual string LastError { get { return error; } }
         internal SerialPort link { get; set; }
         public abstract bool IsConnected { get; }
@@ -31,7 +31,7 @@ namespace NXTLib
         /// <summary> 
         /// [Native] Starts a program (.rxe) on the NXT brick.
         /// </summary>
-        /// <param name="pattern">The name of the program you wish to run.</param>
+        /// <param name="fileName">The name of the program you wish to run.</param>
         /// <returns>Returns true if operation was a success, false otherwise.  If false, check LastError.</returns>
         public bool StartProgram(string fileName)
         {
@@ -84,7 +84,7 @@ namespace NXTLib
         /// [Native] Plays a beep tone on the NXT brick.
         /// </summary>
         /// <param name="frequency">The frequency, in Hz, where frequency is between 200 and 14000 Hz.</param>
-        /// <param name="durarion">The duration of the tone, in milliseconds.</param>
+        /// <param name="duration">The duration of the tone, in milliseconds.</param>
         /// <returns>Returns true if operation was a success, false otherwise.  If false, check LastError.</returns>
         public bool PlayTone(UInt16 frequency, UInt16 duration)
         {
@@ -112,7 +112,7 @@ namespace NXTLib
         /// [Native] Plays a sound file from the NXT.
         /// </summary>
         /// <param name="loop">Set to true to loop the sound until stopped.</param>
-        /// <param name="pattern">The name of the sound file (.rso) on the NXT.</param>
+        /// <param name="fileName">The name of the sound file (.rso) on the NXT.</param>
         /// <returns>Returns true if operation was a success, false otherwise.  If false, check LastError.</returns>
         public bool PlaySoundFile(bool loop, string fileName)
         {
@@ -657,7 +657,7 @@ namespace NXTLib
         /// </summary>
         /// <param name="port">The port of the attached sensor.</param>
         /// <param name="txData">The tx Data to be written.</param>
-        /// <param name="port">The rx Data Length. </param>
+        /// <param name="rxDataLength">The rx Data Length. </param>
         /// <returns>Returns true if operation was a success, false otherwise.  If false, check LastError.</returns>
         public bool LowspeedWrite(SensorPort port, byte[] txData, byte rxDataLength)
         {
@@ -1179,7 +1179,6 @@ namespace NXTLib
             /// <summary>
             /// <para>[Internal] Run motors on the NXT brick.</para>
             /// </summary>
-    
             /// <param name="motorPort">MotorPort Port</param>
             /// <param name="power">Power Set Point, between -100 and 100.</param>
             /// <param name="mode">Mode</param>
@@ -1485,7 +1484,7 @@ namespace NXTLib
         /// <summary>
         /// [Native] Close and dispose of a handle.
         /// </summary>
-        /// <param name="buffer">The buffer number.  Either 0x00 (Poll) or 0x01 (High Speed).</param>
+        /// <param name="handle">The buffer number.  Either 0x00 (Poll) or 0x01 (High Speed).</param>
         /// <returns>The number of bytes for the command ready in the buffer (0 = no command ready).</returns>
         public bool Close(byte handle)
         {
@@ -1513,8 +1512,7 @@ namespace NXTLib
         /// <param name="filename">The name of the file to read, as a string.
         ///   The extension must be included.  The possible file extensions are: 
         /// Program (.rxe), OnBrick Program (.rpg), TryMe Program (.rtm),
-        ///  Sound (.rso), Datalog (.rdt), and Graphic (.ric).</param>
-        /// <param name="filesize">The size of the file to be written.</param>
+        ///  Sound (.rso), Datalog (.rdt), Graphic (.ric), and Text (.txt).</param>
         /// <returns>Returns true if operation was a success, false otherwise.  If false, check LastError.</returns>
         public bool Delete(string filename)
         {
