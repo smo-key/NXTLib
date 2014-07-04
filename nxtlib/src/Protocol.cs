@@ -1651,7 +1651,7 @@ namespace NXTLib
             }
             catch (Exception ex)
             {
-                if (ex.Message == "[NXT Bluetooth] File not found.")
+                if (ex.Message == "[NXT] File not found.")
                 {
                     result.fileFound = false;
                     result.handle = 0;
@@ -1923,7 +1923,7 @@ namespace NXTLib
                 }
                 if (reply[2] != 0x00)
                 {
-                    string error = LookupError(reply[2]);
+                    error = LookupError(reply[2]);
                     return false;
                 }
                 return true;
@@ -2099,151 +2099,151 @@ namespace NXTLib
         {
             if (error == 0x20)
             {
-                return "[NXT Bluetooth] Pending communication transaction in progress.";
+                return "[NXT] Pending communication transaction in progress.";
             }
             if (error == 0x40)
             {
-                return "[NXT Bluetooth] Specified mailbox queue is empty.";
+                return "[NXT] Specified mailbox queue is empty.";
             }
             if (error == 0xBD)
             {
-                return "[NXT Bluetooth] Request failed.";
+                return "[NXT] Request failed.";
             }
             if (error == 0xBE)
             {
-                return "[NXT Bluetooth] Unknown command opcode.";
+                return "[NXT] Unknown command opcode.";
             }
             if (error == 0xBF)
             {
-                return "[NXT Bluetooth] Insane packet.";
+                return "[NXT] Insane packet.";
             }
             if (error == 0xC0)
             {
-                return "[NXT Bluetooth] Data contains out-of-range values.";
+                return "[NXT] Data contains out-of-range values.";
             }
             if (error == 0xDD)
             {
-                return "[NXT Bluetooth] Communication bus error.";
+                return "[NXT] Communication bus error.";
             }
             if (error == 0xDE)
             {
-                return "[NXT Bluetooth] No free memory in communtication buffer.";
+                return "[NXT] No free memory in communtication buffer.";
             }
             if (error == 0xDF)
             {
-                return "[NXT Bluetooth] Specified channel/connection is not valid.";
+                return "[NXT] Specified channel/connection is not valid.";
             }
             if (error == 0xE0)
             {
-                return "[NXT Bluetooth] Specified channel/connection is not configured or busy.";
+                return "[NXT] Specified channel/connection is not configured or busy.";
             }
             if (error == 0xEC)
             {
-                return "[NXT Bluetooth] No active program.";
+                return "[NXT] No active program.";
             }
             if (error == 0xED)
             {
-                return "[NXT Bluetooth] Illegal size specified.";
+                return "[NXT] Illegal size specified.";
             }
             if (error == 0xEE)
             {
-                return "[NXT Bluetooth] Illegal mailbox queue ID specified.";
+                return "[NXT] Illegal mailbox queue ID specified.";
             }
             if (error == 0xEF)
             {
-                return "[NXT Bluetooth] Attempted to access invalid field of a structure.";
+                return "[NXT] Attempted to access invalid field of a structure.";
             }
             if (error == 0xF0)
             {
-                return "[NXT Bluetooth] Bad input or output specified.";
+                return "[NXT] Bad input or output specified.";
             }
             if (error == 0xFB)
             {
-                return "[NXT Bluetooth] Insufficient memory available.";
+                return "[NXT] Insufficient memory available.";
             }
             if (error == 0xFF)
             {
-                return "[NXT Bluetooth] Bad arguments.";
+                return "[NXT] Bad arguments.";
             }
 
             //Message Commands
             if (error == 0x81)
             {
-                return "[NXT Bluetooth] No more handles.";
+                return "[NXT] No more handles.";
             }
             if (error == 0x82)
             {
-                return "[NXT Bluetooth] No space.";
+                return "[NXT] No space.";
             }
             if (error == 0x83)
             {
-                return "[NXT Bluetooth] No more files.";
+                return "[NXT] No more files.";
             }
             if (error == 0x84)
             {
-                return "[NXT Bluetooth] End of file expected.";
+                return "[NXT] End of file expected.";
             }
             if (error == 0x85)
             {
-                return "[NXT Bluetooth] End of file.";
+                return "[NXT] End of file.";
             }
             if (error == 0x86)
             {
-                return "[NXT Bluetooth] Not a linear file.";
+                return "[NXT] Not a linear file.";
             }
             if (error == 0x87)
             {
-                return "[NXT Bluetooth] File not found.";
+                return "[NXT] File not found.";
             }
             if (error == 0x88)
             {
-                return "[NXT Bluetooth] Handle already closed.";
+                return "[NXT] Handle already closed.";
             }
             if (error == 0x89)
             {
-                return "[NXT Bluetooth] Not linear space.";
+                return "[NXT] Not linear space.";
             }
             if (error == 0x8A)
             {
-                return "[NXT Bluetooth] Undefined error.";
+                return "[NXT] Undefined error.";
             }
             if (error == 0x8B)
             {
-                return "[NXT Bluetooth] File is busy.";
+                return "[NXT] File is busy.";
             }
             if (error == 0x8C)
             {
-                return "[NXT Bluetooth] No write buffers.";
+                return "[NXT] No write buffers.";
             }
             if (error == 0x8D)
             {
-                return "[NXT Bluetooth] Append not possible.";
+                return "[NXT] Append not possible.";
             }
             if (error == 0x8E)
             {
-                return "[NXT Bluetooth] File is full.";
+                return "[NXT] File is full.";
             }
             if (error == 0x8F)
             {
-                return "[NXT Bluetooth] File exists.";
+                return "[NXT] File exists.";
             }
             if (error == 0x90)
             {
-                return "[NXT Bluetooth] Module not found.";
+                return "[NXT] Module not found.";
             }
             if (error == 0x91)
             {
-                return "[NXT Bluetooth] Out of boundary.";
+                return "[NXT] Out of boundary.";
             }
             if (error == 0x92)
             {
-                return "[NXT Bluetooth] Illegal file name.";
+                return "[NXT] Illegal file name.";
             }
             if (error == 0x93)
             {
-                return "[NXT Bluetooth] Illegal handle.";
+                return "[NXT] Illegal handle.";
             }
-            return "Unspecified internal NXT error.";
+            return "[NXT] Unspecified internal NXT error.";
         }
 
 #endregion
