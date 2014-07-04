@@ -1299,7 +1299,7 @@ namespace NXTLib
         {
             try
             {
-                if (ValidateFilename(filename, new string[] { ".rxe", ".ric", ".rso", ".rdt" }) == false)
+                if (ValidateFilename(filename, new string[] { ".rxe", ".ric", ".rso", ".rdt", ".txt" }) == false)
                 {
                     return null;
                 }
@@ -1351,7 +1351,7 @@ namespace NXTLib
             try
             {
                 if (ValidateFilename(filename, new string[] { ".rfw", ".rxe", ".ric",
-                    ".rso", ".rtm", ".rpg" }) == false)
+                    ".rso", ".rtm", ".rpg",".txt" }) == false)
                 {
                     return null;
                 }
@@ -1521,7 +1521,7 @@ namespace NXTLib
             try
             {
                 if (ValidateFilename(filename, new string[] { ".rso", ".ric", ".rxe", ".rpg",
-                ".rtm", ".rdt"}) == false)
+                ".rtm", ".rdt", ".txt"}) == false)
                 {
                     return false;
                 }
