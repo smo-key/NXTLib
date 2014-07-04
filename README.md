@@ -18,4 +18,5 @@ The purpose of this library is to code a solution for **live control** of the br
 -----------------------------------
 Licensed under MIT.
 
-Arthur Pachachura (smo-key)
+Original Author: Arthur Pachachura (smo-key)
+Copyright (c) 2014 LASA Robotics
