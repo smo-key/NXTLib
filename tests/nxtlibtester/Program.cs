@@ -16,16 +16,25 @@ namespace nxtlibtester
             {
                 string filename = "../../version.ric"; //filename on disk (locally)
                 string filenameonbrick = "version.ric"; //filename on remote NXT
+                Brick brick = new Brick(Brick.LinkType.Null, null);
 
-                //Prepare Connection
-                Console.WriteLine("File Upload Test\r\n");
-                Console.WriteLine("Connecting to brick...");
-                Brick brick = new Brick(Brick.LinkType.USB, null); //Brick = top layer of code, contains the sensors and motors
-                if (!brick.Connect()) { throw new Exception(brick.LastError); }
+                Console.WriteLine("File Upload Test\r\n"); 
+
+                //Try Connecting via USB
+                Console.WriteLine("Connecting to brick via USB...");
+                try
+                {
+                    brick = new Brick(Brick.LinkType.USB, null); //Brick = top layer of code, contains the sensors and motors
+                    if (!brick.Connect()) { throw new Exception(brick.LastError); }
+                    if (!brick.IsConnected) { throw new Exception("Not connected to NXT!"); }
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception(ex.Message);
+                }
+
+                //Get Protocol from Brick
                 Protocol protocol = brick.ProtocolLink; //Protocol = underlying layer of code, contains NXT communications
-
-                //Test Connection
-                if (!brick.IsConnected) { throw new Exception("Not connected to NXT!"); }
 
                 //Upload File
                 Console.WriteLine("Uploading file...");

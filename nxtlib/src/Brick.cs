@@ -14,7 +14,7 @@ namespace NXTLib
         //TODO: Add timer
 
     #region Connection and Timer
-        public enum LinkType { Bluetooth, USB }
+        public enum LinkType { Bluetooth, USB, Null }
         public Brick(LinkType type, string port)
         {
             switch (type)
@@ -24,6 +24,9 @@ namespace NXTLib
                     break;
                 case LinkType.USB:
                     ProtocolLink = new USB();
+                    break;
+                case LinkType.Null:
+                    ProtocolLink = null;
                     break;
                 default:
                     throw new Exception("[NXTLib] Parameter 'type' formatted incorrectly.");
