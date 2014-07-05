@@ -14,7 +14,7 @@ namespace nxtlibtester
         {
             try
             {
-                string filename = "version.ric"; //filename on disk (locally)
+                string filename = "../../version.ric"; //filename on disk (locally)
                 string filenameonbrick = "version.ric"; //filename on remote NXT
 
                 //Prepare Connection
