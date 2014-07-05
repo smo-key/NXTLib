@@ -17,23 +17,16 @@ namespace NXTLib
         public enum LinkType { Bluetooth, USB }
         public Brick(LinkType type, string port)
         {
-            try
+            switch (type)
             {
-                switch (type)
-                {
-                    case LinkType.Bluetooth:
-                        ProtocolLink = new Bluetooth(port);
-                        break;
-                    case LinkType.USB:
-                        ProtocolLink = new USB();
-                        break;
-                    default:
-                        throw new Exception("[NXTLib] Parameter 'type' formatted incorrectly.");
-                }
-            }
-            catch (Exception ex)
-            {
-                error = ex.Message;
+                case LinkType.Bluetooth:
+                    ProtocolLink = new Bluetooth(port);
+                    break;
+                case LinkType.USB:
+                    ProtocolLink = new USB();
+                    break;
+                default:
+                    throw new Exception("[NXTLib] Parameter 'type' formatted incorrectly.");
             }
         }
         public Protocol ProtocolLink
@@ -280,9 +273,6 @@ namespace NXTLib
             {
                 UInt32 filesize = 0;
                 byte? filehandle;
-
-                //Test Connection
-                if (!IsConnected) { throw new Exception("Not connected to NXT!"); }
 
                 //Delete File, if Exists
                 if (_link.DoesExist(filenameonbrick))

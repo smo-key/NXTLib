@@ -9,7 +9,7 @@ namespace NXTLib
     public abstract class Protocol
     {
         //TODO: Complete the missing portions of the library after phase 3!
-        //Ensure comments are written for each method!
+        //TODO: Ensure comments are written for each method!
 
 #region Base
         public Protocol()
