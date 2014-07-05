@@ -5,6 +5,7 @@
 *.suo
 *.user
 *.sln.docstates
+*.pfx
 
 # Build results
 [Dd]ebug/
@@ -147,7 +148,6 @@ ClientBin/
 *~
 *.dbmdl
 *.dbproj.schemaview
-*.pfx
 *.publishsettings
 node_modules/
 
