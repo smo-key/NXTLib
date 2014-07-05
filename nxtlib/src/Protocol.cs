@@ -243,7 +243,7 @@ namespace NXTLib
                 }
                 if (reply[2] != 0x00)
                 {
-                    string error = LookupError(reply[2]);
+                    error = LookupError(reply[2]);
                     return null;
                 }
                 string fileName = Encoding.ASCII.GetString(reply, 3, 20).TrimEnd('\0');
@@ -322,7 +322,7 @@ namespace NXTLib
                 }
                 if (reply[2] != 0x00)
                 {
-                    string error = LookupError(reply[2]);
+                    error = LookupError(reply[2]);
                     return null;
                 }
                 GetFirmwareVersionReply result;
@@ -361,7 +361,7 @@ namespace NXTLib
                 }
                 if (reply[2] != 0x00)
                 {
-                    string error = LookupError(reply[2]);
+                    error = LookupError(reply[2]);
                     return false;
                 }
                 string result = Encoding.ASCII.GetString(reply, 3, 4).TrimEnd('\0');
@@ -430,7 +430,7 @@ namespace NXTLib
                 }
                 if (reply[2] != 0x00)
                 {
-                    string error = LookupError(reply[2]);
+                    error = LookupError(reply[2]);
                     return null;
                 }
 
@@ -568,7 +568,7 @@ namespace NXTLib
                 }
                 if (reply[2] != 0x00)
                 {
-                    string error = LookupError(reply[2]);
+                    error = LookupError(reply[2]);
                     return null;
                 }
                 SensorInput result = new SensorInput();
@@ -640,7 +640,7 @@ namespace NXTLib
                 }                
                 if (reply[2] != 0x00)
                 {
-                    string error = LookupError(reply[2]);
+                    error = LookupError(reply[2]);
                     return null;
                 }
                 return reply[3];
@@ -717,7 +717,7 @@ namespace NXTLib
                 }
                 if (reply[2] != 0x00)
                 {
-                    string error = LookupError(reply[2]);
+                    error = LookupError(reply[2]);
                     return null;
                 }
 
@@ -863,7 +863,7 @@ namespace NXTLib
                 }
                 if (reply[2] != 0x00)
                 {
-                    string error = LookupError(reply[2]);
+                    error = LookupError(reply[2]);
                     return null;
                 }
                 MotorStateOut result = new MotorStateOut();
@@ -1286,6 +1286,19 @@ namespace NXTLib
             public UInt32 fileSize { get; internal set; }
         }
 
+        public struct NxtOpenAppendDataReply
+        {
+            /// <summary>
+            /// <para>File handle.</para>
+            /// </summary>
+            public byte handle { get; internal set; }
+
+            /// <summary>
+            /// <para>Available file size.</para>
+            /// </summary>
+            public UInt32 availableFilesize { get; internal set; }
+        }
+
         /// <summary>
         /// [NXTLib] Checks if a file exists.
         /// </summary>
@@ -1308,6 +1321,28 @@ namespace NXTLib
             }
         }
 
+        /*/// <summary>
+        /// [NXTLib] Uploads a file to the NXT, overwriting contents.
+        /// </summary>
+        /// <param name="filename">The name of the file to read, as a string.
+        ///   The extension must be included.</param>
+        /// <returns>True if exists and no error.</returns>
+        public bool Upload(string filenamelocal, string filenameonbrick)
+        {
+            try
+            {
+                FindFileReply? reply = FindFirst(filename);
+                if (!reply.HasValue) { return false; }
+                if (!reply.Value.fileFound) { return false; }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                error = ex.Message;
+                return false;
+            }
+        }*/
+        
         /// <summary>
         /// [Native] Open a file for reading.  When finished reading, the handle MUST be closed with 
         /// the Close() command.  If an error occurs, this handle will be closed automatically.
@@ -1342,7 +1377,7 @@ namespace NXTLib
                 }
                 if (reply[2] != 0x00)
                 {
-                    string error = LookupError(reply[2]);
+                    error = LookupError(reply[2]);
                     return null;
                 }
                 NXTOpenReadReply result = new NXTOpenReadReply();
@@ -1395,10 +1430,203 @@ namespace NXTLib
                 }
                 if (reply[2] != 0x00)
                 {
-                    string error = LookupError(reply[2]);
+                    error = LookupError(reply[2]);
                     return null;
                 }
                 return reply[3];
+            }
+            catch (Exception ex)
+            {
+                error = ex.Message;
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// [Native] Open a file for writing continuously.
+        /// When finished writing, the handle MUST be closed with 
+        /// the Close() command.  If an error occurs, this handle will be closed automatically.
+        /// </summary>
+        /// <param name="filename">The name of the file to write, as a string.
+        ///   The extension must be included.  The possible file extensions are: 
+        /// Firmware (.rfw), Program (.rxe), OnBrick Program (.rpg), TryMe Program (.rtm),
+        ///  Sound (.rso), Graphic (.ric), and Text (.txt).</param>
+        /// <param name="filesize">The size of the file to be written.</param>
+        /// <returns>The handle used in the write session.  Use this handle with the Close() command.</returns>
+        public byte? OpenWriteLinear(string filename, UInt32 filesize)
+        {
+            try
+            {
+                ValidateFilename(filename);
+
+                byte[] request = new byte[26];
+                request[0] = 0x01;
+                request[1] = (byte)MessageCommand.OpenWriteLinear;
+                Encoding.ASCII.GetBytes(filename).CopyTo(request, 2);
+                SetUInt32(filesize, request, 22);  //correct here, since command does not allow space for the null terminator
+
+                if (Send(request) == false)
+                {
+                    return null;
+                }
+
+                byte[] reply = RecieveReply();
+                if (reply == null)
+                {
+                    return null;
+                }
+                if (reply[2] != 0x00)
+                {
+                    error = LookupError(reply[2]);
+                    return null;
+                }
+                
+                return reply[3];
+            }
+            catch (Exception ex)
+            {
+                error = ex.Message;
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// [Internal] Open a file for reading continuously.  (This command is for internal use!)
+        /// When finished reading, the handle MUST be closed with 
+        /// the Close() command.  If an error occurs, this handle will be closed automatically.
+        /// </summary>
+        /// <param name="filename">The name of the file to write, as a string.
+        ///   The extension must be included.  The possible file extensions are: 
+        /// Firmware (.rfw), Program (.rxe), OnBrick Program (.rpg), TryMe Program (.rtm),
+        ///  Sound (.rso), Graphic (.ric), and Text (.txt).</param>
+        /// <returns>Pointer to the linear memory segment.</returns>
+        public UInt32? OpenReadLinear(string filename)
+        {
+            try
+            {
+                ValidateFilename(filename);
+
+                byte[] request = new byte[22];
+                request[0] = 0x01;
+                request[1] = (byte)MessageCommand.OpenReadLinear_Internal;
+                Encoding.ASCII.GetBytes(filename).CopyTo(request, 2);
+
+                if (Send(request) == false)
+                {
+                    return null;
+                }
+
+                byte[] reply = RecieveReply();
+                if (reply == null)
+                {
+                    return null;
+                }
+                if (reply[2] != 0x00)
+                {
+                    error = LookupError(reply[2]);
+                    return null;
+                }
+
+                UInt32 pointer = GetUInt32(reply, 3);
+                return pointer;
+            }
+            catch (Exception ex)
+            {
+                error = ex.Message;
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// [Native] Open a file for writing a data stream.
+        /// When finished writing, the handle MUST be closed with 
+        /// the Close() command.  If an error occurs, this handle will be closed automatically.
+        /// </summary>
+        /// <param name="filename">The name of the file to write, as a string.
+        ///   The extension must be included.  The possible file extensions are: 
+        /// Firmware (.rfw), Program (.rxe), OnBrick Program (.rpg), TryMe Program (.rtm),
+        ///  Sound (.rso), Graphic (.ric), and Text (.txt).</param>
+        /// <param name="filesize">The size of the file to be written.</param>
+        /// <returns>The handle used in the write session.  Use this handle with the Close() command.</returns>
+        public byte? OpenWriteData(string filename, UInt32 filesize)
+        {
+            try
+            {
+                ValidateFilename(filename);
+
+                byte[] request = new byte[26];
+                request[0] = 0x01;
+                request[1] = (byte)MessageCommand.OpenWriteData;
+                Encoding.ASCII.GetBytes(filename).CopyTo(request, 2);
+                SetUInt32(filesize, request, 22);  //correct here, since message does not allow null terminator
+
+                if (Send(request) == false)
+                {
+                    return null;
+                }
+
+                byte[] reply = RecieveReply();
+                if (reply == null)
+                {
+                    return null;
+                }
+                if (reply[2] != 0x00)
+                {
+                    error = LookupError(reply[2]);
+                    return null;
+                }
+
+                byte handle = reply[3];
+                return handle;
+            }
+            catch (Exception ex)
+            {
+                error = ex.Message;
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// [Native] Open a file for appending to a data stream.
+        /// When finished writing, the handle MUST be closed with 
+        /// the Close() command.  If an error occurs, this handle will be closed automatically.
+        /// </summary>
+        /// <param name="filename">The name of the file to write, as a string.
+        ///   The extension must be included.  The possible file extensions are: 
+        /// Firmware (.rfw), Program (.rxe), OnBrick Program (.rpg), TryMe Program (.rtm),
+        ///  Sound (.rso), Graphic (.ric), and Text (.txt).</param>
+        /// <returns>The handle used in the write session.  Use this handle with the Close() command.</returns>
+        public NxtOpenAppendDataReply? OpenAppendData(string fileName)
+        {
+            try
+            {
+                ValidateFilename(fileName);
+
+                byte[] request = new byte[22];
+                request[0] = 0x01;
+                request[1] = (byte)MessageCommand.OpenAppendData;
+                Encoding.ASCII.GetBytes(fileName).CopyTo(request, 2);
+
+                if (Send(request) == false)
+                {
+                    return null;
+                }
+
+                byte[] reply = RecieveReply();
+                if (reply == null)
+                {
+                    return null;
+                }
+                if (reply[2] != 0x00)
+                {
+                    error = LookupError(reply[2]);
+                    return null;
+                }
+
+                NxtOpenAppendDataReply result = new NxtOpenAppendDataReply();
+                result.handle = reply[3];
+                result.availableFilesize = GetUInt32(reply, 4);
+                return result;
             }
             catch (Exception ex)
             {
@@ -1434,7 +1662,7 @@ namespace NXTLib
                 }
                 if (reply[2] != 0x00)
                 {
-                    string error = LookupError(reply[2]);
+                    error = LookupError(reply[2]);
                     return null;
                 }
                 if (reply[3] != handle)
@@ -1457,50 +1685,68 @@ namespace NXTLib
         }
 
         /// <summary>
-        /// [Native] Writes data to an NXT.
+        /// [Native] Writes data to an NXT until all data is written.
         /// </summary>
         /// <param name="handle">The handle, located in the OpenWrite command.</param>
         /// <param name="data">The data to be written to flash memory.</param>
         /// <returns>The number of bytes written.</returns>
         public int? Write(byte handle, byte[] data)
         {
-            try
+            UInt16 bytesWritten = 0;
+            int n = 0;
+            while (bytesWritten < data.Length)
             {
-                byte[] request = new byte[3 + data.Length];
-                request[0] = 0x01;
-                request[1] = (byte)MessageCommand.Write;
-                request[2] = handle;
-                data.CopyTo(request, 3);
-                if (Send(request) == false)
+                try
                 {
-                    return null;
-                }
-                byte[] reply = RecieveReply();
-                if (reply == null)
-                {
-                    return null;
-                }
-                if (reply[2] != 0x00)
-                {
-                    string error = LookupError(reply[2]);
-                    return null;
-                }
-                byte handleOut = reply[3];
-                if (handleOut != handle)
-                {
-                    error = "[NXTLib] There was a problem with the reply.";
-                    return null;
-                }
+                    System.Threading.Thread.Sleep(7);
+                    int j = 0;
+                    int max = data.Length;
+                    if ((61 * (n + 1)) < max) { max = (61 * (n + 1)); }
+                    byte[] datatowrite = new byte[max - (61*n)];
+                    for (int i = 61*n; i < max; i++)
+                    {
+                        datatowrite[j] = data[i];
+                        j++;
+                    }
+                    
+                    byte[] request = new byte[3 + datatowrite.Length];
+                    request[0] = 0x01;
+                    request[1] = (byte)MessageCommand.Write;
+                    request[2] = handle;
+                    datatowrite.CopyTo(request, 3);
+                    if (Send(request) == false)
+                    {
+                        return null;
+                    }
+                    System.Threading.Thread.Sleep(7);
+                    byte[] reply = RecieveReply();
+                    if (reply == null)
+                    {
+                        return null;
+                    }
+                    if (reply[2] != 0x00)
+                    {
+                        error = LookupError(reply[2]);
+                        return null;
+                    }
+                    byte handleOut = reply[3];
+                    if (handleOut != handle)
+                    {
+                        error = "[NXTLib] There was a problem with the reply.";
+                        return null;
+                    }
 
-                UInt16 bytesWritten = GetUInt16(reply, 4);
+                    bytesWritten += GetUInt16(reply, 4);
+                    n++;
+                }
+                catch (Exception ex)
+                {
+                    error = ex.Message;
+                    return null;
+                }
+            }
 
-                return Convert.ToInt32(bytesWritten);
-            }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return null;
-            }
+            return Convert.ToInt32(bytesWritten);
         }
 
         /// <summary>
@@ -1563,17 +1809,17 @@ namespace NXTLib
                 }
                 if (reply[2] != 0x00)
                 {
-                    string error = LookupError(reply[2]);
+                    error = LookupError(reply[2]);
                     return false;
                 }
 
-                string fileNameOut = Encoding.ASCII.GetString(reply, 3, 20);
+                /*string fileNameOut = Encoding.ASCII.GetString(reply, 3, 20);
                 if (fileNameOut != filename)
                 {
                     throw new Exception(string.Format(
                         "[NXTLib] The file reported as deleted, '{0}', was different from the file requested, '{1}'."
                         , fileNameOut, filename));
-                }
+                }*/
 
                 return true;
             }
@@ -1727,7 +1973,7 @@ namespace NXTLib
                 }
                 if (reply[2] != 0x00)
                 {
-                    string error = LookupError(reply[2]);
+                    error = LookupError(reply[2]);
                     return null;
                 }
                 byte bufferNoOut = reply[3];
@@ -1892,7 +2138,7 @@ namespace NXTLib
                 }
                 if (reply[2] != 0x00)
                 {
-                    string error = LookupError(reply[2]);
+                    error = LookupError(reply[2]);
                     return null;
                 }
                 byte localInboxNoOut = reply[3];
@@ -1930,7 +2176,7 @@ namespace NXTLib
             OpenRead = 0x80, OpenWrite = 0x81,
             Read = 0x82, Write = 0x83, Close = 0x84, Delete = 0x85,
             FindFirst = 0x86, FindNext = 0x87, GetFirmwareVersion = 0x88,
-            OpenWriteLinear = 0x89, OpenWriteLinear_Internal = 0x8A,
+            OpenWriteLinear = 0x89, OpenReadLinear_Internal = 0x8A,
             OpenWriteData = 0x8B, OpenAppendData = 0x8C, Boot = 0x97,
             SetBrickName = 0x98, GetDeviceInfo = 0x9B, DeleteUserFlash = 0xA0,
             PollCommandLength = 0xA1, Poll = 0xA2, BluetoothFactoryReset = 0xA4

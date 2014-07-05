@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NXTLib;
+using System.IO;
 
 namespace nxtlibtester
 {
@@ -19,9 +20,9 @@ namespace nxtlibtester
 
         static void Main(string[] args)
         {
-            string filename = "version.ric"; //filename on disk (locally)
-            string filenameonbrick = "version.ric"; //filename on remote NXT
-            uint filesize = 0;
+            string filename = "lasa.ric"; //filename on disk (locally)
+            string filenameonbrick = "lasa.ric"; //filename on remote NXT
+            UInt32 filesize = 0;
             byte? filehandle;
 
             //Prepare Connection
@@ -42,21 +43,33 @@ namespace nxtlibtester
             }
 
             //Read Local File
-            System.IO.StreamReader localfile =
-               new System.IO.StreamReader(filename);
-            string localcontents = localfile.ReadToEnd();
-            byte[] localarray = Encoding.ASCII.GetBytes(localcontents);
-            localfile.Close();
+            byte[] localcontents;
+            using (var stream = File.OpenRead(filename))
+            {
+                localcontents = new byte[(int)stream.Length];
+                int offset = 0;
+                while (offset < localcontents.Length)
+                {
+                    int chunk = stream.Read(localcontents, offset, localcontents.Length - offset);
+                    if (chunk == 0)
+                    {
+                        // Or handle this some other way
+                        throw new IOException("File has shrunk while reading!");
+                    }
+                    offset += chunk;
+                }
+                stream.Close();
+            }            
 
             //Find Length of Local File
-            filesize = (uint)localcontents.Length;
+            filesize = (UInt32)localcontents.Length;
 
             //Open New File for Reading
             filehandle = protocol.OpenWrite(filenameonbrick, filesize);
             if (!filehandle.HasValue) { writeError(protocol.LastError); return; }
 
             //Copy Local to Remote
-            int? reply = protocol.Write(filehandle.Value, localarray);
+            int? reply = protocol.Write(filehandle.Value, localcontents);
             if (!reply.HasValue) { writeError(protocol.LastError); return; }
             if (reply.Value < filesize) { writeError("Not all bytes written!"); return; }
 
