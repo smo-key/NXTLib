@@ -268,6 +268,69 @@ namespace NXTLib
             return fileArr.ToArray();
         }
 
+        /// <summary>
+        /// Uploads a file to the NXT, overwriting contents.
+        /// </summary>
+        /// <param name="filenamelocal">The name of the file to read from local disk.</param>
+        /// <param name="filenameonbrick">The target file to upload to, with expension.</param>
+        /// <returns>True if no error.</returns>
+        public bool UploadFile(string filenamelocal, string filenameonbrick)
+        {
+            try
+            {
+                UInt32 filesize = 0;
+                byte? filehandle;
+
+                //Test Connection
+                if (!IsConnected) { throw new Exception("Not connected to NXT!"); }
+
+                //Delete File, if Exists
+                if (_link.DoesExist(filenameonbrick))
+                {
+                    if (!_link.Delete(filenameonbrick))
+                    {
+                        throw new Exception(_link.LastError);
+                    }
+                }
+
+                //Read Local File
+                byte[] localcontents;
+                using (var stream = System.IO.File.OpenRead(filenamelocal))
+                {
+                    localcontents = new byte[(int)stream.Length];
+                    int offset = 0;
+                    while (offset < localcontents.Length)
+                    {
+                        int chunk = stream.Read(localcontents, offset, localcontents.Length - offset);
+                        if (chunk == 0) { throw new Exception("Not all bytes written!"); }
+                        offset += chunk;
+                    }
+                    stream.Close();
+                }
+
+                //Find Length of Local File
+                filesize = (UInt32)localcontents.Length;
+
+                //Open New File for Reading
+                filehandle = _link.OpenWrite(filenameonbrick, filesize);
+                if (!filehandle.HasValue) { throw new Exception(_link.LastError); }
+
+                //Copy Local to Remote
+                int? reply = _link.Write(filehandle.Value, localcontents);
+                if (!reply.HasValue) { throw new Exception(_link.LastError); }
+
+                //Close Remote Files
+                if (!_link.Close(filehandle.Value)) { throw new Exception(_link.LastError); }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                error = ex.Message;
+                return false;
+            }
+        }
+
     #endregion
 
     #region Programs

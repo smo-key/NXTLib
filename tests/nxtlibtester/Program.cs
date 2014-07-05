@@ -20,8 +20,8 @@ namespace nxtlibtester
 
         static void Main(string[] args)
         {
-            string filename = "lasa.ric"; //filename on disk (locally)
-            string filenameonbrick = "lasa.ric"; //filename on remote NXT
+            string filename = "version.ric"; //filename on disk (locally)
+            string filenameonbrick = "version.ric"; //filename on remote NXT
             UInt32 filesize = 0;
             byte? filehandle;
 
@@ -30,52 +30,8 @@ namespace nxtlibtester
             brick.Connect();
             Protocol protocol = brick.ProtocolLink; //Protocol = underlying layer of code, contains NXT communications
 
-            //Test Connection
-            if (!brick.IsConnected) { writeError("Not connected to NXT!"); return; }
-            
-            //Delete File, if Exists
-            if (protocol.DoesExist(filenameonbrick))
-            {
-                if (!protocol.Delete(filenameonbrick)) 
-                { 
-                    writeError(protocol.LastError); return; 
-                }
-            }
-
-            //Read Local File
-            byte[] localcontents;
-            using (var stream = File.OpenRead(filename))
-            {
-                localcontents = new byte[(int)stream.Length];
-                int offset = 0;
-                while (offset < localcontents.Length)
-                {
-                    int chunk = stream.Read(localcontents, offset, localcontents.Length - offset);
-                    if (chunk == 0)
-                    {
-                        // Or handle this some other way
-                        throw new IOException("File has shrunk while reading!");
-                    }
-                    offset += chunk;
-                }
-                stream.Close();
-            }            
-
-            //Find Length of Local File
-            filesize = (UInt32)localcontents.Length;
-
-            //Open New File for Reading
-            filehandle = protocol.OpenWrite(filenameonbrick, filesize);
-            if (!filehandle.HasValue) { writeError(protocol.LastError); return; }
-
-            //Copy Local to Remote
-            int? reply = protocol.Write(filehandle.Value, localcontents);
-            if (!reply.HasValue) { writeError(protocol.LastError); return; }
-            if (reply.Value < filesize) { writeError("Not all bytes written!"); return; }
-
-            //Close Remote Files
-            if (!protocol.Close(filehandle.Value)) { writeError(protocol.LastError); return; }
-
+            //Upload File
+            if (!brick.UploadFile(filename, filenameonbrick)) { writeError(brick.LastError); return; }
 
             Console.WriteLine("Success!");
             Console.WriteLine("Press ENTER...");

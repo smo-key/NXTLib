@@ -1320,28 +1320,6 @@ namespace NXTLib
                 return false;
             }
         }
-
-        /*/// <summary>
-        /// [NXTLib] Uploads a file to the NXT, overwriting contents.
-        /// </summary>
-        /// <param name="filename">The name of the file to read, as a string.
-        ///   The extension must be included.</param>
-        /// <returns>True if exists and no error.</returns>
-        public bool Upload(string filenamelocal, string filenameonbrick)
-        {
-            try
-            {
-                FindFileReply? reply = FindFirst(filename);
-                if (!reply.HasValue) { return false; }
-                if (!reply.Value.fileFound) { return false; }
-                return true;
-            }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return false;
-            }
-        }*/
         
         /// <summary>
         /// [Native] Open a file for reading.  When finished reading, the handle MUST be closed with 
