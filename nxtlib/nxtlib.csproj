@@ -50,6 +50,12 @@
     <Compile Include="src\Connect\Bluetooth.cs" />
     <Compile Include="src\Brick.cs" />
     <Compile Include="src\Connect\USB.cs" />
+    <Compile Include="src\Connect\USBWrapper\DeviceManagement.cs" />
+    <Compile Include="src\Connect\USBWrapper\DeviceManagementApi.cs" />
+    <Compile Include="src\Connect\USBWrapper\FileIOApi.cs" />
+    <Compile Include="src\Connect\USBWrapper\UsbCommunication.cs" />
+    <Compile Include="src\Connect\USBWrapper\WinUsbDevice.cs" />
+    <Compile Include="src\Connect\USBWrapper\WinUsbDeviceApi.cs" />
     <Compile Include="src\DigitalSensor.cs" />
     <Compile Include="src\Motor.cs" />
     <Compile Include="src\PassiveSensor.cs" />
@@ -64,12 +70,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\winusbwrapper\WinUsbWrapper.csproj">
-      <Project>{40c6e946-d5ac-43b8-aede-d896e9cbb3e2}</Project>
-      <Name>WinUsbWrapper</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSHARP.Targets" />
   <ProjectExtensions>

@@ -4,7 +4,7 @@ using System;
 using System.Runtime.InteropServices;
 // NKH - using System.Windows.Forms;
 
-namespace WinUsbWrapper
+namespace NXTLib.USBWrapper
 {
     ///  <summary>
     ///  Routines for detecting devices and receiving device notifications.

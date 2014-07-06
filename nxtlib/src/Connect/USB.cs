@@ -1,4 +1,4 @@
-﻿using WinUsbWrapper;
+﻿using NXTLib.USBWrapper;
 using System;
 using System.Collections.Generic;
 using System.IO.Ports;

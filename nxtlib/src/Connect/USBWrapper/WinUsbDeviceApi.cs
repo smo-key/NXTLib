@@ -2,7 +2,7 @@ using System;
 using Microsoft.Win32.SafeHandles;
 using System.Runtime.InteropServices;
 
-namespace WinUsbWrapper
+namespace NXTLib.USBWrapper
 {
 	/// <summary>
 	///  These declarations are translated from the C declarations in various files

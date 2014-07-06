@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace WinUsbWrapper
+namespace NXTLib.USBWrapper
 {
 	///<summary >
 	// API declarations relating to device management (SetupDixxx and 

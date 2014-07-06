@@ -2,7 +2,7 @@ using System;
 using Microsoft.Win32.SafeHandles;
 using System.Runtime.InteropServices;
 
-namespace WinUsbWrapper
+namespace NXTLib.USBWrapper
 {
 	///  <summary>
 	///  API declarations relating to file I/O (and used by WinUsb).

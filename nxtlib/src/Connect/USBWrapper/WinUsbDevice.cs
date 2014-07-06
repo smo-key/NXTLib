@@ -2,7 +2,7 @@ using System;
 using Microsoft.Win32.SafeHandles;
 using System.Runtime.InteropServices;
 
-namespace WinUsbWrapper
+namespace NXTLib.USBWrapper
 {
     /// <summary>
     ///  Routines for the WinUsb driver supported by Windows Vista and Windows XP.

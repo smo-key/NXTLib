@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace WinUsbWrapper
+namespace NXTLib.USBWrapper
 {
     public class UsbCommunication
     {
