@@ -30,6 +30,11 @@ namespace NXTLib
         public RadioMode radiomode { get { return radio.Mode; } set { radio.Mode = value; } }
 
         /// <summary>
+        /// <para>Object to control mutex locking via Bluetooth.</para>
+        /// </summary>
+        object commLock = new object();
+
+        /// <summary>
         /// <para>Useless when connecting via USB.</para>
         /// </summary>
         /// <returns>Search for bricks connected via USB.</returns>
@@ -37,21 +42,25 @@ namespace NXTLib
         {
             try
             {
-                radiomode = RadioMode.Discoverable;
-
-                client.InquiryLength = new TimeSpan(0, 0, 30);
-                BluetoothDeviceInfo[] peers = client.DiscoverDevices(255, true, true, true, true);
                 List<BrickInfo> bricks = new List<BrickInfo>();
-                foreach (BluetoothDeviceInfo info in peers)
+                lock (commLock)
                 {
-                    if (info.ClassOfDevice.Value != 2052) { continue; }
+                    radiomode = RadioMode.Discoverable;
 
-                    BluetoothEndPoint ep = new BluetoothEndPoint(info.DeviceAddress, NXT_GUID);
-                    BluetoothSecurity.SetPin(info.DeviceAddress, "1234");
-                    BrickInfo brick = new BrickInfo();
-                    brick.address = info.DeviceAddress.ToByteArray();
-                    brick.name = info.DeviceName;
-                    bricks.Add(brick);
+                    client.InquiryLength = new TimeSpan(0, 0, 30);
+                    BluetoothDeviceInfo[] peers = client.DiscoverDevices(255, true, true, true, true);
+                    
+                    foreach (BluetoothDeviceInfo info in peers)
+                    {
+                        if (info.ClassOfDevice.Value != 2052) { continue; }
+
+                        BluetoothEndPoint ep = new BluetoothEndPoint(info.DeviceAddress, NXT_GUID);
+                        BluetoothSecurity.SetPin(info.DeviceAddress, "1234");
+                        BrickInfo brick = new BrickInfo();
+                        brick.address = info.DeviceAddress.ToByteArray();
+                        brick.name = info.DeviceName;
+                        bricks.Add(brick);
+                    }
                 }
                 return bricks;
             }
@@ -69,13 +78,16 @@ namespace NXTLib
         {
             try
             {
-                radiomode = RadioMode.Discoverable;
+                lock (commLock)
+                {
+                    radiomode = RadioMode.Discoverable;
 
-                BluetoothAddress adr = new BluetoothAddress(brick.address);
-                BluetoothEndPoint ep = new BluetoothEndPoint(adr, NXT_GUID);
+                    BluetoothAddress adr = new BluetoothAddress(brick.address);
+                    BluetoothEndPoint ep = new BluetoothEndPoint(adr, NXT_GUID);
 
-                BluetoothSecurity.PairRequest(adr, "1234");
-                client.Connect(ep);
+                    BluetoothSecurity.PairRequest(adr, "1234");
+                    client.Connect(ep);
+                }
                 return IsConnected;
             }
             catch (Exception ex)
@@ -92,7 +104,10 @@ namespace NXTLib
         {
             try
             {
-                if (IsConnected) { client.Close(); client = new BluetoothClient(); }
+                lock (commLock)
+                {
+                    if (IsConnected) { client.Close(); client = new BluetoothClient(); }
+                }
                 return true;
             }
             catch (Exception ex)
@@ -139,9 +154,9 @@ namespace NXTLib
         {
             try
             {
-                /*lock (serialPortLock)
+                lock (commLock)
                 {
-                    int length = request.Length;
+                    /*int length = request.Length;
 
                     // Create a Bluetooth request.
                     byte[] btRequest = new byte[request.Length + 2];
@@ -150,8 +165,8 @@ namespace NXTLib
                     request.CopyTo(btRequest, 2);
 
                     // Write the request to the NXT brick.
-                    serialPort.Write(btRequest, 0, btRequest.Length);
-                }*/
+                    serialPort.Write(btRequest, 0, btRequest.Length);*/
+                }
                 return true;
             }
             catch (Exception ex)
@@ -169,16 +184,16 @@ namespace NXTLib
             try
             {
                 byte[] byteIn = new byte[256];
-                /*lock (serialPortLock)
+                lock (commLock)
                 {
-                    int length = serialPort.ReadByte() + 256 * serialPort.ReadByte();
+                    /*int length = serialPort.ReadByte() + 256 * serialPort.ReadByte();
                     for (int i = 0; i < length; i++)
                     {
                         int data = serialPort.ReadByte();
                         byte bit = Convert.ToByte(data);
                         byteIn[i] = bit;
-                    }
-                }*/
+                    }*/
+                }
                 return byteIn;
             }
             catch (Exception ex)
