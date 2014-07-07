@@ -13,7 +13,7 @@ namespace NXTLib
     public class Bluetooth : Protocol
     {
         // This value was found in the fantomv.inf file. Search for [WinUsb_Inst_HW_AddReg].
-        private static readonly Guid NXT_GUID = new Guid("{761ED34A-CCFA-416b-94BB-33486DB1F5D5}");
+        private static readonly Guid NXT_GUID = BluetoothService.SerialPort;
         private static BluetoothClient client = new BluetoothClient();
 
         /// <summary
@@ -44,9 +44,10 @@ namespace NXTLib
                 BluetoothDeviceInfo brick;
                 foreach (BluetoothDeviceInfo info in peers)
                 {
-                    if (info.ClassOfDevice.Value != 2052) { continue;  }
+                    if (info.ClassOfDevice.Value != 2052) { continue; }
                     BluetoothEndPoint ep = new BluetoothEndPoint(info.DeviceAddress, NXT_GUID);
-                    client.SetPin(info.DeviceAddress, "1234");
+                    //BluetoothSecurity.SetPin(info.DeviceAddress, "1234");
+                    BluetoothSecurity.PairRequest(info.DeviceAddress, "1234");
                     client.Connect(ep);
                     if (IsConnected) {
                         brick = info;
