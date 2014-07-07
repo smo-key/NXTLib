@@ -6,13 +6,17 @@ using System.Text;
 using InTheHand.Net;
 using InTheHand.Net.Sockets;
 using InTheHand.Net.Bluetooth;
+using System.IO;
 
 namespace NXTLib
 {
     public class Bluetooth : Protocol
     {
+        // This value was found in the fantomv.inf file. Search for [WinUsb_Inst_HW_AddReg].
+        private static readonly Guid NXT_GUID = new Guid("{761ED34A-CCFA-416b-94BB-33486DB1F5D5}");
+        private static BluetoothClient client = new BluetoothClient();
 
-        /// <summary>
+        /// <summary
         /// <para>The communication protocols specific to Bluetooth.</para>
         /// </summary>
         /// <param name="serialport">The COM port used by the Bluetooth link.  For example, COM3 would be the third COM port.</param>
@@ -34,7 +38,22 @@ namespace NXTLib
             try
             {
                 radiomode = RadioMode.Discoverable;
-                return true;
+                
+                client.InquiryLength = new TimeSpan(0, 0, 30);
+                BluetoothDeviceInfo[] peers = client.DiscoverDevices();
+                BluetoothDeviceInfo brick;
+                foreach (BluetoothDeviceInfo info in peers)
+                {
+                    if (info.ClassOfDevice.Value != 2052) { continue;  }
+                    BluetoothEndPoint ep = new BluetoothEndPoint(info.DeviceAddress, NXT_GUID);
+                    client.SetPin(info.DeviceAddress, "1234");
+                    client.Connect(ep);
+                    if (IsConnected) {
+                        brick = info;
+                    }
+                }
+
+                return false;
             }
             catch (Exception ex)
             {
@@ -85,18 +104,7 @@ namespace NXTLib
         {
             get
             {
-                try
-                {
-                    /*return
-                        serialPort != null &&
-                        serialPort.IsOpen &&
-                        serialPort.CtsHolding;  // Necessary, or a NXT that is turned of will report as Connected!*/
-                    return true;
-                }
-                catch (System.ObjectDisposedException)
-                {
-                    return false;
-                }
+                return client.Connected;
             }
         }
         /// <summary> 

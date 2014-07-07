@@ -13,8 +13,8 @@ namespace NXTLib
     public class USB : Protocol
     {
         // This value was found in the fantomv.inf file. Search for [WinUsb_Inst_HW_AddReg].
-        private static readonly Guid NXT_WINUSB_GUID = new Guid("{761ED34A-CCFA-416b-94BB-33486DB1F5D5}");
-        private static UsbCommunication usb = new UsbCommunication(NXT_WINUSB_GUID);
+        private static readonly Guid NXT_GUID = new Guid("{761ED34A-CCFA-416b-94BB-33486DB1F5D5}");
+        private static UsbCommunication usb = new UsbCommunication(NXT_GUID);
 
         /// <summary>
         /// <para>The communication protocols specific to USB.</para>
