@@ -29,11 +29,43 @@ namespace NXTLib
 
         public RadioMode radiomode { get { return radio.Mode; } set { radio.Mode = value; } }
 
+        /// <summary>
+        /// <para>Useless when connecting via USB.</para>
+        /// </summary>
+        /// <returns>Search for bricks connected via USB.</returns>
+        public override List<BrickInfo> Search(Protocol link)
+        {
+            try
+            {
+                radiomode = RadioMode.Discoverable;
+
+                client.InquiryLength = new TimeSpan(0, 0, 30);
+                BluetoothDeviceInfo[] peers = client.DiscoverDevices();
+                List<BrickInfo> bricks = new List<BrickInfo>();
+                foreach (BluetoothDeviceInfo info in peers)
+                {
+                    if (info.ClassOfDevice.Value != 2052) { continue; }
+
+                    BluetoothEndPoint ep = new BluetoothEndPoint(info.DeviceAddress, NXT_GUID);
+                    BluetoothSecurity.SetPin(info.DeviceAddress, "1234");
+                    BrickInfo brick = new BrickInfo();
+                    brick.address = info.DeviceAddress.ToString();
+                    brick.name = info.DeviceName;
+                    bricks.Add(brick);
+                }
+                return bricks;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         /// <summary> 
         /// Connect to the device via Bluetooth.
         /// </summary>
         /// <returns>Returns true if operation was a success, false otherwise.  If false, check LastError.</returns>
-        public override bool Connect()
+        public override bool Connect(BrickInfo brick)
         {
             try
             {
@@ -41,17 +73,20 @@ namespace NXTLib
                 
                 client.InquiryLength = new TimeSpan(0, 0, 30);
                 BluetoothDeviceInfo[] peers = client.DiscoverDevices();
-                BluetoothDeviceInfo brick;
+                List<BluetoothDeviceInfo> bricks = new List<BluetoothDeviceInfo>();
                 foreach (BluetoothDeviceInfo info in peers)
                 {
                     if (info.ClassOfDevice.Value != 2052) { continue; }
+
                     BluetoothEndPoint ep = new BluetoothEndPoint(info.DeviceAddress, NXT_GUID);
-                    //BluetoothSecurity.SetPin(info.DeviceAddress, "1234");
-                    BluetoothSecurity.PairRequest(info.DeviceAddress, "1234");
+                    BluetoothSecurity.SetPin(info.DeviceAddress, "1234");
+                    bricks.Add(info);
+
+                    /*BluetoothSecurity.PairRequest(info.DeviceAddress, "1234");
                     client.Connect(ep);
                     if (IsConnected) {
-                        brick = info;
-                    }
+                        bricks.Add(info);
+                    }*/
                 }
 
                 return false;
@@ -70,7 +105,7 @@ namespace NXTLib
         {
             try
             {
-                
+                if (IsConnected) { client.Close(); client = new BluetoothClient(); }
                 return true;
             }
             catch (Exception ex)

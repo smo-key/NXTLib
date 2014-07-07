@@ -26,8 +26,9 @@ namespace nxtlibtester
                 {
                     //Brick = top layer of code, contains the sensors and motors
                     brick = new Brick(Brick.LinkType.USB);
-                    if (!brick.Connect()) { throw new Exception(brick.LastError); }
-                    if (!brick.IsConnected) { throw new Exception("Failed to connect via USB!"); }
+                    List<Protocol.BrickInfo> bricks = brick.Search();
+                    if (bricks == null) { throw new Exception(brick.LastError); }
+                    brick.Connect(bricks[0]);
                 }
                 catch (Exception ex)
                 {
@@ -40,7 +41,9 @@ namespace nxtlibtester
                     {
                         //Brick = top layer of code, contains the sensors and motors
                         brick = new Brick(Brick.LinkType.Bluetooth);
-                        if (!brick.Connect()) { throw new Exception(brick.LastError); }
+                        List<Protocol.BrickInfo> bricks = brick.Search();
+                        if (bricks == null) { throw new Exception(brick.LastError); }
+                        if (!brick.Connect(bricks[0])) { throw new Exception(brick.LastError); }
                         if (!brick.IsConnected) { throw new Exception("Failed to connect via Bluetooth!"); }
                     }
                     catch (Exception exc)

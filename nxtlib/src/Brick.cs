@@ -60,12 +60,24 @@ namespace NXTLib
                 error = value;
             }
         }
+        public Protocol.BrickInfo brickinfo { get; private set; }
 
-        public bool Connect()
+        public List<Protocol.BrickInfo> Search()
+        {
+            List<Protocol.BrickInfo> bricks = ProtocolLink.Search(_link);
+            if (bricks == null)
+            {
+                error = "[Protocol] No NXTs found!";
+                return null;
+            }
+            return bricks;
+        }
+
+        public bool Connect(Protocol.BrickInfo brick)
         {
             if (!IsConnected)
             {
-                if (!ProtocolLink.Connect())
+                if (!ProtocolLink.Connect(brick))
                 {
                     error = ProtocolLink.LastError;
                     return false;

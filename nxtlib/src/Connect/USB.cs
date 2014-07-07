@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
+using InTheHand.Net;
+using InTheHand.Net.Sockets;
+using InTheHand.Net.Bluetooth;
 
 namespace NXTLib
 {
@@ -27,10 +30,44 @@ namespace NXTLib
         /// <summary>
         /// <para>Useless when connecting via USB.</para>
         /// </summary>
-        /// <returns>Always true.</returns>
-        public override bool Connect()
+        /// <returns>Search for bricks connected via USB.</returns>
+        public override List<BrickInfo> Search(Protocol link)
         {
-            return true;
+            if (IsConnected)
+            {
+                List<BrickInfo> list = new List<BrickInfo>();
+                BrickInfo brick = new BrickInfo();
+                brick.address = "USB";
+                brick.name = "NXT";
+
+                GetDeviceInfoReply? reply = link.GetDeviceInfo();
+                if (reply.HasValue)
+                {
+                    byte[] adr = new byte[6];
+                    for (int i = 0; i < 6; i++)
+                    {
+                        adr[i] = reply.Value.Address[i];
+                    }
+
+                    brick.address = new BluetoothAddress(adr).ToString();
+                    brick.name = reply.Value.Name;
+                }
+                list.Add(brick);
+                return list;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// <para>Useless when connecting via USB.</para>
+        /// </summary>
+        /// <returns>Always true.</returns>
+        public override bool Connect(BrickInfo brick)
+        {
+            return IsConnected;
         }
 
         /// <summary>

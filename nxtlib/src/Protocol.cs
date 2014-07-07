@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
+using InTheHand.Net;
+using InTheHand.Net.Sockets;
+using InTheHand.Net.Bluetooth;
+using System.IO;
 
 namespace NXTLib
 {
@@ -16,12 +20,19 @@ namespace NXTLib
             : base()
         { }
 
-        public abstract bool Connect();
-        public abstract bool Send(byte[] request);
+        public struct BrickInfo
+        {
+            public string address { get; internal set; }
+            public string name { get; internal set; }
+        }
+
+        public abstract List<BrickInfo> Search(Protocol link);
+        public abstract bool Connect(BrickInfo brick);
         public abstract bool Disconnect();
+        public abstract bool Send(byte[] request);
         public abstract byte[] RecieveReply();
         internal string error;
-        public virtual string LastError { get { return error; } }
+        public string LastError { get { return error; } }
         internal SerialPort link { get; set; }
         public abstract bool IsConnected { get; }
         public abstract bool IsSupported { get; }

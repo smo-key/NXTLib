@@ -8,7 +8,7 @@ namespace NXTLib.USBWrapper
 
         private bool myDeviceDetected = false;
         private DeviceManagement myDeviceManagement = new DeviceManagement();
-        private string myDevicePathName;
+        internal string devicePathName { get; private set; }
         private WinUsbDevice myWinUsbDevice = new WinUsbDevice();
 
         public UsbCommunication(Guid winUsbGuid)
@@ -32,7 +32,7 @@ namespace NXTLib.USBWrapper
                         myDeviceDetected = true;
 
                         // Save DevicePathName so OnDeviceChange() knows which name is my device.
-                        myDevicePathName = devicePathName;
+                        devicePathName = devicePathName;
                     }
                     else
                     {
