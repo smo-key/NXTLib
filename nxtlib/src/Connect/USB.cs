@@ -37,19 +37,13 @@ namespace NXTLib
             {
                 List<BrickInfo> list = new List<BrickInfo>();
                 BrickInfo brick = new BrickInfo();
-                brick.address = "USB";
+                brick.address = new byte[] { };
                 brick.name = "NXT";
 
                 GetDeviceInfoReply? reply = link.GetDeviceInfo();
                 if (reply.HasValue)
                 {
-                    byte[] adr = new byte[6];
-                    for (int i = 0; i < 6; i++)
-                    {
-                        adr[i] = reply.Value.Address[i];
-                    }
-
-                    brick.address = new BluetoothAddress(adr).ToString();
+                    brick.address = reply.Value.Address;
                     brick.name = reply.Value.Name;
                 }
                 list.Add(brick);

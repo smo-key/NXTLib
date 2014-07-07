@@ -40,7 +40,7 @@ namespace NXTLib
                 radiomode = RadioMode.Discoverable;
 
                 client.InquiryLength = new TimeSpan(0, 0, 30);
-                BluetoothDeviceInfo[] peers = client.DiscoverDevices();
+                BluetoothDeviceInfo[] peers = client.DiscoverDevices(255, true, true, true, true);
                 List<BrickInfo> bricks = new List<BrickInfo>();
                 foreach (BluetoothDeviceInfo info in peers)
                 {
@@ -49,7 +49,7 @@ namespace NXTLib
                     BluetoothEndPoint ep = new BluetoothEndPoint(info.DeviceAddress, NXT_GUID);
                     BluetoothSecurity.SetPin(info.DeviceAddress, "1234");
                     BrickInfo brick = new BrickInfo();
-                    brick.address = info.DeviceAddress.ToString();
+                    brick.address = info.DeviceAddress.ToByteArray();
                     brick.name = info.DeviceName;
                     bricks.Add(brick);
                 }
@@ -70,26 +70,13 @@ namespace NXTLib
             try
             {
                 radiomode = RadioMode.Discoverable;
-                
-                client.InquiryLength = new TimeSpan(0, 0, 30);
-                BluetoothDeviceInfo[] peers = client.DiscoverDevices();
-                List<BluetoothDeviceInfo> bricks = new List<BluetoothDeviceInfo>();
-                foreach (BluetoothDeviceInfo info in peers)
-                {
-                    if (info.ClassOfDevice.Value != 2052) { continue; }
 
-                    BluetoothEndPoint ep = new BluetoothEndPoint(info.DeviceAddress, NXT_GUID);
-                    BluetoothSecurity.SetPin(info.DeviceAddress, "1234");
-                    bricks.Add(info);
+                BluetoothAddress adr = new BluetoothAddress(brick.address);
+                BluetoothEndPoint ep = new BluetoothEndPoint(adr, NXT_GUID);
 
-                    /*BluetoothSecurity.PairRequest(info.DeviceAddress, "1234");
-                    client.Connect(ep);
-                    if (IsConnected) {
-                        bricks.Add(info);
-                    }*/
-                }
-
-                return false;
+                BluetoothSecurity.PairRequest(adr, "1234");
+                client.Connect(ep);
+                return IsConnected;
             }
             catch (Exception ex)
             {

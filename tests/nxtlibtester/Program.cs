@@ -51,7 +51,6 @@ namespace nxtlibtester
                         Console.WriteLine("Failed to connect to any brick!");
                         throw new Exception(exc.Message);
                     }
-
                 }
 
                 //Connect to Protocol

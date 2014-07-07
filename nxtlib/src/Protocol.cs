@@ -22,7 +22,19 @@ namespace NXTLib
 
         public struct BrickInfo
         {
-            public string address { get; internal set; }
+            private byte[] _adr;
+            public byte[] address 
+            {
+                get { return _adr; }
+                internal set
+                {
+                    _adr = new byte[6];
+                    for (int i = 0; i < 6; i++)
+                    {
+                        _adr[i] = value[i];
+                    }
+                } 
+            }
             public string name { get; internal set; }
         }
 

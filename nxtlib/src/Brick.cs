@@ -70,6 +70,11 @@ namespace NXTLib
                 error = "[Protocol] No NXTs found!";
                 return null;
             }
+            if (bricks.Count < 1)
+            {
+                error = "[Protocol] No NXTs found!";
+                return null;
+            }
             return bricks;
         }
 
