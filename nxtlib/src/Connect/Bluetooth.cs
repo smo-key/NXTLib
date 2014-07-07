@@ -156,7 +156,8 @@ namespace NXTLib
             {
                 lock (commLock)
                 {
-                    /*int length = request.Length;
+                    Stream stream = client.GetStream();
+                    int length = request.Length;
 
                     // Create a Bluetooth request.
                     byte[] btRequest = new byte[request.Length + 2];
@@ -165,7 +166,7 @@ namespace NXTLib
                     request.CopyTo(btRequest, 2);
 
                     // Write the request to the NXT brick.
-                    serialPort.Write(btRequest, 0, btRequest.Length);*/
+                    stream.Write(btRequest, 0, btRequest.Length);
                 }
                 return true;
             }
@@ -186,13 +187,14 @@ namespace NXTLib
                 byte[] byteIn = new byte[256];
                 lock (commLock)
                 {
-                    /*int length = serialPort.ReadByte() + 256 * serialPort.ReadByte();
+                    Stream stream = client.GetStream();
+                    int length = stream.ReadByte() + 256 * stream.ReadByte();
                     for (int i = 0; i < length; i++)
                     {
-                        int data = serialPort.ReadByte();
+                        int data = stream.ReadByte();
                         byte bit = Convert.ToByte(data);
                         byteIn[i] = bit;
-                    }*/
+                    }
                 }
                 return byteIn;
             }

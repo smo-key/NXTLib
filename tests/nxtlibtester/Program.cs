@@ -48,7 +48,6 @@ namespace nxtlibtester
                     }
                     catch (Exception exc)
                     {
-                        Console.WriteLine("Failed to connect to any brick!");
                         throw new Exception(exc.Message);
                     }
                 }
