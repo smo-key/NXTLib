@@ -15,12 +15,12 @@ namespace NXTLib
 
     #region Connection and Timer
         public enum LinkType { Bluetooth, USB, Null }
-        public Brick(LinkType type, string port)
+        public Brick(LinkType type)
         {
             switch (type)
             {
                 case LinkType.Bluetooth:
-                    ProtocolLink = new Bluetooth(port);
+                    ProtocolLink = new Bluetooth();
                     break;
                 case LinkType.USB:
                     ProtocolLink = new USB();
@@ -29,7 +29,7 @@ namespace NXTLib
                     ProtocolLink = null;
                     break;
                 default:
-                    throw new Exception("[NXTLib] Parameter 'type' formatted incorrectly.");
+                    throw new Exception("[NXTLib] Unrecognized LinkType.");
             }
             if (ProtocolLink != null)
             {

@@ -18,25 +18,41 @@ namespace nxtlibtester
 
                 string filename = "version.ric"; //filename on disk (locally)
                 string filenameonbrick = "version.ric"; //filename on remote NXT
-                Brick brick = new Brick(Brick.LinkType.Null, null);
+                Brick brick = new Brick(Brick.LinkType.Null);
 
                 //Try Connecting via USB
                 Console.WriteLine("Connecting to brick via USB...");
                 try
                 {
                     //Brick = top layer of code, contains the sensors and motors
-                    brick = new Brick(Brick.LinkType.USB, null);
+                    brick = new Brick(Brick.LinkType.USB);
                     if (!brick.Connect()) { throw new Exception(brick.LastError); }
-                    if (!brick.IsConnected) { throw new Exception("Not connected to NXT!"); }
+                    if (!brick.IsConnected) { throw new Exception("Failed to connect via USB!"); }
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception(ex.Message);
+                    Console.WriteLine("Error: {0}", ex.Message);
+                    Console.WriteLine("Failed to connect via USB.");
+
+                    //Try Connecting via Bluetooth
+                    Console.WriteLine("Connecting to brick via Bluetooth...");
+                    try
+                    {
+                        //Brick = top layer of code, contains the sensors and motors
+                        brick = new Brick(Brick.LinkType.Bluetooth);
+                        if (!brick.Connect()) { throw new Exception(brick.LastError); }
+                        if (!brick.IsConnected) { throw new Exception("Failed to connect via Bluetooth!"); }
+                    }
+                    catch (Exception exc)
+                    {
+                        Console.WriteLine("Failed to connect to any brick!");
+                        throw new Exception(exc.Message);
+                    }
+
                 }
 
-                //Get Protocol from Brick
-                //Protocol = underlying layer of code, contains NXT communications
-                Protocol protocol = brick.ProtocolLink; 
+                //Connect to Protocol
+                Protocol protocol = brick.ProtocolLink;
 
                 //Upload File
                 Console.WriteLine("Uploading file...");

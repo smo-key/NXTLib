@@ -16,43 +16,14 @@ namespace NXTLib
         /// <para>The communication protocols specific to Bluetooth.</para>
         /// </summary>
         /// <param name="serialport">The COM port used by the Bluetooth link.  For example, COM3 would be the third COM port.</param>
-        public Bluetooth(string serialport)
+        public Bluetooth()
         {
-            this.serialPort = new SerialPort(serialport);
-            this.port = serialport;
-            createnew = true;
             radio = BluetoothRadio.PrimaryRadio;
         }
-        /// <summary>
-        /// <para>The communication protocols specific to Bluetooth.</para>
-        /// </summary>
-        /// <param name="serialport">The custom port used by the Bluetooth link.  This is required if you want to use custom settings.</param>
-        public Bluetooth(SerialPort serialport)
-        {
-            this.serialPort = serialport;
-            createnew = false;
-            radio = BluetoothRadio.PrimaryRadio;
-        }
-
-        private bool createnew;
-
-        /// <summary>
-        /// <para>The COM port value used by the Bluetooth connection.</para>
-        /// </summary>
-        private string port;
-        /// <summary>
-        /// <para>The serial port used by the Bluetooth connection.</para>
-        /// </summary>
-        private SerialPort serialPort = new SerialPort();
-        /// <summary>
-        /// <para>Object to control mutex locking on the serial port.</para>
-        /// </summary>
-        private object serialPortLock = new object();
 
         public BluetoothRadio radio { get; set; }
 
         public RadioMode radiomode { get { return radio.Mode; } set { radio.Mode = value; } }
-
 
         /// <summary> 
         /// Connect to the device via Bluetooth.
@@ -62,20 +33,7 @@ namespace NXTLib
         {
             try
             {
-                lock (serialPortLock)
-                {
-                    if (createnew == true)
-                    {
-                        serialPort.PortName = port;  //<<<< Change this number for your computer
-                        //Bluetooth.BaudRate = 96000;
-                        //Bluetooth.Parity = System.IO.Ports.Parity.None;
-                        //Bluetooth.DataBits = 8;
-                        //Bluetooth.StopBits = System.IO.Ports.StopBits.One;
-                        serialPort.ReadTimeout = 300;  //5000ms
-                        serialPort.WriteTimeout = 300; //5000ms
-                    }
-                    serialPort.Open();
-                }
+                radiomode = RadioMode.Discoverable;
                 return true;
             }
             catch (Exception ex)
@@ -92,10 +50,7 @@ namespace NXTLib
         {
             try
             {
-                lock (serialPortLock)
-                {
-                    serialPort.Close();
-                }
+                
                 return true;
             }
             catch (Exception ex)
@@ -132,10 +87,11 @@ namespace NXTLib
             {
                 try
                 {
-                    return
+                    /*return
                         serialPort != null &&
                         serialPort.IsOpen &&
-                        serialPort.CtsHolding;  // Necessary, or a NXT that is turned of will report as Connected!
+                        serialPort.CtsHolding;  // Necessary, or a NXT that is turned of will report as Connected!*/
+                    return true;
                 }
                 catch (System.ObjectDisposedException)
                 {
@@ -152,7 +108,7 @@ namespace NXTLib
         {
             try
             {
-                lock (serialPortLock)
+                /*lock (serialPortLock)
                 {
                     int length = request.Length;
 
@@ -164,7 +120,7 @@ namespace NXTLib
 
                     // Write the request to the NXT brick.
                     serialPort.Write(btRequest, 0, btRequest.Length);
-                }
+                }*/
                 return true;
             }
             catch (Exception ex)
@@ -182,7 +138,7 @@ namespace NXTLib
             try
             {
                 byte[] byteIn = new byte[256];
-                lock (serialPortLock)
+                /*lock (serialPortLock)
                 {
                     int length = serialPort.ReadByte() + 256 * serialPort.ReadByte();
                     for (int i = 0; i < length; i++)
@@ -191,7 +147,7 @@ namespace NXTLib
                         byte bit = Convert.ToByte(data);
                         byteIn[i] = bit;
                     }
-                }
+                }*/
                 return byteIn;
             }
             catch (Exception ex)
