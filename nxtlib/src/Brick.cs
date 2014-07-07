@@ -31,6 +31,10 @@ namespace NXTLib
                 default:
                     throw new Exception("[NXTLib] Parameter 'type' formatted incorrectly.");
             }
+            if (ProtocolLink != null)
+            {
+                if (!ProtocolLink.IsSupported) { throw new Exception("[NXTLib] Link type not supported by this system!"); }
+            }
         }
         public Protocol ProtocolLink
         {

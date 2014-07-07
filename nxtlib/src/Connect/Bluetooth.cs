@@ -21,6 +21,7 @@ namespace NXTLib
             this.serialPort = new SerialPort(serialport);
             this.port = serialport;
             createnew = true;
+            radio = BluetoothRadio.PrimaryRadio;
         }
         /// <summary>
         /// <para>The communication protocols specific to Bluetooth.</para>
@@ -30,6 +31,7 @@ namespace NXTLib
         {
             this.serialPort = serialport;
             createnew = false;
+            radio = BluetoothRadio.PrimaryRadio;
         }
 
         private bool createnew;
@@ -46,6 +48,10 @@ namespace NXTLib
         /// <para>Object to control mutex locking on the serial port.</para>
         /// </summary>
         private object serialPortLock = new object();
+
+        public BluetoothRadio radio { get; set; }
+
+        public RadioMode radiomode { get { return radio.Mode; } set { radio.Mode = value; } }
 
 
         /// <summary> 
@@ -98,6 +104,24 @@ namespace NXTLib
                 return false;
             }
         }
+
+        /// <summary>
+        /// <para>Indicates if protocol is supported.</para>
+        /// </summary>
+        /// <returns>True if protocol is supported on current platform.</returns>
+        public override bool IsSupported
+        {
+            get
+            {
+                radio = BluetoothRadio.PrimaryRadio;
+                if (radio == null)
+                {
+                    return false;
+                }
+                return true;
+            }
+        }
+
         /// <summary> 
         /// Checks if the NXT is connected via Bluetooth.
         /// </summary>

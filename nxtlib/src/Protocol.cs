@@ -24,6 +24,7 @@ namespace NXTLib
         public virtual string LastError { get { return error; } }
         internal SerialPort link { get; set; }
         public abstract bool IsConnected { get; }
+        public abstract bool IsSupported { get; }
 
 #endregion
 

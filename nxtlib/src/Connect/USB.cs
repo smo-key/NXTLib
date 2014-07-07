@@ -43,6 +43,15 @@ namespace NXTLib
         }
 
         /// <summary>
+        /// <para>Indicates if protocol is supported.</para>
+        /// </summary>
+        /// <returns>True if protocol is supported on current platform.</returns>
+        public override bool IsSupported
+        {
+            get { return true; }
+        }
+
+        /// <summary>
         /// <para>Indicates if connected to the NXT brick.</para>
         /// </summary>
         /// <returns>Returns true if NXT found via USB.</returns>
