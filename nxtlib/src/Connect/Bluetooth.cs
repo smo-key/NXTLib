@@ -42,20 +42,21 @@ namespace NXTLib
         {
             try
             {
+                radiomode = RadioMode.Connectable;
                 List<BrickInfo> bricks = new List<BrickInfo>();
                 lock (commLock)
                 {
                     radiomode = RadioMode.Discoverable;
 
                     client.InquiryLength = new TimeSpan(0, 0, 30);
-                    BluetoothDeviceInfo[] peers = client.DiscoverDevices(255, true, true, true, true);
+                    BluetoothDeviceInfo[] peers = client.DiscoverDevicesInRange();
                     
                     foreach (BluetoothDeviceInfo info in peers)
                     {
                         if (info.ClassOfDevice.Value != 2052) { continue; }
 
                         BluetoothEndPoint ep = new BluetoothEndPoint(info.DeviceAddress, NXT_GUID);
-                        BluetoothSecurity.SetPin(info.DeviceAddress, "1234");
+                        //BluetoothSecurity.SetPin(info.DeviceAddress, "1234");
                         BrickInfo brick = new BrickInfo();
                         brick.address = info.DeviceAddress.ToByteArray();
                         brick.name = info.DeviceName;
@@ -80,13 +81,15 @@ namespace NXTLib
             {
                 lock (commLock)
                 {
-                    radiomode = RadioMode.Discoverable;
+                    radiomode = RadioMode.Connectable;
 
                     BluetoothAddress adr = new BluetoothAddress(brick.address);
-                    BluetoothEndPoint ep = new BluetoothEndPoint(adr, NXT_GUID);
+
+                    //BluetoothSecurity.RevokePin(adr);
+                    //BluetoothSecurity.RemoveDevice(adr);
 
                     BluetoothSecurity.PairRequest(adr, "1234");
-                    client.Connect(ep);
+                    client.Connect(adr, NXT_GUID);
                 }
                 return IsConnected;
             }
@@ -106,7 +109,7 @@ namespace NXTLib
             {
                 lock (commLock)
                 {
-                    if (IsConnected) { client.Close(); client = new BluetoothClient(); }
+                    if (IsConnected) { client.Close(); }
                 }
                 return true;
             }

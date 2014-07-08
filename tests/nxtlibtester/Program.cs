@@ -59,6 +59,9 @@ namespace nxtlibtester
                 Console.WriteLine("Uploading file...");
                 if (!brick.UploadFile(filename, filenameonbrick)) { throw new Exception(brick.LastError); }
 
+                //Disconnect
+                if (!brick.Disconnect()) { throw new Exception(brick.LastError); }
+
                 Console.WriteLine("Success!");
                 Console.WriteLine("Press any key to continue...");
                 Console.ReadKey(true);
