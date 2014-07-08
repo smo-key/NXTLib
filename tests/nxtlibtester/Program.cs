@@ -10,6 +10,14 @@ namespace nxtlibtester
 {
     class Program
     {
+        static void Error_NoBricks()
+        {
+            Console.WriteLine("No bricks found!");
+            Console.WriteLine("Press any key to continue...");
+            Console.ReadKey(true);
+            return;
+        }
+
         static void Main(string[] args)
         {
             Console.WriteLine("File Upload Test\r\n");
@@ -44,10 +52,11 @@ namespace nxtlibtester
                 catch (NXTLinkNotSupported)
                 {
                     Console.WriteLine("Bluetooth not supported on this machine!");
-                    Console.WriteLine("No bricks found!");
-                    Console.WriteLine("Press any key to continue...");
-                    Console.ReadKey(true);
-                    return;
+                    Error_NoBricks();
+                }
+                catch (NXTNoBricksFound)
+                {
+                    Error_NoBricks();
                 }
             }
 
