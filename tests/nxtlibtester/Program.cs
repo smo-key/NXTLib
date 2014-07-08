@@ -39,7 +39,7 @@ namespace nxtlibtester
 
                 brick = bricks[0];
             }
-            catch (NXTException ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
                 Console.WriteLine("Failed to connect via USB.");
@@ -54,18 +54,12 @@ namespace nxtlibtester
 
                     brick = bricks[0];
                 }
-                catch (NXTLinkNotSupported)
-                {
-                    Console.WriteLine("Bluetooth not supported on this machine!");
-                    Error_NoBricks();
-                    return;
-                }
                 catch (NXTNoBricksFound)
                 {
                     Error_NoBricks();
                     return;
                 }
-                catch (NXTException)
+                catch (Exception)
                 {
                     Console.WriteLine(ex.Message);
                     Error_NoBricks();

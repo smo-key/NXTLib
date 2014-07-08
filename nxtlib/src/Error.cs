@@ -100,7 +100,7 @@ namespace NXTLib
     public class NXTLinkNotSupported : NXTCommException
     {
         public override string Message
-        { get { return "Not reply recieved!"; } }
+        { get { return "Link type not supported on this machine!"; } }
     }
     #endregion
     
