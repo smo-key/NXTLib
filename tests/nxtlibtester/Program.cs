@@ -31,13 +31,13 @@ namespace nxtlibtester
                 //Try connecting via USB
                 Console.WriteLine("Searching for bricks via USB...");
                 brick = new Brick(Brick.LinkType.USB);
-                List<Protocol.BrickInfo> bricks = brick.Search();
+                List<Protocol.BrickInfo> bricks = brick.link.Search();
                 Console.WriteLine("Connecting to brick via USB...");
                 brick.Connect(bricks[0]);
             }
             catch (NXTException ex)
             {
-                Console.WriteLine("Error: {0}", ex.Message);
+                Console.WriteLine(ex.Message);
                 Console.WriteLine("Failed to connect via USB.");
 
                 try
@@ -53,10 +53,18 @@ namespace nxtlibtester
                 {
                     Console.WriteLine("Bluetooth not supported on this machine!");
                     Error_NoBricks();
+                    return;
                 }
                 catch (NXTNoBricksFound)
                 {
                     Error_NoBricks();
+                    return;
+                }
+                catch (NXTException)
+                {
+                    Console.WriteLine(ex.Message);
+                    Error_NoBricks();
+                    return;
                 }
             }
 

@@ -38,7 +38,7 @@ namespace NXTLib
         /// <para>Search for bricks connected via Bluetooth.</para>
         /// </summary>
         /// <returns>A list of brick information.</returns>
-        public override List<BrickInfo> Search(Protocol link)
+        public override List<BrickInfo> Search()
         {
             radiomode = RadioMode.Connectable;
             List<BrickInfo> bricks = new List<BrickInfo>();

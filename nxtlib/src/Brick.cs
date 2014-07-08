@@ -48,7 +48,7 @@ namespace NXTLib
 
         public List<Protocol.BrickInfo> Search()
         {
-            return link.Search(link);
+            return link.Search();
         }
 
         public bool Connect(Protocol.BrickInfo brick)

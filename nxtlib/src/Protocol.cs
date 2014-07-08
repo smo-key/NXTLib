@@ -38,7 +38,7 @@ namespace NXTLib
             public string name { get; internal set; }
         }
 
-        public abstract List<BrickInfo> Search(Protocol link);
+        public abstract List<BrickInfo> Search();
         public abstract void Connect(BrickInfo brick);
         public abstract void Disconnect();
         public abstract void Send(byte[] request);

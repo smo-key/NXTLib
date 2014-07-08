@@ -31,28 +31,25 @@ namespace NXTLib
         /// <para>Search for bricks connected via USB.</para>
         /// </summary>
         /// <returns>A list of brick information (returns max 1 brick!).</returns>
-        public override List<BrickInfo> Search(Protocol link)
+        public override List<BrickInfo> Search()
         {
+            List<BrickInfo> list = new List<BrickInfo>();
             if (IsConnected)
             {
-                List<BrickInfo> list = new List<BrickInfo>();
                 BrickInfo brick = new BrickInfo();
                 brick.address = new byte[6] { 0, 0, 0, 0, 0, 0 };
                 brick.name = "NXT";
 
-                GetDeviceInfoReply? reply = link.GetDeviceInfo();
+                GetDeviceInfoReply? reply = GetDeviceInfo();
                 if (reply.HasValue)
                 {
                     brick.address = reply.Value.Address;
                     brick.name = reply.Value.Name;
                 }
                 list.Add(brick);
-                return list;
             }
-            else
-            {
-                throw new NXTNoBricksFound();
-            }
+            else { throw new NXTNoBricksFound(); }
+            return list;
         }
 
         /// <summary>
