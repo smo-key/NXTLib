@@ -10,6 +10,8 @@ using System.IO;
 
 namespace NXTLib
 {
+    public enum LinkType { USB, Bluetooth, Null }
+
     public abstract class Protocol
     {
         //TODO: Complete the missing portions of the library after phase 3!
@@ -23,7 +25,7 @@ namespace NXTLib
         public struct BrickInfo
         {
             private byte[] _adr;
-            public byte[] address 
+            public byte[] address
             {
                 get { return _adr; }
                 internal set
@@ -33,14 +35,14 @@ namespace NXTLib
                     {
                         _adr[i] = value[i];
                     }
-                } 
+                }
             }
             public string name { get; internal set; }
         }
 
-        public abstract List<BrickInfo> Search();
-        public abstract void Connect(BrickInfo brick);
-        public abstract void Disconnect();
+        public abstract List<Brick> Search();
+        public abstract void Connect(Brick brick);
+        public abstract void Disconnect(Brick brick);
         public abstract void Send(byte[] request);
         public abstract byte[] RecieveReply();
         internal SerialPort link { get; set; }

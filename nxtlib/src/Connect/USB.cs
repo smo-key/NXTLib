@@ -31,21 +31,19 @@ namespace NXTLib
         /// <para>Search for bricks connected via USB.</para>
         /// </summary>
         /// <returns>A list of brick information (returns max 1 brick!).</returns>
-        public override List<BrickInfo> Search()
+        public override List<Brick> Search()
         {
-            List<BrickInfo> list = new List<BrickInfo>();
+            List<Brick> list = new List<Brick>();
             if (IsConnected)
             {
-                BrickInfo brick = new BrickInfo();
-                brick.address = new byte[6] { 0, 0, 0, 0, 0, 0 };
-                brick.name = "NXT";
+                BrickInfo _brick = new BrickInfo();
+                _brick.address = new byte[6] { 0, 0, 0, 0, 0, 0 };
+                _brick.name = "NXT";
 
-                GetDeviceInfoReply? reply = GetDeviceInfo();
-                if (reply.HasValue)
-                {
-                    brick.address = reply.Value.Address;
-                    brick.name = reply.Value.Name;
-                }
+                GetDeviceInfoReply reply = GetDeviceInfo();
+                _brick.address = reply.Address;
+                _brick.name = reply.Name;
+                Brick brick = new Brick(this, _brick);
                 list.Add(brick);
             }
             else { throw new NXTNoBricksFound(); }
@@ -55,7 +53,7 @@ namespace NXTLib
         /// <summary>
         /// <para>Useless when connecting via USB.</para>
         /// </summary>
-        public override void Connect(BrickInfo brick)
+        public override void Connect(Brick brick)
         {
             if (!IsConnected) { throw new NXTNotConnected(); }
         }
@@ -63,7 +61,7 @@ namespace NXTLib
         /// <summary>
         /// <para>This method has no function for an USB connection.</para>
         /// </summary>
-        public override void Disconnect()
+        public override void Disconnect(Brick brick)
         {
             return;
         }

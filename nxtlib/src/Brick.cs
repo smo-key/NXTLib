@@ -9,53 +9,32 @@ namespace NXTLib
     public partial class Brick
     {
 
-        //The brick is the front-end of the library.  It contains a simplified version of ALL FUNCTIONS in NXTLib.Protocol.
+        //The brick is the front-end of the library.  It contains a simplified version of functions in NXTLib.Protocol.
         //TODO: Add more functions to front-end
         //TODO: Add timer
 
     #region Connection and Timer
-        public enum LinkType { Bluetooth, USB, Null }
-        public Brick(LinkType type)
+        public Brick(Protocol protocol, Protocol.BrickInfo brickinfo)
         {
-            try
-            {
-                switch (type)
-                {
-                    case LinkType.Bluetooth:
-                        link = new Bluetooth();
-                        break;
-                    case LinkType.USB:
-                        link = new USB();
-                        break;
-                    case LinkType.Null:
-                        link = null;
-                        break;
-                    default:
-                        throw new Exception("[NXTLib] Unrecognized LinkType.");
-                }
-                if (link != null)
-                {
-                    if (!link.IsSupported) { throw new NXTLinkNotSupported(); }
-                }
-            }
-            catch (System.TypeInitializationException)
-            {
-                throw new NXTLinkNotSupported();
-            }
+            link = protocol;
+
+            if (link == null) { throw new NXTLinkNotSupported(); }
+            if (!link.IsSupported) { throw new NXTLinkNotSupported(); }
         }
         public Protocol link { get; internal set; }
+
         public Protocol.BrickInfo brickinfo { get; private set; }
 
-        public List<Protocol.BrickInfo> Search()
+        public List<Brick> Search()
         {
             return link.Search();
         }
 
-        public bool Connect(Protocol.BrickInfo brick)
+        public bool Connect()
         {
             if (!IsConnected)
             {
-                link.Connect(brick);
+                link.Connect(this);
                 InitSensors();
                 EnableAutoPoll();
                 return true;
@@ -69,7 +48,7 @@ namespace NXTLib
         {
             if (IsConnected)
             {
-                link.Disconnect();
+                link.Disconnect(this);
                 DisableAutoPoll();
                 return true;
             }

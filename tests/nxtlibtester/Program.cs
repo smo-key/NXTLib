@@ -24,16 +24,20 @@ namespace nxtlibtester
 
             string filename = "version.ric"; //filename on disk (locally)
             string filenameonbrick = "version.ric"; //filename on remote NXT
-            Brick brick = new Brick(Brick.LinkType.Null);
+            USB usbLink = new USB();
+            Bluetooth blueLink = new Bluetooth();
+
+            Brick brick;
 
             try
             {
                 //Try connecting via USB
                 Console.WriteLine("Searching for bricks via USB...");
-                brick = new Brick(Brick.LinkType.USB);
-                List<Protocol.BrickInfo> bricks = brick.link.Search();
+                List<Brick> bricks = usbLink.Search();
                 Console.WriteLine("Connecting to brick via USB...");
-                brick.Connect(bricks[0]);
+                usbLink.Connect(bricks[0]);
+
+                brick = bricks[0];
             }
             catch (NXTException ex)
             {
@@ -44,10 +48,11 @@ namespace nxtlibtester
                 {
                     //Try Connecting via Bluetooth
                     Console.WriteLine("Searching for bricks via Bluetooth...");
-                    brick = new Brick(Brick.LinkType.Bluetooth);
-                    List<Protocol.BrickInfo> bricks = brick.Search();
+                    List<Brick> bricks = blueLink.Search();
                     Console.WriteLine("Connecting to brick via Bluetooth...");
-                    brick.Connect(bricks[0]);
+                    bricks[0].Connect();
+
+                    brick = bricks[0];
                 }
                 catch (NXTLinkNotSupported)
                 {
@@ -67,9 +72,6 @@ namespace nxtlibtester
                     return;
                 }
             }
-
-            //Connect to underlying NXT Protocol
-            Protocol protocol = brick.link;
 
             //Upload File
             Console.WriteLine("Uploading file...");

@@ -12,21 +12,35 @@ namespace NXTLib
 {
     public class Bluetooth : Protocol
     {
-        // This value was found in the fantomv.inf file. Search for [WinUsb_Inst_HW_AddReg].
         private static readonly Guid NXT_GUID = BluetoothService.SerialPort;
-        private static BluetoothClient client = new BluetoothClient();
+        private static BluetoothClient client = null;
+        private bool initialized = false;
 
         /// <summary
         /// <para>The communication protocols specific to Bluetooth.</para>
         /// </summary>
-        /// <param name="serialport">The COM port used by the Bluetooth link.  For example, COM3 would be the third COM port.</param>
         public Bluetooth()
         {
-            radio = BluetoothRadio.PrimaryRadio;
+            
         }
 
-        public BluetoothRadio radio { get; set; }
+        private void Initialize()
+        {
+            if (initialized) { return; }
+            try
+            {
+                client = new BluetoothClient();
+                if (radio == null) { throw new NXTLinkNotSupported(); }
+                radiomode = RadioMode.Discoverable;
+            }
+            catch
+            {
+                throw new NXTLinkNotSupported();
+            }
+            initialized = true;
+        }
 
+        public BluetoothRadio radio { get { return BluetoothRadio.PrimaryRadio; } }
         public RadioMode radiomode { get { return radio.Mode; } set { radio.Mode = value; } }
 
         /// <summary>
@@ -38,14 +52,13 @@ namespace NXTLib
         /// <para>Search for bricks connected via Bluetooth.</para>
         /// </summary>
         /// <returns>A list of brick information.</returns>
-        public override List<BrickInfo> Search()
+        public override List<Brick> Search()
         {
-            radiomode = RadioMode.Connectable;
-            List<BrickInfo> bricks = new List<BrickInfo>();
+            Initialize();
+
+            List<Brick> bricks = new List<Brick>();
             lock (commLock)
             {
-                radiomode = RadioMode.Discoverable;
-
                 client.InquiryLength = new TimeSpan(0, 0, 30);
                 BluetoothDeviceInfo[] peers = client.DiscoverDevicesInRange();
                     
@@ -55,9 +68,10 @@ namespace NXTLib
 
                     BluetoothEndPoint ep = new BluetoothEndPoint(info.DeviceAddress, NXT_GUID);
                     //BluetoothSecurity.SetPin(info.DeviceAddress, "1234");
-                    BrickInfo brick = new BrickInfo();
-                    brick.address = info.DeviceAddress.ToByteArray();
-                    brick.name = info.DeviceName;
+                    BrickInfo _brick = new BrickInfo();
+                    _brick.address = info.DeviceAddress.ToByteArray();
+                    _brick.name = info.DeviceName;
+                    Brick brick = new Brick(this, _brick);
                     bricks.Add(brick);
                 }
             }
@@ -68,28 +82,30 @@ namespace NXTLib
         /// <summary> 
         /// Connect to the device via Bluetooth.
         /// </summary>
-        public override void Connect(BrickInfo brick)
+        public override void Connect(Brick brick)
         {
-            lock (commLock)
+            Initialize();
+            if (!IsConnected)
             {
-                radiomode = RadioMode.Connectable;
+                lock (commLock)
+                {
+                    BluetoothAddress adr = new BluetoothAddress(brick.brickinfo.address);
+                    BluetoothDeviceInfo device = new BluetoothDeviceInfo(adr);
 
-                BluetoothAddress adr = new BluetoothAddress(brick.address);
-                BluetoothDeviceInfo device = new BluetoothDeviceInfo(adr);
+                    //BluetoothSecurity.RevokePin(adr);
+                    //BluetoothSecurity.RemoveDevice(adr);
 
-                //BluetoothSecurity.RevokePin(adr);
-                //BluetoothSecurity.RemoveDevice(adr);
-
-                BluetoothSecurity.PairRequest(adr, "1234");
-                client.Connect(adr, NXT_GUID);
+                    BluetoothSecurity.PairRequest(adr, "1234");
+                    client.Connect(adr, NXT_GUID);
+                }
+                if (!IsConnected) { throw new NXTNotConnected(); }
             }
-            if (!IsConnected) { throw new NXTNotConnected(); }
             return;
         }
         /// <summary> 
         /// Disconnects from the NXT via Bluetooth.
         /// </summary>
-        public override void Disconnect()
+        public override void Disconnect(Brick brick)
         {
             if (!IsConnected) { throw new NXTNotConnected(); }
             lock (commLock)
@@ -107,7 +123,7 @@ namespace NXTLib
         {
             get
             {
-                radio = BluetoothRadio.PrimaryRadio;
+                BluetoothRadio radio = BluetoothRadio.PrimaryRadio;
                 if (radio == null)
                 {
                     return false;
@@ -124,6 +140,7 @@ namespace NXTLib
         {
             get
             {
+                Initialize();
                 return client.Connected;
             }
         }
@@ -133,6 +150,7 @@ namespace NXTLib
         /// <param name="request">The request, as a byte array.</param>
         public override void Send(byte[] request)
         {
+            if (!IsConnected) { throw new NXTNotConnected(); }
             lock (commLock)
             {
                 Stream stream = client.GetStream();
@@ -155,6 +173,7 @@ namespace NXTLib
         /// <returns>Returns the reply from the NXT, as a byte array.</returns>
         public override byte[] RecieveReply()
         {
+            if (!IsConnected) { throw new NXTNotConnected(); }
             byte[] byteIn = new byte[256];
             lock (commLock)
             {

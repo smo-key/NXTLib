@@ -73,9 +73,9 @@
     <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\include\InTheHand.Net.Personal\nxtlib.bluetoothwrapper.csproj">
+    <ProjectReference Include="..\include\InTheHand.Net.Personal\NXTLib.BluetoothWrapper.csproj">
       <Project>{98bdde14-8f8c-40cc-9e45-5bac73573ef4}</Project>
-      <Name>nxtlib.bluetoothwrapper</Name>
+      <Name>NXTLib.BluetoothWrapper</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSHARP.Targets" />

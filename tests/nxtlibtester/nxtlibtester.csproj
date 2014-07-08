@@ -96,9 +96,9 @@
     <None Include="Properties\app.manifest" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\nxtlib\nxtlib.csproj">
+    <ProjectReference Include="..\..\nxtlib\NXTLib.csproj">
       <Project>{42c3d5d5-edfd-4917-a353-4a25b23d78cc}</Project>
-      <Name>nxtlib</Name>
+      <Name>NXTLib</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
