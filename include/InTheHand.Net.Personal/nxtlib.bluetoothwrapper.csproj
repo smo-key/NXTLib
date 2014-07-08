@@ -334,7 +334,6 @@
     <None Include="app.config">
     </None>
     <None Include="BluetoothStacks.cd" />
-    <None Include="Migrated rules for InTheHand.Net.Personal.FX2.ruleset" />
     <None Include="Net.Bluetooth.BlueSoleil\32feet BlueSoleil Test.html" />
     <None Include="Net.Bluetooth.Msft\BTH_LOCAL_VERSION.cs" />
     <None Include="Net.Bluetooth\BluetoothVersion.cs" />

@@ -75,6 +75,7 @@ namespace NXTLib
                 radiomode = RadioMode.Connectable;
 
                 BluetoothAddress adr = new BluetoothAddress(brick.address);
+                BluetoothDeviceInfo device = new BluetoothDeviceInfo(adr);
 
                 //BluetoothSecurity.RevokePin(adr);
                 //BluetoothSecurity.RemoveDevice(adr);
