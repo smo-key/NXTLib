@@ -32,7 +32,7 @@ namespace NXTLib.USBWrapper
                         myDeviceDetected = true;
 
                         // Save DevicePathName so OnDeviceChange() knows which name is my device.
-                        devicePathName = devicePathName;
+                        this.devicePathName = devicePathName;
                     }
                     else
                     {

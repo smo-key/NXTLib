@@ -32,92 +32,70 @@ namespace NXTLib
         /// <summary>
         /// <para>Object to control mutex locking via Bluetooth.</para>
         /// </summary>
-        object commLock = new object();
+        private object commLock = new object();
 
         /// <summary>
-        /// <para>Useless when connecting via USB.</para>
+        /// <para>Search for bricks connected via Bluetooth.</para>
         /// </summary>
-        /// <returns>Search for bricks connected via USB.</returns>
+        /// <returns>A list of brick information.</returns>
         public override List<BrickInfo> Search(Protocol link)
         {
-            try
+            radiomode = RadioMode.Connectable;
+            List<BrickInfo> bricks = new List<BrickInfo>();
+            lock (commLock)
             {
-                radiomode = RadioMode.Connectable;
-                List<BrickInfo> bricks = new List<BrickInfo>();
-                lock (commLock)
-                {
-                    radiomode = RadioMode.Discoverable;
+                radiomode = RadioMode.Discoverable;
 
-                    client.InquiryLength = new TimeSpan(0, 0, 30);
-                    BluetoothDeviceInfo[] peers = client.DiscoverDevicesInRange();
+                client.InquiryLength = new TimeSpan(0, 0, 30);
+                BluetoothDeviceInfo[] peers = client.DiscoverDevicesInRange();
                     
-                    foreach (BluetoothDeviceInfo info in peers)
-                    {
-                        if (info.ClassOfDevice.Value != 2052) { continue; }
+                foreach (BluetoothDeviceInfo info in peers)
+                {
+                    if (info.ClassOfDevice.Value != 2052) { continue; }
 
-                        BluetoothEndPoint ep = new BluetoothEndPoint(info.DeviceAddress, NXT_GUID);
-                        //BluetoothSecurity.SetPin(info.DeviceAddress, "1234");
-                        BrickInfo brick = new BrickInfo();
-                        brick.address = info.DeviceAddress.ToByteArray();
-                        brick.name = info.DeviceName;
-                        bricks.Add(brick);
-                    }
+                    BluetoothEndPoint ep = new BluetoothEndPoint(info.DeviceAddress, NXT_GUID);
+                    //BluetoothSecurity.SetPin(info.DeviceAddress, "1234");
+                    BrickInfo brick = new BrickInfo();
+                    brick.address = info.DeviceAddress.ToByteArray();
+                    brick.name = info.DeviceName;
+                    bricks.Add(brick);
                 }
-                return bricks;
             }
-            catch
-            {
-                return null;
-            }
+            if (bricks.Count == 0) { throw new NXTNoBricksFound(); }
+            return bricks;
         }
 
         /// <summary> 
         /// Connect to the device via Bluetooth.
         /// </summary>
-        /// <returns>Returns true if operation was a success, false otherwise.  If false, check LastError.</returns>
-        public override bool Connect(BrickInfo brick)
+        public override void Connect(BrickInfo brick)
         {
-            try
+            lock (commLock)
             {
-                lock (commLock)
-                {
-                    radiomode = RadioMode.Connectable;
+                radiomode = RadioMode.Connectable;
 
-                    BluetoothAddress adr = new BluetoothAddress(brick.address);
+                BluetoothAddress adr = new BluetoothAddress(brick.address);
 
-                    //BluetoothSecurity.RevokePin(adr);
-                    //BluetoothSecurity.RemoveDevice(adr);
+                //BluetoothSecurity.RevokePin(adr);
+                //BluetoothSecurity.RemoveDevice(adr);
 
-                    BluetoothSecurity.PairRequest(adr, "1234");
-                    client.Connect(adr, NXT_GUID);
-                }
-                return IsConnected;
+                BluetoothSecurity.PairRequest(adr, "1234");
+                client.Connect(adr, NXT_GUID);
             }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return false;
-            }
+            if (!IsConnected) { throw new NXTNotConnected(); }
+            return;
         }
         /// <summary> 
         /// Disconnects from the NXT via Bluetooth.
         /// </summary>
-        /// <returns>Returns true if operation was a success, false otherwise.  If false, check LastError.</returns>
-        public override bool Disconnect()
+        public override void Disconnect()
         {
-            try
+            if (!IsConnected) { throw new NXTNotConnected(); }
+            lock (commLock)
             {
-                lock (commLock)
-                {
-                    if (IsConnected) { client.Close(); }
-                }
-                return true;
+                client.Close();
             }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return false;
-            }
+            return;
         }
 
         /// <summary>
@@ -152,32 +130,23 @@ namespace NXTLib
         /// Sends a message via Bluetooth.
         /// </summary>
         /// <param name="request">The request, as a byte array.</param>
-        /// <returns>Returns true if operation was a success, false otherwise.  If false, check LastError.</returns>
-        public override bool Send(byte[] request)
+        public override void Send(byte[] request)
         {
-            try
+            lock (commLock)
             {
-                lock (commLock)
-                {
-                    Stream stream = client.GetStream();
-                    int length = request.Length;
+                Stream stream = client.GetStream();
+                int length = request.Length;
 
-                    // Create a Bluetooth request.
-                    byte[] btRequest = new byte[request.Length + 2];
-                    btRequest[0] = (byte)(length & 0xFF);
-                    btRequest[1] = (byte)((length & 0xFF00) >> 8);
-                    request.CopyTo(btRequest, 2);
+                // Create a Bluetooth request.
+                byte[] btRequest = new byte[request.Length + 2];
+                btRequest[0] = (byte)(length & 0xFF);
+                btRequest[1] = (byte)((length & 0xFF00) >> 8);
+                request.CopyTo(btRequest, 2);
 
-                    // Write the request to the NXT brick.
-                    stream.Write(btRequest, 0, btRequest.Length);
-                }
-                return true;
+                // Write the request to the NXT brick.
+                stream.Write(btRequest, 0, btRequest.Length);
             }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return false;
-            }
+            return;
         }
         /// <summary> 
         /// Recieves the reply from the NXT.
@@ -185,27 +154,20 @@ namespace NXTLib
         /// <returns>Returns the reply from the NXT, as a byte array.</returns>
         public override byte[] RecieveReply()
         {
-            try
+            byte[] byteIn = new byte[256];
+            lock (commLock)
             {
-                byte[] byteIn = new byte[256];
-                lock (commLock)
+                Stream stream = client.GetStream();
+                int length = stream.ReadByte() + 256 * stream.ReadByte();
+                for (int i = 0; i < length; i++)
                 {
-                    Stream stream = client.GetStream();
-                    int length = stream.ReadByte() + 256 * stream.ReadByte();
-                    for (int i = 0; i < length; i++)
-                    {
-                        int data = stream.ReadByte();
-                        byte bit = Convert.ToByte(data);
-                        byteIn[i] = bit;
-                    }
+                    int data = stream.ReadByte();
+                    byte bit = Convert.ToByte(data);
+                    byteIn[i] = bit;
                 }
-                return byteIn;
             }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return null;
-            }
+            if (byteIn == null) { throw new NXTNoReply(); }
+            return byteIn;
         }
         
     }

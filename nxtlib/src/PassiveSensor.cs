@@ -27,7 +27,7 @@ namespace NXTLib
         /// </summary>
         public override void Poll()
         {
-            pollData = brick.ProtocolLink.GetSensorValues(port);
+            pollData = brick.link.GetSensorValues(port);
             base.Poll();
         }
 

@@ -28,16 +28,16 @@ namespace NXTLib
         }
 
         /// <summary>
-        /// <para>Useless when connecting via USB.</para>
+        /// <para>Search for bricks connected via USB.</para>
         /// </summary>
-        /// <returns>Search for bricks connected via USB.</returns>
+        /// <returns>A list of brick information (returns max 1 brick!).</returns>
         public override List<BrickInfo> Search(Protocol link)
         {
             if (IsConnected)
             {
                 List<BrickInfo> list = new List<BrickInfo>();
                 BrickInfo brick = new BrickInfo();
-                brick.address = new byte[] { };
+                brick.address = new byte[6] { 0, 0, 0, 0, 0, 0 };
                 brick.name = "NXT";
 
                 GetDeviceInfoReply? reply = link.GetDeviceInfo();
@@ -51,26 +51,24 @@ namespace NXTLib
             }
             else
             {
-                return null;
+                throw new NXTNoBricksFound();
             }
         }
 
         /// <summary>
         /// <para>Useless when connecting via USB.</para>
         /// </summary>
-        /// <returns>Always true.</returns>
-        public override bool Connect(BrickInfo brick)
+        public override void Connect(BrickInfo brick)
         {
-            return IsConnected;
+            if (!IsConnected) { throw new NXTNotConnected(); }
         }
 
         /// <summary>
         /// <para>This method has no function for an USB connection.</para>
         /// </summary>
-        /// <returns>Always true.</returns>
-        public override bool Disconnect()
+        public override void Disconnect()
         {
-            return true;
+            return;
         }
 
         /// <summary>
@@ -94,27 +92,19 @@ namespace NXTLib
         /// <summary>
         /// <para>Object to control mutex locking via USB.</para>
         /// </summary>
-        object usbLock = new object();
+        private object commLock = new object();
 
         /// <summary>
         /// <para>Sends a request to the NXT brick.</para>
         /// </summary>
         /// <param name="request">The request, as a byte array.</param>
-        /// <returns>True if successful.</returns>
-        public override bool Send(byte[] request)
+        public override void Send(byte[] request)
         {
-            try
+            if (!IsConnected) { throw new NXTNotConnected(); }
+            lock (commLock)
             {
-                lock (usbLock)
-                {
-                    usb.SendDataViaBulkTransfers(request);
-                    return true;
-                }
-            }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return false;
+                usb.SendDataViaBulkTransfers(request);
+                return;
             }
         }
 
@@ -124,17 +114,12 @@ namespace NXTLib
         /// <returns>Returns the reply from the NXT, as a byte array.</returns>
         public override byte[] RecieveReply()
         {
-            try
+            if (!IsConnected) { throw new NXTNotConnected(); }
+            lock (commLock)
             {
-                lock (usbLock)
-                {
-                    return usb.ReadDataViaBulkTransfer();
-                }
-            }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return null;
+                byte[] reply = usb.ReadDataViaBulkTransfer();
+                if (reply == null) { throw new NXTNoReply(); }
+                return reply;
             }
         }
         

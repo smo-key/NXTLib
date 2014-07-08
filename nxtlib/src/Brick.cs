@@ -17,76 +17,45 @@ namespace NXTLib
         public enum LinkType { Bluetooth, USB, Null }
         public Brick(LinkType type)
         {
-            switch (type)
+            try
             {
-                case LinkType.Bluetooth:
-                    ProtocolLink = new Bluetooth();
-                    break;
-                case LinkType.USB:
-                    ProtocolLink = new USB();
-                    break;
-                case LinkType.Null:
-                    ProtocolLink = null;
-                    break;
-                default:
-                    throw new Exception("[NXTLib] Unrecognized LinkType.");
+                switch (type)
+                {
+                    case LinkType.Bluetooth:
+                        link = new Bluetooth();
+                        break;
+                    case LinkType.USB:
+                        link = new USB();
+                        break;
+                    case LinkType.Null:
+                        link = null;
+                        break;
+                    default:
+                        throw new Exception("[NXTLib] Unrecognized LinkType.");
+                }
+                if (link != null)
+                {
+                    if (!link.IsSupported) { throw new NXTLinkNotSupported(); }
+                }
             }
-            if (ProtocolLink != null)
+            catch (System.TypeInitializationException)
             {
-                if (!ProtocolLink.IsSupported) { throw new Exception("[NXTLib] Link type not supported by this system!"); }
-            }
-        }
-        public Protocol ProtocolLink
-        {
-            get
-            {
-                return _link;
-            }
-            internal set
-            {
-                _link = value;
+                throw new NXTLinkNotSupported();
             }
         }
-        private Protocol _link;
-        private string error;
-        public string LastError
-        {
-            get
-            {
-                return error;
-            }
-            internal set
-            {
-                error = value;
-            }
-        }
+        public Protocol link { get; internal set; }
         public Protocol.BrickInfo brickinfo { get; private set; }
 
         public List<Protocol.BrickInfo> Search()
         {
-            List<Protocol.BrickInfo> bricks = ProtocolLink.Search(_link);
-            if (bricks == null)
-            {
-                error = "[Protocol] No NXTs found!";
-                return null;
-            }
-            if (bricks.Count < 1)
-            {
-                error = "[Protocol] No NXTs found!";
-                return null;
-            }
-            return bricks;
+            return link.Search(link);
         }
 
         public bool Connect(Protocol.BrickInfo brick)
         {
             if (!IsConnected)
             {
-                if (!ProtocolLink.Connect(brick))
-                {
-                    error = ProtocolLink.LastError;
-                    return false;
-                }
+                link.Connect(brick);
                 InitSensors();
                 EnableAutoPoll();
                 return true;
@@ -100,11 +69,7 @@ namespace NXTLib
         {
             if (IsConnected)
             {
-                if (!ProtocolLink.Disconnect())
-                {
-                    error = ProtocolLink.LastError;
-                    return false;
-                }
+                link.Disconnect();
                 DisableAutoPoll();
                 return true;
             }
@@ -115,14 +80,14 @@ namespace NXTLib
         }
         public bool IsConnected
         {
-            get { return ProtocolLink.IsConnected; }
+            get { return link.IsConnected; }
         }
 
         //private Timer timer = null;
         private void timer_Callback(object state)
         {
             if (IsConnected)
-                ProtocolLink.KeepAlive();
+                link.KeepAlive();
         }
     #endregion
 
@@ -275,12 +240,16 @@ namespace NXTLib
         {
             List<string> fileArr = new List<string>();
 
-            Protocol.FindFileReply? reply = ProtocolLink.FindFirst(fileMask);
-            while (reply.HasValue && reply.Value.fileFound)
+            Protocol.FindFileReply reply = link.FindFirst(fileMask);
+            try
             {
-                fileArr.Add(reply.Value.fileName);
-                reply = ProtocolLink.FindNext(reply.Value.handle);
+                while (reply.fileFound)
+                {
+                    fileArr.Add(reply.filename);
+                    reply = link.FindNext(reply.handle);
+                }
             }
+            catch (NXTFileNotFound) { }
 
             return fileArr.ToArray();
         }
@@ -290,59 +259,43 @@ namespace NXTLib
         /// </summary>
         /// <param name="filenamelocal">The name of the file to read from local disk.</param>
         /// <param name="filenameonbrick">The target file to upload to, with expension.</param>
-        /// <returns>True if no error.</returns>
-        public bool UploadFile(string filenamelocal, string filenameonbrick)
+        public void UploadFile(string filenamelocal, string filenameonbrick)
         {
-            try
+            //Delete File, if Exists
+            if (link.DoesExist(filenameonbrick))
             {
-                UInt32 filesize = 0;
-                byte? filehandle;
-
-                //Delete File, if Exists
-                if (_link.DoesExist(filenameonbrick))
-                {
-                    if (!_link.Delete(filenameonbrick))
-                    {
-                        throw new Exception(_link.LastError);
-                    }
-                }
-
-                //Read Local File
-                byte[] localcontents;
-                using (var stream = System.IO.File.OpenRead(filenamelocal))
-                {
-                    localcontents = new byte[(int)stream.Length];
-                    int offset = 0;
-                    while (offset < localcontents.Length)
-                    {
-                        int chunk = stream.Read(localcontents, offset, localcontents.Length - offset);
-                        if (chunk == 0) { throw new Exception("Not all bytes written!"); }
-                        offset += chunk;
-                    }
-                    stream.Close();
-                }
-
-                //Find Length of Local File
-                filesize = (UInt32)localcontents.Length;
-
-                //Open New File for Reading
-                filehandle = _link.OpenWrite(filenameonbrick, filesize);
-                if (!filehandle.HasValue) { throw new Exception(_link.LastError); }
-
-                //Copy Local to Remote
-                int? reply = _link.Write(filehandle.Value, localcontents);
-                if (!reply.HasValue) { throw new Exception(_link.LastError); }
-
-                //Close Remote Files
-                if (!_link.Close(filehandle.Value)) { throw new Exception(_link.LastError); }
-
-                return true;
+                link.Delete(filenameonbrick);
             }
-            catch (Exception ex)
+
+            //Read Local File
+            byte[] localcontents;
+            using (var stream = System.IO.File.OpenRead(filenamelocal))
             {
-                error = ex.Message;
-                return false;
+                localcontents = new byte[(int)stream.Length];
+                int offset = 0;
+                while (offset < localcontents.Length)
+                {
+                    int chunk = stream.Read(localcontents, offset, localcontents.Length - offset);
+                    if (chunk == 0) { throw new NXTException("Not all bytes written!"); }
+                    offset += chunk;
+                }
+                stream.Close();
             }
+
+            //Find Length of Local File
+            UInt32 filesize = 0;
+            filesize = (UInt32)localcontents.Length;
+
+            //Open New File for Reading
+            byte filehandle = link.OpenWrite(filenameonbrick, filesize);
+
+            //Copy Local to Remote
+            int reply = link.Write(filehandle, localcontents);
+
+            //Close Remote Files
+            link.Close(filehandle);
+
+            return;
         }
 
     #endregion
@@ -353,26 +306,18 @@ namespace NXTLib
         {
             get
             {
-                try
-                {
-                    return ProtocolLink.GetCurrentProgramName();
-                }
-                catch (Exception ex)
-                {
-                    error = ex.Message;
-                    return null;
-                }
+                return link.GetCurrentProgramName();
             }
             set
             {
-                string fileName = value ?? "";
+                string filename = value ?? "";
 
-                fileName = fileName.Trim();
+                filename = filename.Trim();
 
-                if (fileName != "")
-                    ProtocolLink.StartProgram(fileName);
+                if (filename != "")
+                    link.StartProgram(filename);
                 else
-                    ProtocolLink.StopProgram();
+                    link.StopProgram();
             }
         }
 
@@ -399,7 +344,7 @@ namespace NXTLib
         /// <param name="soundFile">The sound file</param>
         public void PlaySoundfile(string soundFile)
         {
-            ProtocolLink.PlaySoundFile(false, soundFile);
+            link.PlaySoundFile(false, soundFile);
         }
 
         /// <summary>
@@ -407,7 +352,7 @@ namespace NXTLib
         /// </summary>
         public void StopSound()
         {
-            ProtocolLink.StopSoundPlayback();
+            link.StopSoundPlayback();
         }
 
         /// <summary>
@@ -417,7 +362,7 @@ namespace NXTLib
         /// <param name="duration">Duration of the tone, ms</param>
         public void PlayTone(UInt16 frequency, UInt16 duration)
         {
-            ProtocolLink.PlayTone(frequency, duration);
+            link.PlayTone(frequency, duration);
         }
 
     #endregion
@@ -434,13 +379,10 @@ namespace NXTLib
         {
             get
             {
-                Protocol.GetDeviceInfoReply? reply = ProtocolLink.GetDeviceInfo();
-                if (reply.HasValue)
-                    return reply.Value.Name;
-                else
-                    return null;
+                Protocol.GetDeviceInfoReply reply = link.GetDeviceInfo();
+                return reply.Name;
             }
-            set { ProtocolLink.SetBrickName(value); }
+            set { link.SetBrickName(value); }
         }
 
         /// <summary>
@@ -450,11 +392,8 @@ namespace NXTLib
         {
             get
             {
-                int? reply = ProtocolLink.GetBatteryLevel();
-                if (reply.HasValue)
-                    return reply.Value;
-                else
-                    return 0;
+                int reply = link.GetBatteryLevel();
+                return reply;
             }
         }
 

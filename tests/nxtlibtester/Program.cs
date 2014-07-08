@@ -12,68 +12,60 @@ namespace nxtlibtester
     {
         static void Main(string[] args)
         {
+            Console.WriteLine("File Upload Test\r\n");
+
+            string filename = "version.ric"; //filename on disk (locally)
+            string filenameonbrick = "version.ric"; //filename on remote NXT
+            Brick brick = new Brick(Brick.LinkType.Null);
+
             try
             {
-                Console.WriteLine("File Upload Test\r\n");
-
-                string filename = "version.ric"; //filename on disk (locally)
-                string filenameonbrick = "version.ric"; //filename on remote NXT
-                Brick brick = new Brick(Brick.LinkType.Null);
-
-                //Try Connecting via USB
+                //Try connecting via USB
+                Console.WriteLine("Searching for bricks via USB...");
+                brick = new Brick(Brick.LinkType.USB);
+                List<Protocol.BrickInfo> bricks = brick.Search();
                 Console.WriteLine("Connecting to brick via USB...");
-                try
-                {
-                    //Brick = top layer of code, contains the sensors and motors
-                    brick = new Brick(Brick.LinkType.USB);
-                    List<Protocol.BrickInfo> bricks = brick.Search();
-                    if (bricks == null) { throw new Exception(brick.LastError); }
-                    brick.Connect(bricks[0]);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Error: {0}", ex.Message);
-                    Console.WriteLine("Failed to connect via USB.");
-
-                    //Try Connecting via Bluetooth
-                    Console.WriteLine("Connecting to brick via Bluetooth...");
-                    try
-                    {
-                        //Brick = top layer of code, contains the sensors and motors
-                        brick = new Brick(Brick.LinkType.Bluetooth);
-                        List<Protocol.BrickInfo> bricks = brick.Search();
-                        if (bricks == null) { throw new Exception(brick.LastError); }
-                        if (!brick.Connect(bricks[0])) { throw new Exception(brick.LastError); }
-                        if (!brick.IsConnected) { throw new Exception("Failed to connect via Bluetooth!"); }
-                    }
-                    catch (Exception exc)
-                    {
-                        throw new Exception(exc.Message);
-                    }
-                }
-
-                //Connect to Protocol
-                Protocol protocol = brick.ProtocolLink;
-
-                //Upload File
-                Console.WriteLine("Uploading file...");
-                if (!brick.UploadFile(filename, filenameonbrick)) { throw new Exception(brick.LastError); }
-
-                //Disconnect
-                if (!brick.Disconnect()) { throw new Exception(brick.LastError); }
-
-                Console.WriteLine("Success!");
-                Console.WriteLine("Press any key to continue...");
-                Console.ReadKey(true);
-                return;
+                brick.Connect(bricks[0]);
             }
-            catch (Exception ex)
+            catch (NXTException ex)
             {
                 Console.WriteLine("Error: {0}", ex.Message);
-                Console.WriteLine("Press any key to continue...");
-                Console.ReadKey(true);
-                return;
+                Console.WriteLine("Failed to connect via USB.");
+
+                try
+                {
+                    //Try Connecting via Bluetooth
+                    Console.WriteLine("Searching for bricks via Bluetooth...");
+                    brick = new Brick(Brick.LinkType.Bluetooth);
+                    List<Protocol.BrickInfo> bricks = brick.Search();
+                    Console.WriteLine("Connecting to brick via Bluetooth...");
+                    brick.Connect(bricks[0]);
+                }
+                catch (NXTLinkNotSupported)
+                {
+                    Console.WriteLine("Bluetooth not supported on this machine!");
+                    Console.WriteLine("No bricks found!");
+                    Console.WriteLine("Press any key to continue...");
+                    Console.ReadKey(true);
+                    return;
+                }
             }
+
+            //Connect to underlying NXT Protocol
+            Protocol protocol = brick.link;
+
+            //Upload File
+            Console.WriteLine("Uploading file...");
+            brick.UploadFile(filename, filenameonbrick);
+
+            //Disconnect
+            Console.WriteLine("Disconnecting...");
+            brick.Disconnect();
+
+            Console.WriteLine("Success!");
+            Console.WriteLine("Press any key to continue...");
+            Console.ReadKey(true);
+            return;
         }
     }
 }

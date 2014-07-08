@@ -90,7 +90,7 @@ namespace NXTLib.Sensors
         public byte? ReadMeasurementByteX(byte x)
         {
             if (x < 0 || 7 < x)
-                throw new ArgumentException("The measurement byte number must be in the interval 0-7.");
+                throw new NXTException("The measurement byte number must be in the interval 0-7.");
 
             x += 0x42;  // 0 -> 0x42, 7 -> 0x49
             return ReadByteFromAddress(x);

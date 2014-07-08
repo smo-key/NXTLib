@@ -61,6 +61,7 @@
     <Compile Include="src\Connect\USBWrapper\WinUsbDevice.cs" />
     <Compile Include="src\Connect\USBWrapper\WinUsbDeviceApi.cs" />
     <Compile Include="src\DigitalSensor.cs" />
+    <Compile Include="src\Error.cs" />
     <Compile Include="src\Motor.cs" />
     <Compile Include="src\PassiveSensor.cs" />
     <Compile Include="src\Pollable.cs" />

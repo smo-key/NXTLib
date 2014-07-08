@@ -24,14 +24,14 @@ namespace NXTLib
                 try
                 {
                     // For an obscure reason there seems to be a tendency that LsGetStatus return an error the first time it is called...
-                    bytesReady = brick.ProtocolLink.LowspeedGetStatus(port);
+                    bytesReady = brick.link.LowspeedGetStatus(port);
                 }
                 catch (Exception)
                 {
-                    bytesReady = brick.ProtocolLink.LowspeedGetStatus(port);
+                    bytesReady = brick.link.LowspeedGetStatus(port);
                 }
                 byte[] garbage = (bytesReady != null && bytesReady.Value > 0)
-                    ? brick.ProtocolLink.LowspeedRead(port)
+                    ? brick.link.LowspeedRead(port)
                     : null;
             }
         }
@@ -45,7 +45,7 @@ namespace NXTLib
         internal byte[] SendN(byte[] request, byte rxDataLength)
         {
             // Send the I2C request to the sensor.
-            brick.ProtocolLink.LowspeedWrite(port, request, rxDataLength);
+            brick.link.LowspeedWrite(port, request, rxDataLength);
 
             // Return null if no reply is expected.
             if (rxDataLength == 0) return null;
@@ -59,12 +59,12 @@ namespace NXTLib
                     Thread.Sleep(10);
 
                     // Query how many bytes are ready in the sensor.
-                    bytesReady = brick.ProtocolLink.LowspeedGetStatus(port);
+                    bytesReady = brick.link.LowspeedGetStatus(port);
                 }
                 catch (Exception ex)
                 {
                     // The port is still busy. Try again.
-                    if (ex.Message == "[NXT Bluetooth] Pending communication transaction in progress.")
+                    if (ex.Message == "[NXT] Pending communication transaction in progress.")
                     {
                         bytesReady = 0;
                         Thread.Sleep(10);
@@ -73,7 +73,7 @@ namespace NXTLib
                     }
 
                     // Rethrow if the error is not a CommunicationBusError.
-                    if (ex.Message != "[NXT Bluetooth] Communication bus error.") throw;
+                    if (ex.Message != "[NXT] Communication bus error.") throw;
 
                     // Clears error condition - any LsWrite should do.
                     DoAnyLsWrite();
@@ -85,7 +85,7 @@ namespace NXTLib
             while (bytesReady < rxDataLength);
 
             // Read, and return, the reply from the sensor.
-            return brick.ProtocolLink.LowspeedRead(port);
+            return brick.link.LowspeedRead(port);
         }
 
         /// <summary>
@@ -99,7 +99,7 @@ namespace NXTLib
         internal byte[] Send1(byte[] request)
         {
             // Send the I2C request to the sensor.
-            brick.ProtocolLink.LowspeedWrite(port, request, 1);
+            brick.link.LowspeedWrite(port, request, 1);
 
             while (true)
             {
@@ -107,16 +107,16 @@ namespace NXTLib
 
                 try
                 {
-                    return brick.ProtocolLink.LowspeedRead(port);
+                    return brick.link.LowspeedRead(port);
                 }
                 catch (Exception ex)
                 {
-                    if (ex.Message == "[NXT Bluetooth] Pending communication transaction in progress.") continue;
+                    if (ex.Message == "[NXT] Pending communication transaction in progress.") continue;
 
-                    if (ex.Message == "[NXT Bluetooth] Communication bus error.")
+                    if (ex.Message == "[NXT] Communication bus error.")
                     {
                         // Doing a LsWrite() clears the CommunicationBusError from the bus.
-                        brick.ProtocolLink.LowspeedWrite(port, request, 1);
+                        brick.link.LowspeedWrite(port, request, 1);
                         continue;
                     }
 
@@ -136,7 +136,7 @@ namespace NXTLib
 
         private void LsReadDelay()
         {
-            if (this.brick.ProtocolLink is Bluetooth)
+            if (this.brick.link is Bluetooth)
             {
                 Thread.Sleep(lsReadDelayTimeMs);
             }
@@ -215,7 +215,7 @@ namespace NXTLib
         {
             byte[] request = new byte[] { deviceAddress, address };
 
-            byte[] reply = (this.brick.ProtocolLink is Bluetooth)
+            byte[] reply = (this.brick.link is Bluetooth)
                 ? Send1(request)
                 : SendN(request, 1);
 

@@ -26,7 +26,7 @@ namespace NXTLib
         {
             if (brick.IsConnected)
             {
-                brick.ProtocolLink.SetSensorMode(port, type, mode);
+                brick.link.SetSensorMode(port, type, mode);
             }
         }
         internal Protocol.SensorPort Port

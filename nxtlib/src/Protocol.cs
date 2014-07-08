@@ -39,12 +39,10 @@ namespace NXTLib
         }
 
         public abstract List<BrickInfo> Search(Protocol link);
-        public abstract bool Connect(BrickInfo brick);
-        public abstract bool Disconnect();
-        public abstract bool Send(byte[] request);
+        public abstract void Connect(BrickInfo brick);
+        public abstract void Disconnect();
+        public abstract void Send(byte[] request);
         public abstract byte[] RecieveReply();
-        internal string error;
-        public string LastError { get { return error; } }
         internal SerialPort link { get; set; }
         public abstract bool IsConnected { get; }
         public abstract bool IsSupported { get; }
@@ -55,38 +53,25 @@ namespace NXTLib
         /// <summary> 
         /// [Native] Starts a program (.rxe) on the NXT brick.
         /// </summary>
-        /// <param name="fileName">The name of the program you wish to run.</param>
-        /// <returns>Returns true if operation was a success, false otherwise.  If false, check LastError.</returns>
-        public bool StartProgram(string fileName)
+        /// <param name="filename">The name of the program you wish to run.</param>
+        public void StartProgram(string filename)
         {
-            try
-            {
-                string n = ValidateFilename(fileName, FileType.Program, true);
-                if (n == null)
-                {
-                    return false;
-                }
-                fileName = n;
-                byte[] fileNameByteArr = Encoding.ASCII.GetBytes(fileName);
+            filename = ValidateFilename(filename, FileType.Program, true);
+            byte[] fileNameByteArr = Encoding.ASCII.GetBytes(filename);
 
-                byte[] request = new byte[22];
-                request[0] = (byte)(0x00);
-                request[1] = (byte)(DirectCommand.StartProgram);
-                fileNameByteArr.CopyTo(request, 2);
+            byte[] request = new byte[22];
+            request[0] = (byte)(0x00);
+            request[1] = (byte)(DirectCommand.StartProgram);
+            fileNameByteArr.CopyTo(request, 2);
+            CompleteRequest(request);
 
-                return CompleteRequest(request);
-            }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return false;
-            }
+            return;
         }
 
         /// <summary> 
         /// [Native] Stops the currently running program on the NXT brick.
         /// </summary>
-        /// <returns>Returns true if operation was a success, false otherwise.  If false, check LastError.</returns>
+        /// <returns>Returns true if program running then stopped successfully.  Returns false if no program was running.</returns>
         public bool StopProgram()
         {
             try
@@ -94,12 +79,12 @@ namespace NXTLib
                 byte[] request = new byte[22];
                 request[0] = (byte)(0x00);
                 request[1] = (byte)(DirectCommand.StopProgram);
+                CompleteRequest(request);
 
-                return CompleteRequest(request);
+                return true;
             }
-            catch (Exception ex)
+            catch (NXTNoActiveProgram)
             {
-                error = ex.Message;
                 return false;
             }
         }
@@ -109,109 +94,69 @@ namespace NXTLib
         /// </summary>
         /// <param name="frequency">The frequency, in Hz, where frequency is between 200 and 14000 Hz.</param>
         /// <param name="duration">The duration of the tone, in milliseconds.</param>
-        /// <returns>Returns true if operation was a success, false otherwise.  If false, check LastError.</returns>
-        public bool PlayTone(UInt16 frequency, UInt16 duration)
+        public void PlayTone(UInt16 frequency, UInt16 duration)
         {
-            try
-            {
-                if (frequency < 200) frequency = 200;
-                if (frequency > 14000) frequency = 14000;
+            if (frequency < 200) frequency = 200;
+            if (frequency > 14000) frequency = 14000;
 
-                byte[] request = new byte[6];
-                request[0] = (byte)(0x00);
-                request[1] = (byte)(DirectCommand.PlayTone);
-                SetUInt16(frequency, request, 2);
-                SetUInt16(duration, request, 4);
+            byte[] request = new byte[6];
+            request[0] = (byte)(0x00);
+            request[1] = (byte)(DirectCommand.PlayTone);
+            SetUInt16(frequency, request, 2);
+            SetUInt16(duration, request, 4);
+            CompleteRequest(request);
 
-                return CompleteRequest(request);
-            }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return false;
-            }
+            return;
         }
 
         /// <summary> 
         /// [Native] Plays a sound file from the NXT.
         /// </summary>
         /// <param name="loop">Set to true to loop the sound until stopped.</param>
-        /// <param name="fileName">The name of the sound file (.rso) on the NXT.</param>
-        /// <returns>Returns true if operation was a success, false otherwise.  If false, check LastError.</returns>
-        public bool PlaySoundFile(bool loop, string fileName)
+        /// <param name="filename">The name of the sound file (.rso) on the NXT.</param>
+        public void PlaySoundFile(bool loop, string filename)
         {
-            try
-            {
-                string n = ValidateFilename(fileName, FileType.Sound, true);
-                if (n == null)
-                {
-                    return false;
-                }
-                fileName = n;
+            filename = ValidateFilename(filename, FileType.Sound, true);
 
-                byte[] request = new byte[23];
-                request[0] = (byte)(0x00);
-                request[1] = (byte)(DirectCommand.PlaySoundFile);
-                request[2] = (byte)(loop ? 0xFF : 0x00);
-                Encoding.ASCII.GetBytes(fileName).CopyTo(request, 3);
+            byte[] request = new byte[23];
+            request[0] = (byte)(0x00);
+            request[1] = (byte)(DirectCommand.PlaySoundFile);
+            request[2] = (byte)(loop ? 0xFF : 0x00);
+            Encoding.ASCII.GetBytes(filename).CopyTo(request, 3);
+            CompleteRequest(request);
 
-                return CompleteRequest(request);
-            }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return false;
-            }
+            return;
         }
 
         /// <summary> 
         /// [Native] Returns the voltage of the NXT battery, in millivolts.
         /// </summary>
         /// <returns>The battery level, in millivolts.</returns>
-        public int? GetBatteryLevel()
+        public int GetBatteryLevel()
         {
-            try
-            {
-                byte[] request = new byte[] {
-                0x00,
-                (byte) DirectCommand.GetBatteryLevel
-                };
-                
-                Send(request);
-                byte[] reply = RecieveReply();
+            byte[] request = new byte[] {
+            0x00,
+            (byte) DirectCommand.GetBatteryLevel
+            };
 
-                if (reply == null) return null;
+            byte[] reply = CompleteRequest(request);
 
-                UInt16 voltage = GetUInt16(reply, 3);
-                return Convert.ToInt32(voltage);
-            }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return null;
-            }
+            UInt16 voltage = GetUInt16(reply, 3);
+            return Convert.ToInt32(voltage);
         }
 
         /// <summary> 
         /// [Native] Stops sound playback on the NXT.
         /// </summary>
-        /// <returns>Returns true if operation was a success, false otherwise.  If false, check LastError.</returns>
-        public bool StopSoundPlayback()
+        public void StopSoundPlayback()
         {
-            try
-            {
-                byte[] request = new byte[] {
-                0x00,
-                (byte) DirectCommand.StopSoundPlayback
-                };
+            byte[] request = new byte[] {
+            0x00,
+            (byte) DirectCommand.StopSoundPlayback
+            };
 
-                return CompleteRequest(request);
-            }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return false;
-            }
+            CompleteRequest(request);
+            return;
         }
 
         /// <summary> 
@@ -219,34 +164,23 @@ namespace NXTLib
         ///  returns a value saying how long until the NXT falls asleep again, in milliseconds.
         /// </summary>
         /// <returns>The time until the NXT falls asleep again, in milliseconds.</returns>
-        public int? KeepAlive()
+        public int KeepAlive()
         {
-            try
-            {
-                byte[] request = new byte[] {
-                0x00,
-                (byte) DirectCommand.KeepAlive
-                };
+            byte[] request = new byte[] {
+            0x00,
+            (byte) DirectCommand.KeepAlive
+            };
 
-                Send(request);
-                byte[] reply = RecieveReply();
+            byte[] reply = CompleteRequest(request);
 
-                if (reply == null) return null;
-
-                UInt32 sleeplimit = GetUInt32(reply, 3);
-                return Convert.ToInt32(sleeplimit);
-            }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return null;
-            }
+            UInt32 sleeplimit = GetUInt32(reply, 3);
+            return Convert.ToInt32(sleeplimit);
         }
 
         /// <summary> 
         /// [Native] Gets the name of the currently running program on the NXT brick.
         /// </summary>
-        /// <returns>The name of the currently running program, as a string.</returns>
+        /// <returns>The name of the currently running program, as a string.  Null if no program running.</returns>
         public string GetCurrentProgramName()
         {
             try
@@ -256,26 +190,12 @@ namespace NXTLib
                 (byte) (DirectCommand.GetCurrentProgramName),
                 };
 
-                if (Send(request) == false)
-                {
-                    return null;
-                }
-                byte[] reply = RecieveReply();
-                if (reply == null)
-                {
-                    return null;
-                }
-                if (reply[2] != 0x00)
-                {
-                    error = LookupError(reply[2]);
-                    return null;
-                }
-                string fileName = Encoding.ASCII.GetString(reply, 3, 20).TrimEnd('\0');
-                return fileName;
+                byte[] reply = CompleteRequest(request);
+                string filename = Encoding.ASCII.GetString(reply, 3, 20).TrimEnd('\0');
+                return filename;
             }
-            catch (Exception ex)
+            catch (NXTNoActiveProgram)
             {
-                error = ex.Message;
                 return null;
             }
         }
@@ -326,152 +246,79 @@ namespace NXTLib
         /// [Native] Get the firware and protocol versions of the NXT.
         /// </summary>
         /// <returns>Returns the reply as a nullable GetFirmwareVersionReply.</returns>
-        public GetFirmwareVersionReply? GetFirmwareVersion()
+        public GetFirmwareVersionReply GetFirmwareVersion()
         {
-            try
-            {
-                byte[] request = new byte[] {
-                0x01,
-                (byte) MessageCommand.GetFirmwareVersion
-                };
+            byte[] request = new byte[] {
+            0x01,
+            (byte) MessageCommand.GetFirmwareVersion
+            };
 
-                if (Send(request) == false)
-                {
-                    return null;
-                }
-                byte[] reply = RecieveReply();
-                if (reply == null)
-                {
-                    return null;
-                }
-                if (reply[2] != 0x00)
-                {
-                    error = LookupError(reply[2]);
-                    return null;
-                }
-                GetFirmwareVersionReply result;
-                result.protocolVersion = new Version(reply[4], reply[3]);
-                result.firmwareVersion = new Version(reply[6], reply[5]);
-                return result;
-            }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return null;
-            }
+            byte[] reply = CompleteRequest(request);
+            GetFirmwareVersionReply result;
+            result.protocolVersion = new Version(reply[4], reply[3]);
+            result.firmwareVersion = new Version(reply[6], reply[5]);
+            return result;
         }
 
         /// <summary> 
         /// [Native] Boot the NXT.  THIS COMMAND MAY ONLY BE ACCEPTED BY USB!
         /// </summary>
-        /// <returns>Returns true if operation was a success, false otherwise.  If false, check LastError.</returns>
-        public bool Boot()
+        public void Boot()
         {
-            try
-            {
-                byte[] request = new byte[21];
-                request[0] = 0x01;
-                request[1] = (byte)MessageCommand.Boot;
-                Encoding.ASCII.GetBytes("Let's dance: SAMBA").CopyTo(request, 2);
+            byte[] request = new byte[21];
+            request[0] = 0x01;
+            request[1] = (byte)MessageCommand.Boot;
+            Encoding.ASCII.GetBytes("Let's dance: SAMBA").CopyTo(request, 2);
 
-                if (Send(request) == false)
-                {
-                    return false;
-                }
-                byte[] reply = RecieveReply();
-                if (reply == null)
-                {
-                    return false;
-                }
-                if (reply[2] != 0x00)
-                {
-                    error = LookupError(reply[2]);
-                    return false;
-                }
-                string result = Encoding.ASCII.GetString(reply, 3, 4).TrimEnd('\0');
-                if (result != "Yes")
-                {
-                    throw new Exception("[NXTLib] The reply was incorrect.");
-                }
-                return true;
-
-            }
-            catch (Exception ex)
+            byte[] reply = CompleteRequest(request);
+            string result = Encoding.ASCII.GetString(reply, 3, 4).TrimEnd('\0');
+            if (result != "Yes")
             {
-                error = ex.Message;
-                return false;
+                throw new NXTReplyIncorrect();
             }
+            return;
         }
 
         /// <summary> 
         /// [Native] Sets the name of the NXT.
         /// </summary>
         /// <param name="newname">The NXT's new name.</param>
-        /// <returns>Returns true if operation was a success, false otherwise.  If false, check LastError.</returns>
-        public bool SetBrickName(string newname)
+        public void SetBrickName(string newname)
         {
-            try
-            {
-                if (newname.Length > 15)
-                    newname = newname.Substring(0, 15);
+            if (newname.Length > 15)
+                newname = newname.Substring(0, 15);
 
-                byte[] request = new byte[18];
-                request[0] = 0x01;
-                request[1] = (byte)MessageCommand.SetBrickName;
-                Encoding.ASCII.GetBytes(newname).CopyTo(request, 2);
+            byte[] request = new byte[18];
+            request[0] = 0x01;
+            request[1] = (byte)MessageCommand.SetBrickName;
+            Encoding.ASCII.GetBytes(newname).CopyTo(request, 2);
 
-                return CompleteRequest(request);
+            CompleteRequest(request);
 
-            }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return false;
-            }
+            return;
         }
 
         /// <summary> 
         /// [Native] Returns the NXT's information.
         /// </summary>
         /// <returns>The reply as a nullable structure, GetDeviceInfoReply.</returns>
-        public GetDeviceInfoReply? GetDeviceInfo()
+        public GetDeviceInfoReply GetDeviceInfo()
         {
-            try
-            {
-                byte[] request = new byte[] {
-                0x01,
-                (byte) MessageCommand.GetDeviceInfo
-                };
+            byte[] request = new byte[] {
+            0x01,
+            (byte) MessageCommand.GetDeviceInfo
+            };
 
-                if (Send(request) == false)
-                {
-                    return null;
-                }
-                byte[] reply = RecieveReply();
-                if (reply == null)
-                {
-                    return null;
-                }
-                if (reply[2] != 0x00)
-                {
-                    error = LookupError(reply[2]);
-                    return null;
-                }
+            byte[] reply = CompleteRequest(request);
 
-                GetDeviceInfoReply result;
-                result.Name = Encoding.ASCII.GetString(reply, 3, 15).TrimEnd('\0');
-                result.Address = new byte[7];
-                Array.Copy(reply, 18, result.Address, 0, 7);
-                result.SignalStrength = GetUInt32(reply, 25);
-                result.freeUserFlash = GetUInt32(reply, 29);
+            GetDeviceInfoReply result;
+            result.Name = Encoding.ASCII.GetString(reply, 3, 15).TrimEnd('\0');
+            result.Address = new byte[7];
+            Array.Copy(reply, 18, result.Address, 0, 7);
+            result.SignalStrength = GetUInt32(reply, 25);
+            result.freeUserFlash = GetUInt32(reply, 29);
 
-                return result;
-            }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return null;
-            }
+            return result;
         }
 
         /// <summary> 
@@ -480,22 +327,15 @@ namespace NXTLib
         /// <param name="waitfor">Set to true to wait until the NXT has completed its memory wipe, false otherwise.</param>
         public void DeleteUserFlash(bool waitfor)
         {
-            try
-            {
-                byte[] request = new byte[] {
-                0x01,
-                (byte) MessageCommand.DeleteUserFlash
-                };
+            byte[] request = new byte[] {
+            0x01,
+            (byte) MessageCommand.DeleteUserFlash
+            };
 
-                Send(request);
-                if (waitfor)
-                    System.Threading.Thread.Sleep(5000);
-                return;
-            }
-            catch
-            {
-
-            }
+            Send(request);
+            if (waitfor)
+                System.Threading.Thread.Sleep(5000);
+            return;
         }
 
 #endregion
@@ -537,27 +377,19 @@ namespace NXTLib
         /// <param name="port">The port of the attached sensor.</param>
         /// <param name="type">The type of the attached sensor.</param>
         /// <param name="mode">The mode of the attached sensor.</param>
-        /// <returns>Returns true if operation was a success, false otherwise.  If false, check LastError.</returns>
-        public bool SetSensorMode(SensorPort port,
+        public void SetSensorMode(SensorPort port,
             SensorType type, SensorMode mode)
         {
-            try
-            {
-                byte[] request = new byte[] {
-                (byte) (0x00),
-                (byte) (DirectCommand.SetInputMode),
-                (byte) port,
-                (byte) type,
-                (byte) mode
-                };
+            byte[] request = new byte[] {
+            (byte) (0x00),
+            (byte) (DirectCommand.SetInputMode),
+            (byte) port,
+            (byte) type,
+            (byte) mode
+            };
 
-                return CompleteRequest(request);
-            }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return false;
-            }
+            CompleteRequest(request);
+            return;
         }
 
         /// <summary>
@@ -565,76 +397,45 @@ namespace NXTLib
         /// </summary>
         /// <param name="port">The port of the attached sensor.</param>
         /// <returns>Returns a SensorInput package.</returns>
-        public SensorInput? GetSensorValues(SensorPort port)
+        public SensorInput GetSensorValues(SensorPort port)
         {
-            try
-            {
-                byte[] request = new byte[] {
-                0x00,
-                (byte) DirectCommand.GetInputValues,
-                (byte) port
-                };
+            byte[] request = new byte[] {
+            0x00,
+            (byte) DirectCommand.GetInputValues,
+            (byte) port
+            };
 
-                if (Send(request) == false)
-                {
-                    return null;
-                }
-
-                byte[] reply = RecieveReply();
-                if (reply == null)
-                {
-                    return null;
-                }
-                if (reply[3] != (byte)port)
-                {
-                    error = "[NXTLib] The reply was incorrect.";
-                    return null;
-                }
-                if (reply[2] != 0x00)
-                {
-                    error = LookupError(reply[2]);
-                    return null;
-                }
-                SensorInput result = new SensorInput();
-                result.valid = (reply[4] != 0x00);
-                result.calibrated = (reply[5] != 0x00);
-                result.type = (SensorType)reply[6];
-                result.mode = (SensorMode)reply[7];
-                result.value_raw = GetUInt16(reply, 8);
-                result.value_normalized = GetUInt16(reply, 10);
-                result.value_scaled = GetInt16(reply, 12);
-                result.value_calibrated = GetInt16(reply, 14);
-                return result;
-            }
-            catch (Exception ex)
+            byte[] reply = CompleteRequest(request);
+            if (reply[3] != (byte)port)
             {
-                error = ex.Message;
-                return null;
+                throw new NXTReplyIncorrect();
             }
+            SensorInput result = new SensorInput();
+            result.valid = (reply[4] != 0x00);
+            result.calibrated = (reply[5] != 0x00);
+            result.type = (SensorType)reply[6];
+            result.mode = (SensorMode)reply[7];
+            result.value_raw = GetUInt16(reply, 8);
+            result.value_normalized = GetUInt16(reply, 10);
+            result.value_scaled = GetInt16(reply, 12);
+            result.value_calibrated = GetInt16(reply, 14);
+            return result;
         }
 
         /// <summary>
         /// [Native] Reset's the selected sensor's scaled value.
         /// </summary>
         /// <param name="port">The port of the attached sensor.</param>
-        /// <returns>Returns true if operation was a success, false otherwise.  If false, check LastError.</returns>
-        public bool ResetSensorScale(SensorPort port)
+        public void ResetSensorScale(SensorPort port)
         {
-            try
-            {
-                byte[] request = new byte[] {
-                (byte) (0x00),
-                (byte) (DirectCommand.ResetInputScaledValue),
-                (byte) port
-                };
+            byte[] request = new byte[] {
+            (byte) (0x00),
+            (byte) (DirectCommand.ResetInputScaledValue),
+            (byte) port
+            };
 
-                return CompleteRequest(request);
-            }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return false;
-            }
+            CompleteRequest(request);
+            return;
         }
 
         /// <summary>
@@ -642,38 +443,16 @@ namespace NXTLib
         /// </summary>
         /// <param name="port">The port of the attached sensor.</param>
         /// <returns>Count of available bytes to read.</returns>
-        public byte? LowspeedGetStatus(SensorPort port)
+        public byte LowspeedGetStatus(SensorPort port)
         {
-            try
-            {
-                byte[] request = new byte[] {
-                (byte) (0x00),
-                (byte) (DirectCommand.LSGetStatus),
-                (byte) port
-                };
+            byte[] request = new byte[] {
+            (byte) (0x00),
+            (byte) (DirectCommand.LSGetStatus),
+            (byte) port
+            };
 
-                if (Send(request) == false)
-                {
-                    return null;
-                }
-
-                byte[] reply = RecieveReply();
-                if (reply == null)
-                {
-                    return null;
-                }                
-                if (reply[2] != 0x00)
-                {
-                    error = LookupError(reply[2]);
-                    return null;
-                }
-                return reply[3];
-            }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return null;
-            }
+            byte[] reply = CompleteRequest(request);
+            return reply[3];
         }
 
         /// <summary>
@@ -682,36 +461,28 @@ namespace NXTLib
         /// <param name="port">The port of the attached sensor.</param>
         /// <param name="txData">The tx Data to be written.</param>
         /// <param name="rxDataLength">The rx Data Length. </param>
-        /// <returns>Returns true if operation was a success, false otherwise.  If false, check LastError.</returns>
-        public bool LowspeedWrite(SensorPort port, byte[] txData, byte rxDataLength)
+        public void LowspeedWrite(SensorPort port, byte[] txData, byte rxDataLength)
         {
-            try
-            {
-                byte txDataLength = (byte)txData.Length;
-                if (txDataLength == 0)
-                    throw new ArgumentException("[NXTLib] No data to send.");
+            byte txDataLength = (byte)txData.Length;
+            if (txDataLength == 0)
+                throw new NXTException("No data to send.");
 
-                if (txDataLength > 16)
-                    throw new ArgumentException("[NXTLib] Tx data may not exceed 16 bytes.");
+            if (txDataLength > 16)
+                throw new NXTException("Tx data may not exceed 16 bytes.");
 
-                if (rxDataLength < 0 || 16 < rxDataLength)
-                    throw new ArgumentException("[NXTLib] Rx data length should be in the interval 0-16.");
+            if (rxDataLength < 0 || 16 < rxDataLength)
+                throw new NXTException("Rx data length should be in the interval 0-16.");
 
-                byte[] request = new byte[5 + txDataLength];
-                request[0] = (byte)(0x00);
-                request[1] = (byte)DirectCommand.LSWrite;
-                request[2] = (byte)port;
-                request[3] = txDataLength;
-                request[4] = rxDataLength;
-                txData.CopyTo(request, 5);
+            byte[] request = new byte[5 + txDataLength];
+            request[0] = (byte)(0x00);
+            request[1] = (byte)DirectCommand.LSWrite;
+            request[2] = (byte)port;
+            request[3] = txDataLength;
+            request[4] = rxDataLength;
+            txData.CopyTo(request, 5);
+            CompleteRequest(request);
 
-                return CompleteRequest(request);
-            }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return false;
-            }
+            return;
         }
 
         /// <summary>
@@ -721,41 +492,19 @@ namespace NXTLib
         /// <returns>The data from the lowspeed sensor, as a byte array.</returns>
         public byte[] LowspeedRead(SensorPort port)
         {
-            try
-            {
-                byte[] request = new byte[] {
-                0x00,
-                (byte) DirectCommand.LSRead,
-                (byte) port
-                };
+            byte[] request = new byte[] {
+            0x00,
+            (byte) DirectCommand.LSRead,
+            (byte) port
+            };
 
-                if (Send(request) == false)
-                {
-                    return null;
-                }
+            byte[] reply = CompleteRequest(request);
 
-                byte[] reply = RecieveReply();
-                if (reply == null)
-                {
-                    return null;
-                }
-                if (reply[2] != 0x00)
-                {
-                    error = LookupError(reply[2]);
-                    return null;
-                }
+            byte bytesRead = reply[3];
+            byte[] rxData = new byte[bytesRead];
+            Array.Copy(reply, 4, rxData, 0, bytesRead);
 
-                byte bytesRead = reply[3];
-                byte[] rxData = new byte[bytesRead];
-                Array.Copy(reply, 4, rxData, 0, bytesRead);
-
-                return rxData;
-            }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return null;
-            }
+            return rxData;
         }
 
 #endregion
@@ -833,25 +582,17 @@ namespace NXTLib
         /// <param name="port">The port of the selected motor.</param>
         /// <param name="relative">If set to true, the reset's position will be relative to the last
         ///  movement.  Otherwise, it is set at an absolute position.</param>
-        ///  <returns>Returns true if operation was a success, false otherwise.  If false, check LastError.</returns>
-        public bool ResetMotorPosition(MotorPortSingle port, bool relative)
+        public void ResetMotorPosition(MotorPortSingle port, bool relative)
         {
-            try
-            {
-                byte[] request = new byte[] {
-                (byte) (0x00),
-                (byte) (DirectCommand.ResetMotorPosition),
-                (byte) port,
-                (byte) (relative ? 0xFF : 0x00)
-                };
+            byte[] request = new byte[] {
+            (byte) (0x00),
+            (byte) (DirectCommand.ResetMotorPosition),
+            (byte) port,
+            (byte) (relative ? 0xFF : 0x00)
+            };
+            CompleteRequest(request);
 
-                return CompleteRequest(request);
-            }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return false;
-            }
+            return;
         }
 
         /// <summary> 
@@ -859,49 +600,26 @@ namespace NXTLib
         /// </summary>
         /// <param name="port">The port of the selected motor.</param>
         /// <returns>Returns a MotorStateOut package.</returns>
-        public MotorStateOut? GetMotorState(MotorPortSingle port)
+        public MotorStateOut GetMotorState(MotorPortSingle port)
         {
-            try
-            {
-                byte[] request = new byte[] {
+            byte[] request = new byte[] {
             0x00,
             (byte) DirectCommand.GetOutputState,
             (byte) port
-                };
+            };
 
-                if (Send(request) == false)
-                {
-                    return null;
-                }
-
-                byte[] reply = RecieveReply();
-                if (reply == null)
-                {
-                    return null;
-                }
-                byte motorportout = reply[3];
-                if (reply[3] != (byte)port)
-                {
-                    error = "[NXTLib] The reply was incorrect.";
-                    return null;
-                }
-                if (reply[2] != 0x00)
-                {
-                    error = LookupError(reply[2]);
-                    return null;
-                }
-                MotorStateOut result = new MotorStateOut();
-                result.power = reply[4];
-                result.tachocount = GetInt32(reply, 13);
-                result.blocktachocount = GetInt32(reply, 17);
-                result.rotationcount = GetInt32(reply, 21);
-                return result;
-            }
-            catch (Exception ex)
+            byte[] reply = CompleteRequest(request);
+            byte motorportout = reply[3];
+            if (reply[3] != (byte)port)
             {
-                error = ex.Message;
-                return null;
+                throw new NXTReplyIncorrect();
             }
+            MotorStateOut result = new MotorStateOut();
+            result.power = reply[4];
+            result.tachocount = GetInt32(reply, 13);
+            result.blocktachocount = GetInt32(reply, 17);
+            result.rotationcount = GetInt32(reply, 21);
+            return result;
 
             /*
             NxtGetOutputStateReply result;
@@ -923,45 +641,27 @@ namespace NXTLib
         /// </summary>
         /// <param name="port">The ports of the selected motors.</param>
         /// <param name="power">The power at which to move the motors, between -100 and 100.</param>
-        /// <returns>Returns true if operation was a success, false otherwise.  If false, check LastError.</returns>
-        public bool MoveMotors(MotorPort port, int power)
+        public void MoveMotors(MotorPort port, int power)
         {
-            try
+            MotorMode mode = MotorMode.On_Regulated;
+            if ((power < 75) && (power > -75)) { mode = MotorMode.MotorOn; }
+            if (port != MotorPort.AB && port != MotorPort.AC && port != MotorPort.BC)
             {
-                MotorMode mode = MotorMode.On_Regulated;
-                if ((power < 75) && (power > -75)) { mode = MotorMode.MotorOn; }
-                if (port != MotorPort.AB && port != MotorPort.AC && port != MotorPort.BC)
-                {
-                    if (SetOutputState((Motor)((byte)port), (sbyte)power, mode,
-                        MotorReg.Speed, 0, MotorState.Running, 0) == false)
-                    {
-                        return false;
-                    }
-                }
-                else
-                {
-                    Motor[] motors = new Motor[] { };
-                    if (port == MotorPort.AB) { motors = new Motor[] { Motor.A, Motor.B }; }
-                    if (port == MotorPort.AC) { motors = new Motor[] { Motor.A, Motor.C }; }
-                    if (port == MotorPort.BC) { motors = new Motor[] { Motor.B, Motor.C }; }
-                    if (SetOutputState(motors[0], (sbyte)power, mode,
-                        MotorReg.Sync, 0, MotorState.Running, (uint)0) == false)
-                    {
-                        return false;
-                    }
-                    if (SetOutputState(motors[1], (sbyte)power, mode,
-                        MotorReg.Sync, 0, MotorState.Running, (uint)0) == false)
-                    {
-                        return false;
-                    }
-                }
-                return true;
+                SetOutputState((Motor)((byte)port), (sbyte)power, mode,
+                    MotorReg.Speed, 0, MotorState.Running, 0);
             }
-            catch (Exception ex)
+            else
             {
-                error = ex.Message;
-                return false;
+                Motor[] motors = new Motor[] { };
+                if (port == MotorPort.AB) { motors = new Motor[] { Motor.A, Motor.B }; }
+                if (port == MotorPort.AC) { motors = new Motor[] { Motor.A, Motor.C }; }
+                if (port == MotorPort.BC) { motors = new Motor[] { Motor.B, Motor.C }; }
+                SetOutputState(motors[0], (sbyte)power, mode,
+                    MotorReg.Sync, 0, MotorState.Running, (uint)0);
+                SetOutputState(motors[1], (sbyte)power, mode,
+                    MotorReg.Sync, 0, MotorState.Running, (uint)0);
             }
+            return;
         }
 
         /// <summary> 
@@ -970,54 +670,36 @@ namespace NXTLib
         /// <param name="port">The ports of the selected motors.</param>
         /// <param name="power">The power at which to move the motors, between -100 and 100.</param>
         /// <param name="stop">Whether to brake or coast during operation.  Braking uses far more power.</param>
-        /// <returns>Returns true if operation was a success, false otherwise.  If false, check LastError.</returns>
-        public bool MoveMotors(MotorPort port, int power, MotorStop stop)
+        public void MoveMotors(MotorPort port, int power, MotorStop stop)
         {
-            try
+            MotorMode mode = MotorMode.On_Regulated;
+            if (stop == MotorStop.Coast)
             {
-                MotorMode mode = MotorMode.On_Regulated;
-                if (stop == MotorStop.Coast)
-                {
-                    mode = MotorMode.On_Regulated;
-                    if ((power < 75) && (power > -75)) { mode = MotorMode.MotorOn; }
-                }
-                if (stop == MotorStop.Brake)
-                {
-                    mode = MotorMode.On_Brake_Regulated;
-                    if ((power < 75) && (power > -75)) { mode = MotorMode.On_Brake; }
-                }
-                if (port != MotorPort.AB && port != MotorPort.AC && port != MotorPort.BC)
-                {
-                    if (SetOutputState((Motor)((byte)port), (sbyte)power, mode,
-                        MotorReg.Speed, 0, MotorState.Running, 0) == false)
-                    {
-                        return false;
-                    }
-                }
-                else
-                {
-                    Motor[] motors = new Motor[] { };
-                    if (port == MotorPort.AB) { motors = new Motor[] { Motor.A, Motor.B }; }
-                    if (port == MotorPort.AC) { motors = new Motor[] { Motor.A, Motor.C }; }
-                    if (port == MotorPort.BC) { motors = new Motor[] { Motor.B, Motor.C }; }
-                    if (SetOutputState(motors[0], (sbyte)power, mode,
-                        MotorReg.Sync, 0, MotorState.Running, (uint)0) == false)
-                    {
-                        return false;
-                    }
-                    if (SetOutputState(motors[1], (sbyte)power, mode,
-                        MotorReg.Sync, 0, MotorState.Running, (uint)0) == false)
-                    {
-                        return false;
-                    }
-                }
-                return true;
+                mode = MotorMode.On_Regulated;
+                if ((power < 75) && (power > -75)) { mode = MotorMode.MotorOn; }
             }
-            catch (Exception ex)
+            if (stop == MotorStop.Brake)
             {
-                error = ex.Message;
-                return false;
+                mode = MotorMode.On_Brake_Regulated;
+                if ((power < 75) && (power > -75)) { mode = MotorMode.On_Brake; }
             }
+            if (port != MotorPort.AB && port != MotorPort.AC && port != MotorPort.BC)
+            {
+                SetOutputState((Motor)((byte)port), (sbyte)power, mode,
+                    MotorReg.Speed, 0, MotorState.Running, 0);
+            }
+            else
+            {
+                Motor[] motors = new Motor[] { };
+                if (port == MotorPort.AB) { motors = new Motor[] { Motor.A, Motor.B }; }
+                if (port == MotorPort.AC) { motors = new Motor[] { Motor.A, Motor.C }; }
+                if (port == MotorPort.BC) { motors = new Motor[] { Motor.B, Motor.C }; }
+                SetOutputState(motors[0], (sbyte)power, mode,
+                    MotorReg.Sync, 0, MotorState.Running, (uint)0);
+                SetOutputState(motors[1], (sbyte)power, mode,
+                    MotorReg.Sync, 0, MotorState.Running, (uint)0);
+            }
+            return;
         }
 
         /// <summary> 
@@ -1029,59 +711,41 @@ namespace NXTLib
         /// <param name="smooth">Whether to smoothly spin up or down the motors.</param>
         /// <param name="degrees">The number of degrees the motor revolves until is it fully spun up or down.  Smaller values 
         ///  make the motors move more smoothly.  Set degrees to zero to run infinitely.</param>
-        ///  <returns>Returns true if operation was a success, false otherwise.  If false, check LastError.</returns>
-        public bool MoveMotors(MotorPort port, int power, MotorStop stop, MotorSmooth smooth, int degrees)
+        public void MoveMotors(MotorPort port, int power, MotorStop stop, MotorSmooth smooth, int degrees)
         {
-            try
+            MotorMode mode = MotorMode.On_Regulated;
+            if (stop == MotorStop.Coast)
             {
-                MotorMode mode = MotorMode.On_Regulated;
-                if (stop == MotorStop.Coast)
-                {
-                    mode = MotorMode.On_Regulated;
-                    if ((power < 75) && (power > -75)) { mode = MotorMode.MotorOn; }
-                }
-                if (stop == MotorStop.Brake)
-                {
-                    mode = MotorMode.On_Brake_Regulated;
-                    if ((power < 75) && (power > -75)) { mode = MotorMode.On_Brake; }
-                }
-                if (port != MotorPort.AB && port != MotorPort.AC && port != MotorPort.BC)
-                {
-                    if (SetOutputState((Motor)((byte)port), (sbyte)power, mode,
-                        MotorReg.Speed, 0, MotorState.Running, 0) == false)
-                    {
-                        return false;
-                    }
-                }
-                else
-                {
-                    MotorState state = MotorState.Rampup;
-                    if (smooth == MotorSmooth.Smooth_Stop)
-                    {
-                        state = MotorState.RampDown;
-                    }
-                    Motor[] motors = new Motor[] { };
-                    if (port == MotorPort.AB) { motors = new Motor[] { Motor.A, Motor.B }; }
-                    if (port == MotorPort.AC) { motors = new Motor[] { Motor.A, Motor.C }; }
-                    if (port == MotorPort.BC) { motors = new Motor[] { Motor.B, Motor.C }; }
-                    if (SetOutputState(motors[0], (sbyte)power, mode,
-                        MotorReg.Sync, 0, state, (uint)degrees) == false)
-                    {
-                        return false;
-                    }
-                    if (SetOutputState(motors[1], (sbyte)power, mode,
-                        MotorReg.Sync, 0, state, (uint)degrees) == false)
-                    {
-                        return false;
-                    }
-                }
-                return true;
+                mode = MotorMode.On_Regulated;
+                if ((power < 75) && (power > -75)) { mode = MotorMode.MotorOn; }
             }
-            catch (Exception ex)
+            if (stop == MotorStop.Brake)
             {
-                error = ex.Message;
-                return false;
+                mode = MotorMode.On_Brake_Regulated;
+                if ((power < 75) && (power > -75)) { mode = MotorMode.On_Brake; }
             }
+            if (port != MotorPort.AB && port != MotorPort.AC && port != MotorPort.BC)
+            {
+                SetOutputState((Motor)((byte)port), (sbyte)power, mode,
+                    MotorReg.Speed, 0, MotorState.Running, 0);
+            }
+            else
+            {
+                MotorState state = MotorState.Rampup;
+                if (smooth == MotorSmooth.Smooth_Stop)
+                {
+                    state = MotorState.RampDown;
+                }
+                Motor[] motors = new Motor[] { };
+                if (port == MotorPort.AB) { motors = new Motor[] { Motor.A, Motor.B }; }
+                if (port == MotorPort.AC) { motors = new Motor[] { Motor.A, Motor.C }; }
+                if (port == MotorPort.BC) { motors = new Motor[] { Motor.B, Motor.C }; }
+                SetOutputState(motors[0], (sbyte)power, mode,
+                    MotorReg.Sync, 0, state, (uint)degrees);
+                SetOutputState(motors[1], (sbyte)power, mode,
+                    MotorReg.Sync, 0, state, (uint)degrees);
+            }
+            return;
         }
 
         /// <summary> 
@@ -1092,106 +756,91 @@ namespace NXTLib
         /// <param name="stop">Whether to brake or coast during operation.  Braking uses far more power.</param>
         /// <param name="turnratio">The turn ratio of the two motors, between -100 and 100.  A ratio of zero will make both motors move straight.
         ///   A negative ratio will move the left motor more and a positive ratio would move the right motor more.</param>
-        ///   <returns>Returns true if operation was a success, false otherwise.  If false, check LastError.</returns>
-        public bool MoveMotors(MotorPortSyncable port, int power, MotorStop stop, int turnratio)
+        public void MoveMotors(MotorPortSyncable port, int power, MotorStop stop, int turnratio)
         {
-            try
+            int[] pow = new int[] { power, power };
+
+            //Arc and Point rotation
+
+
+            //Both arc and point rotation may be used for joystick control
+            double ratio = (double)turnratio;
+            double powr = (double)power;
+            //pow = new int[] { Convert.ToInt32(Math.Floor(((50 - diff) / 100) * powr)),
+            //Convert.ToInt32(Math.Floor(((50 + diff) / 100) * powr)) };
+            //pow = new int[] { Convert.ToInt32(Math.Floor(((50 - diff) / 100) * powr)),
+            //Convert.ToInt32(Math.Floor(((50 + diff) / 100) * powr)) };
+
+            //slave motor power = master power * turn ratio
+
+            //find which motor is the master
+            if (turnratio != 0)
             {
-                int[] pow = new int[] { power, power };
-
-                //Arc and Point rotation
-
-
-                //Both arc and point rotation may be used for joystick control
-                double ratio = (double)turnratio;
-                double powr = (double)power;
-                //pow = new int[] { Convert.ToInt32(Math.Floor(((50 - diff) / 100) * powr)),
-                //Convert.ToInt32(Math.Floor(((50 + diff) / 100) * powr)) };
-                //pow = new int[] { Convert.ToInt32(Math.Floor(((50 - diff) / 100) * powr)),
-                //Convert.ToInt32(Math.Floor(((50 + diff) / 100) * powr)) };
-
-                //slave motor power = master power * turn ratio
-
-                //find which motor is the master
-                if (turnratio != 0)
+                bool masterleft = true;
+                if (power < 0)
                 {
-                    bool masterleft = true;
-                    if (power < 0)
+                    if (turnratio < 0)
                     {
-                        if (turnratio < 0)
-                        {
-                            masterleft = true;
-                        }
-                        else
-                        {
-                            masterleft = false;
-                        }
+                        masterleft = true;
                     }
                     else
                     {
-                        if (turnratio <= 0)
-                        {
-                            masterleft = false;
-                        }
-                        else
-                        {
-                            masterleft = true;
-                        }
+                        masterleft = false;
                     }
-                    double equ = ((-2 * Math.Abs(ratio)) + 100) / 100 * powr;
-                    if (masterleft == true)
+                }
+                else
+                {
+                    if (turnratio <= 0)
                     {
-                        pow = new int[] { power, Convert.ToInt32(Math.Floor(equ)) };
+                        masterleft = false;
                     }
                     else
                     {
-                        pow = new int[] { Convert.ToInt32(Math.Floor(equ)), power };
+                        masterleft = true;
                     }
                 }
-
-                MotorMode mode = MotorMode.MotorOn;
-                if (stop == MotorStop.Coast)
+                double equ = ((-2 * Math.Abs(ratio)) + 100) / 100 * powr;
+                if (masterleft == true)
                 {
-                    mode = MotorMode.On_Regulated;
-                    if ((power < 75) && (power > -75))
-                    {
-                        mode = MotorMode.MotorOn;
-                    }
+                    pow = new int[] { power, Convert.ToInt32(Math.Floor(equ)) };
                 }
-                if (stop == MotorStop.Brake)
+                else
                 {
-                    mode = MotorMode.On_Brake_Regulated;
-                    if ((power < 75) && (power > -75))
-                    {
-                        mode = MotorMode.On_Brake;
-                    }
+                    pow = new int[] { Convert.ToInt32(Math.Floor(equ)), power };
                 }
-
-                Motor[] motors = new Motor[] { };
-                if (port == MotorPortSyncable.AB) { motors = new Motor[] { Motor.A, Motor.B }; }
-                if (port == MotorPortSyncable.AC) { motors = new Motor[] { Motor.A, Motor.C }; }
-                if (port == MotorPortSyncable.BC) { motors = new Motor[] { Motor.B, Motor.C }; }
-                if (port == MotorPortSyncable.BA) { motors = new Motor[] { Motor.B, Motor.A }; }
-                if (port == MotorPortSyncable.CA) { motors = new Motor[] { Motor.C, Motor.A }; }
-                if (port == MotorPortSyncable.CB) { motors = new Motor[] { Motor.C, Motor.B }; }
-                if (SetOutputState(motors[0], (sbyte)pow[0], mode,
-                    MotorReg.Speed, (sbyte)turnratio, MotorState.Running, (uint)0) == false)
-                {
-                    return false;
-                }
-                if (SetOutputState(motors[1], (sbyte)pow[1], mode,
-                    MotorReg.Speed, (sbyte)turnratio, MotorState.Running, (uint)0) == false)
-                {
-                    return false;
-                }
-
-                return true;
             }
-            catch (Exception ex)
+
+            MotorMode mode = MotorMode.MotorOn;
+            if (stop == MotorStop.Coast)
             {
-                error = ex.Message;
-                return false;
+                mode = MotorMode.On_Regulated;
+                if ((power < 75) && (power > -75))
+                {
+                    mode = MotorMode.MotorOn;
+                }
             }
+            if (stop == MotorStop.Brake)
+            {
+                mode = MotorMode.On_Brake_Regulated;
+                if ((power < 75) && (power > -75))
+                {
+                    mode = MotorMode.On_Brake;
+                }
+            }
+
+            Motor[] motors = new Motor[] { };
+            if (port == MotorPortSyncable.AB) { motors = new Motor[] { Motor.A, Motor.B }; }
+            if (port == MotorPortSyncable.AC) { motors = new Motor[] { Motor.A, Motor.C }; }
+            if (port == MotorPortSyncable.BC) { motors = new Motor[] { Motor.B, Motor.C }; }
+            if (port == MotorPortSyncable.BA) { motors = new Motor[] { Motor.B, Motor.A }; }
+            if (port == MotorPortSyncable.CA) { motors = new Motor[] { Motor.C, Motor.A }; }
+            if (port == MotorPortSyncable.CB) { motors = new Motor[] { Motor.C, Motor.B }; }
+            SetOutputState(motors[0], (sbyte)pow[0], mode,
+                MotorReg.Speed, (sbyte)turnratio, MotorState.Running, (uint)0);
+            SetOutputState(motors[1], (sbyte)pow[1], mode,
+                MotorReg.Speed, (sbyte)turnratio, MotorState.Running, (uint)0);
+
+            return;
         }
 
 #region Internal
@@ -1211,38 +860,29 @@ namespace NXTLib
             /// <param name="runState">Run State</param>
             /// <param name="tachoLimit">Tacho Limit, 0=run forever</param>
             /// <returns>Returns true if operation was a success, false otherwise.  If false, check LastError.</returns>
-            internal bool SetOutputState(Motor motorPort
+            internal void SetOutputState(Motor motorPort
                 , sbyte power, MotorMode mode
                 , MotorReg regulationMode, sbyte turnRatio
                 , MotorState runState, UInt32 tachoLimit)
             {
-                try
-                {
-                    if (power < -100) power = -100;
-                    if (power > 100) power = 100;
+                if (power < -100) power = -100;
+                if (power > 100) power = 100;
 
-                    if (turnRatio < -100) turnRatio = -100;
-                    if (turnRatio > 100) turnRatio = 100;
+                if (turnRatio < -100) turnRatio = -100;
+                if (turnRatio > 100) turnRatio = 100;
 
-                    byte[] request = new byte[12];
-                    request[0] = (byte)(0x00);
-                    request[1] = (byte)(DirectCommand.SetOutputState);
-                    request[2] = (byte)motorPort;
-                    request[3] = (byte)power;
-                    request[4] = (byte)mode;
-                    request[5] = (byte)regulationMode;
-                    request[6] = (byte)turnRatio;
-                    request[7] = (byte)runState;
-                    SetUInt32(tachoLimit, request, 8);
+                byte[] request = new byte[12];
+                request[0] = (byte)(0x00);
+                request[1] = (byte)(DirectCommand.SetOutputState);
+                request[2] = (byte)motorPort;
+                request[3] = (byte)power;
+                request[4] = (byte)mode;
+                request[5] = (byte)regulationMode;
+                request[6] = (byte)turnRatio;
+                request[7] = (byte)runState;
+                SetUInt32(tachoLimit, request, 8);
 
-                    if (CompleteRequest(request)) { return true; }
-                    else { return false; }
-                }
-                catch (Exception ex)
-                {
-                    error = ex.Message;
-                    return false;
-                }
+                CompleteRequest(request);
             }
 
         /*private class Private
@@ -1328,21 +968,19 @@ namespace NXTLib
         /// </summary>
         /// <param name="filename">The name of the file to read, as a string.
         ///   The extension must be included.</param>
-        /// <returns>True if exists and no error.</returns>
+        /// <returns>True if exists.</returns>
         public bool DoesExist(string filename)
         {
             try
             {
-                FindFileReply? reply = FindFirst(filename);
-                if (!reply.HasValue) { return false; }
-                if (!reply.Value.fileFound) { return false; }
-                return true;
+                FindFileReply reply = FindFirst(filename);
+                if (!reply.fileFound) { return false; }
             }
-            catch (Exception ex)
+            catch (NXTFileNotFound)
             {
-                error = ex.Message;
                 return false;
             }
+            return true;
         }
         
         /// <summary>
@@ -1353,45 +991,20 @@ namespace NXTLib
         ///   The extension must be included.  The possible file extensions are: 
         /// Program (.rxe), Graphic (.ric), Sound (.rso), Datalog (.rdt), and Text (.txt).</param>
         /// <returns>The reply as struct NXTOpenReadReply.</returns>
-        public NXTOpenReadReply? OpenRead(string filename)
+        public NXTOpenReadReply OpenRead(string filename)
         {
-            try
-            {
-                if (ValidateFilename(filename, new string[] { ".rxe", ".ric", ".rso", ".rdt", ".txt" }) == false)
-                {
-                    return null;
-                }
+            ValidateFilename(filename, new string[] { ".rxe", ".ric", ".rso", ".rdt", ".txt" });
 
-                byte[] request = new byte[22];
-                request[0] = 0x01;
-                request[1] = (byte)MessageCommand.OpenRead;
-                Encoding.ASCII.GetBytes(filename).CopyTo(request, 2);
+            byte[] request = new byte[22];
+            request[0] = 0x01;
+            request[1] = (byte)MessageCommand.OpenRead;
+            Encoding.ASCII.GetBytes(filename).CopyTo(request, 2);
 
-                if (Send(request) == false)
-                {
-                    return null;
-                }
-
-                byte[] reply = RecieveReply();
-                if (reply == null)
-                {
-                    return null;
-                }
-                if (reply[2] != 0x00)
-                {
-                    error = LookupError(reply[2]);
-                    return null;
-                }
-                NXTOpenReadReply result = new NXTOpenReadReply();
-                result.handle = reply[3];
-                result.fileSize = GetUInt32(reply, 4);
-                return result;
-            }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return null;
-            }
+            byte[] reply = CompleteRequest(request);
+            NXTOpenReadReply result = new NXTOpenReadReply();
+            result.handle = reply[3];
+            result.fileSize = GetUInt32(reply, 4);
+            return result;
         }
 
         /// <summary>
@@ -1404,44 +1017,19 @@ namespace NXTLib
         ///  Sound (.rso), Graphic (.ric), and Text (.txt).</param>
         /// <param name="filesize">The size of the file to be written.</param>
         /// <returns>The handle used in the write session.  Use this handle with the Close() command.</returns>
-        public byte? OpenWrite(string filename, UInt32 filesize)
+        public byte OpenWrite(string filename, UInt32 filesize)
         {
-            try
-            {
-                if (ValidateFilename(filename, new string[] { ".rfw", ".rxe", ".ric",
-                    ".rso", ".rtm", ".rpg", ".txt" }) == false)
-                {
-                    return null;
-                }
+            ValidateFilename(filename, new string[] { ".rfw", ".rxe", ".ric",
+                ".rso", ".rtm", ".rpg", ".txt" });
 
-                byte[] request = new byte[26];
-                request[0] = 0x01;
-                request[1] = (byte)MessageCommand.OpenWrite;
-                Encoding.ASCII.GetBytes(filename).CopyTo(request, 2);
-                SetUInt32(filesize, request, 22);
+            byte[] request = new byte[26];
+            request[0] = 0x01;
+            request[1] = (byte)MessageCommand.OpenWrite;
+            Encoding.ASCII.GetBytes(filename).CopyTo(request, 2);
+            SetUInt32(filesize, request, 22);
 
-                if (Send(request) == false)
-                {
-                    return null;
-                }
-
-                byte[] reply = RecieveReply();
-                if (reply == null)
-                {
-                    return null;
-                }
-                if (reply[2] != 0x00)
-                {
-                    error = LookupError(reply[2]);
-                    return null;
-                }
-                return reply[3];
-            }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return null;
-            }
+            byte[] reply = CompleteRequest(request);
+            return reply[3];
         }
 
         /// <summary>
@@ -1455,41 +1043,18 @@ namespace NXTLib
         ///  Sound (.rso), Graphic (.ric), and Text (.txt).</param>
         /// <param name="filesize">The size of the file to be written.</param>
         /// <returns>The handle used in the write session.  Use this handle with the Close() command.</returns>
-        public byte? OpenWriteLinear(string filename, UInt32 filesize)
+        public byte OpenWriteLinear(string filename, UInt32 filesize)
         {
-            try
-            {
-                ValidateFilename(filename);
+            ValidateFilename(filename);
 
-                byte[] request = new byte[26];
-                request[0] = 0x01;
-                request[1] = (byte)MessageCommand.OpenWriteLinear;
-                Encoding.ASCII.GetBytes(filename).CopyTo(request, 2);
-                SetUInt32(filesize, request, 22);  //correct here, since command does not allow space for the null terminator
+            byte[] request = new byte[26];
+            request[0] = 0x01;
+            request[1] = (byte)MessageCommand.OpenWriteLinear;
+            Encoding.ASCII.GetBytes(filename).CopyTo(request, 2);
+            SetUInt32(filesize, request, 22);  //correct here, since command does not allow space for the null terminator
 
-                if (Send(request) == false)
-                {
-                    return null;
-                }
-
-                byte[] reply = RecieveReply();
-                if (reply == null)
-                {
-                    return null;
-                }
-                if (reply[2] != 0x00)
-                {
-                    error = LookupError(reply[2]);
-                    return null;
-                }
-                
-                return reply[3];
-            }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return null;
-            }
+            byte[] reply = CompleteRequest(request);
+            return reply[3];
         }
 
         /// <summary>
@@ -1502,41 +1067,18 @@ namespace NXTLib
         /// Firmware (.rfw), Program (.rxe), OnBrick Program (.rpg), TryMe Program (.rtm),
         ///  Sound (.rso), Graphic (.ric), and Text (.txt).</param>
         /// <returns>Pointer to the linear memory segment.</returns>
-        public UInt32? OpenReadLinear(string filename)
+        public UInt32 OpenReadLinear(string filename)
         {
-            try
-            {
-                ValidateFilename(filename);
+            ValidateFilename(filename);
 
-                byte[] request = new byte[22];
-                request[0] = 0x01;
-                request[1] = (byte)MessageCommand.OpenReadLinear_Internal;
-                Encoding.ASCII.GetBytes(filename).CopyTo(request, 2);
+            byte[] request = new byte[22];
+            request[0] = 0x01;
+            request[1] = (byte)MessageCommand.OpenReadLinear_Internal;
+            Encoding.ASCII.GetBytes(filename).CopyTo(request, 2);
 
-                if (Send(request) == false)
-                {
-                    return null;
-                }
-
-                byte[] reply = RecieveReply();
-                if (reply == null)
-                {
-                    return null;
-                }
-                if (reply[2] != 0x00)
-                {
-                    error = LookupError(reply[2]);
-                    return null;
-                }
-
-                UInt32 pointer = GetUInt32(reply, 3);
-                return pointer;
-            }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return null;
-            }
+            byte[] reply = CompleteRequest(request);
+            UInt32 pointer = GetUInt32(reply, 3);
+            return pointer;
         }
 
         /// <summary>
@@ -1550,42 +1092,19 @@ namespace NXTLib
         ///  Sound (.rso), Graphic (.ric), and Text (.txt).</param>
         /// <param name="filesize">The size of the file to be written.</param>
         /// <returns>The handle used in the write session.  Use this handle with the Close() command.</returns>
-        public byte? OpenWriteData(string filename, UInt32 filesize)
+        public byte OpenWriteData(string filename, UInt32 filesize)
         {
-            try
-            {
-                ValidateFilename(filename);
+            ValidateFilename(filename);
 
-                byte[] request = new byte[26];
-                request[0] = 0x01;
-                request[1] = (byte)MessageCommand.OpenWriteData;
-                Encoding.ASCII.GetBytes(filename).CopyTo(request, 2);
-                SetUInt32(filesize, request, 22);  //correct here, since message does not allow null terminator
+            byte[] request = new byte[26];
+            request[0] = 0x01;
+            request[1] = (byte)MessageCommand.OpenWriteData;
+            Encoding.ASCII.GetBytes(filename).CopyTo(request, 2);
+            SetUInt32(filesize, request, 22);  //correct here, since message does not allow null terminator
 
-                if (Send(request) == false)
-                {
-                    return null;
-                }
-
-                byte[] reply = RecieveReply();
-                if (reply == null)
-                {
-                    return null;
-                }
-                if (reply[2] != 0x00)
-                {
-                    error = LookupError(reply[2]);
-                    return null;
-                }
-
-                byte handle = reply[3];
-                return handle;
-            }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return null;
-            }
+            byte[] reply = CompleteRequest(request);
+            byte handle = reply[3];
+            return handle;
         }
 
         /// <summary>
@@ -1597,44 +1116,21 @@ namespace NXTLib
         ///   The extension must be included.  The possible file extensions are: 
         /// Firmware (.rfw), Program (.rxe), OnBrick Program (.rpg), TryMe Program (.rtm),
         ///  Sound (.rso), Graphic (.ric), and Text (.txt).</param>
-        /// <returns>The handle used in the write session.  Use this handle with the Close() command.</returns>
-        public NxtOpenAppendDataReply? OpenAppendData(string fileName)
+        /// <returns>The OpenApppendDataReply structure.</returns>
+        public NxtOpenAppendDataReply OpenAppendData(string filename)
         {
-            try
-            {
-                ValidateFilename(fileName);
+            ValidateFilename(filename);
 
-                byte[] request = new byte[22];
-                request[0] = 0x01;
-                request[1] = (byte)MessageCommand.OpenAppendData;
-                Encoding.ASCII.GetBytes(fileName).CopyTo(request, 2);
+            byte[] request = new byte[22];
+            request[0] = 0x01;
+            request[1] = (byte)MessageCommand.OpenAppendData;
+            Encoding.ASCII.GetBytes(filename).CopyTo(request, 2);
 
-                if (Send(request) == false)
-                {
-                    return null;
-                }
-
-                byte[] reply = RecieveReply();
-                if (reply == null)
-                {
-                    return null;
-                }
-                if (reply[2] != 0x00)
-                {
-                    error = LookupError(reply[2]);
-                    return null;
-                }
-
-                NxtOpenAppendDataReply result = new NxtOpenAppendDataReply();
-                result.handle = reply[3];
-                result.availableFilesize = GetUInt32(reply, 4);
-                return result;
-            }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return null;
-            }
+            byte[] reply = CompleteRequest(request);
+            NxtOpenAppendDataReply result = new NxtOpenAppendDataReply();
+            result.handle = reply[3];
+            result.availableFilesize = GetUInt32(reply, 4);
+            return result;
         }
 
         /// <summary>
@@ -1645,45 +1141,23 @@ namespace NXTLib
         /// <returns>The requested data from NXT flash memory.</returns>
         public byte[] Read(byte handle, UInt16 bytesToRead)
         {
-            try
+            byte[] request = new byte[5];
+            request[0] = 0x01;
+            request[1] = (byte)MessageCommand.Read;
+            request[2] = handle;
+            SetUInt16(bytesToRead, request, 3);
+
+            byte[] reply = CompleteRequest(request);
+            if (reply[3] != handle)
             {
-                byte[] request = new byte[5];
-                request[0] = 0x01;
-                request[1] = (byte)MessageCommand.Read;
-                request[2] = handle;
-                SetUInt16(bytesToRead, request, 3);
-
-                if (Send(request) == false)
-                {
-                    return null;
-                }
-                byte[] reply = RecieveReply();
-                if (reply == null)
-                {
-                    return null;
-                }
-                if (reply[2] != 0x00)
-                {
-                    error = LookupError(reply[2]);
-                    return null;
-                }
-                if (reply[3] != handle)
-                {
-                    error = "[NXTLib] There was a problem with the reply.";
-                    return null;
-                }
-
-                UInt16 bytesRead = GetUInt16(reply, 4);
-                byte[] response = new byte[bytesRead];
-                Array.Copy(reply, 6, response, 0, bytesRead);
-
-                return response;
+                throw new NXTReplyIncorrect();
             }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return null;
-            }
+
+            UInt16 bytesRead = GetUInt16(reply, 4);
+            byte[] response = new byte[bytesRead];
+            Array.Copy(reply, 6, response, 0, bytesRead);
+
+            return response;
         }
 
         /// <summary>
@@ -1692,60 +1166,38 @@ namespace NXTLib
         /// <param name="handle">The handle, located in the OpenWrite command.</param>
         /// <param name="data">The data to be written to flash memory.</param>
         /// <returns>The number of bytes written.</returns>
-        public int? Write(byte handle, byte[] data)
+        public int Write(byte handle, byte[] data)
         {
             UInt16 bytesWritten = 0;
             int n = 0;
             while (bytesWritten < data.Length)
             {
-                try
+                System.Threading.Thread.Sleep(7);
+                int j = 0;
+                int max = data.Length;
+                if ((61 * (n + 1)) < max) { max = (61 * (n + 1)); }
+                byte[] datatowrite = new byte[max - (61*n)];
+                for (int i = 61*n; i < max; i++)
                 {
-                    System.Threading.Thread.Sleep(7);
-                    int j = 0;
-                    int max = data.Length;
-                    if ((61 * (n + 1)) < max) { max = (61 * (n + 1)); }
-                    byte[] datatowrite = new byte[max - (61*n)];
-                    for (int i = 61*n; i < max; i++)
-                    {
-                        datatowrite[j] = data[i];
-                        j++;
-                    }
+                    datatowrite[j] = data[i];
+                    j++;
+                }
                     
-                    byte[] request = new byte[3 + datatowrite.Length];
-                    request[0] = 0x01;
-                    request[1] = (byte)MessageCommand.Write;
-                    request[2] = handle;
-                    datatowrite.CopyTo(request, 3);
-                    if (Send(request) == false)
-                    {
-                        return null;
-                    }
-                    System.Threading.Thread.Sleep(7);
-                    byte[] reply = RecieveReply();
-                    if (reply == null)
-                    {
-                        return null;
-                    }
-                    if (reply[2] != 0x00)
-                    {
-                        error = LookupError(reply[2]);
-                        return null;
-                    }
-                    byte handleOut = reply[3];
-                    if (handleOut != handle)
-                    {
-                        error = "[NXTLib] There was a problem with the reply.";
-                        return null;
-                    }
+                byte[] request = new byte[3 + datatowrite.Length];
+                request[0] = 0x01;
+                request[1] = (byte)MessageCommand.Write;
+                request[2] = handle;
+                datatowrite.CopyTo(request, 3);
 
-                    bytesWritten += GetUInt16(reply, 4);
-                    n++;
-                }
-                catch (Exception ex)
+                byte[] reply = CompleteRequest(request);
+                byte handleOut = reply[3];
+                if (handleOut != handle)
                 {
-                    error = ex.Message;
-                    return null;
+                    throw new NXTReplyIncorrect();
                 }
+
+                bytesWritten += GetUInt16(reply, 4);
+                n++;
             }
 
             return Convert.ToInt32(bytesWritten);
@@ -1754,25 +1206,18 @@ namespace NXTLib
         /// <summary>
         /// [Native] Close and dispose of a handle.
         /// </summary>
-        /// <param name="handle">The buffer number.  Either 0x00 (Poll) or 0x01 (High Speed).</param>
-        /// <returns>The number of bytes for the command ready in the buffer (0 = no command ready).</returns>
-        public bool Close(byte handle)
+        /// <param name="handle">The read or write handle number.</param>
+        public void Close(byte handle)
         {
-            try
-            {
 
-                byte[] request = new byte[] {
-                0x01,
-                (byte) MessageCommand.Close,
-                handle
-                };
-                return CompleteRequest(request);
-            }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return false;
-            }
+            byte[] request = new byte[] {
+            0x01,
+            (byte) MessageCommand.Close,
+            handle
+            };
+            CompleteRequest(request);
+
+            return;
         }
 
 
@@ -1783,53 +1228,27 @@ namespace NXTLib
         ///   The extension must be included.  The possible file extensions are: 
         /// Program (.rxe), OnBrick Program (.rpg), TryMe Program (.rtm),
         ///  Sound (.rso), Datalog (.rdt), Graphic (.ric), and Text (.txt).</param>
-        /// <returns>Returns true if operation was a success, false otherwise.  If false, check LastError.</returns>
-        public bool Delete(string filename)
+        public void Delete(string filename)
         {
-            try
+            ValidateFilename(filename, new string[] { ".rso", ".ric", ".rxe", ".rpg",
+            ".rtm", ".rdt", ".txt"});
+
+            byte[] request = new byte[22];
+            request[0] = 0x01;
+            request[1] = (byte)MessageCommand.Delete;
+            Encoding.ASCII.GetBytes(filename).CopyTo(request, 2);
+
+            CompleteRequest(request);
+
+            /*string fileNameOut = Encoding.ASCII.GetString(reply, 3, 20);
+            if (fileNameOut != filename)
             {
-                if (ValidateFilename(filename, new string[] { ".rso", ".ric", ".rxe", ".rpg",
-                ".rtm", ".rdt", ".txt"}) == false)
-                {
-                    return false;
-                }
+                throw new Exception(string.Format(
+                    "[NXTLib] The file reported as deleted, '{0}', was different from the file requested, '{1}'."
+                    , fileNameOut, filename));
+            }*/
 
-                byte[] request = new byte[22];
-                request[0] = 0x01;
-                request[1] = (byte)MessageCommand.Delete;
-                Encoding.ASCII.GetBytes(filename).CopyTo(request, 2);
-
-                if (Send(request) == false)
-                {
-                    return false;
-                }
-
-                byte[] reply = RecieveReply();
-                if (reply == null)
-                {
-                    return false;
-                }
-                if (reply[2] != 0x00)
-                {
-                    error = LookupError(reply[2]);
-                    return false;
-                }
-
-                /*string fileNameOut = Encoding.ASCII.GetString(reply, 3, 20);
-                if (fileNameOut != filename)
-                {
-                    throw new Exception(string.Format(
-                        "[NXTLib] The file reported as deleted, '{0}', was different from the file requested, '{1}'."
-                        , fileNameOut, filename));
-                }*/
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return false;
-            }
+            return;
         }
 
         /// <summary>
@@ -1850,7 +1269,7 @@ namespace NXTLib
             /// <summary>
             /// <para>The file name.</para>
             /// </summary>
-            public string fileName;
+            public string filename;
 
             /// <summary>
             /// <para>The filesize.</para>
@@ -1862,26 +1281,18 @@ namespace NXTLib
         /// [Native] Find the first file that matches a pattern.
         /// </summary>
         /// <param name="pattern">The pattern to search against.  Allows the following wildcards:
-        ///  Filename.Extension, Filename.*, *.Extension, and *.*</param>
-        /// <returns>The nullable structure FileTypeReply.  Returns null if an error occurs.</returns>
-        public FindFileReply? FindFirst(string pattern)
+        ///  filename.Extension, filename.*, *.Extension, and *.*</param>
+        /// <returns>The structure FileTypeReply.</returns>
+        public FindFileReply FindFirst(string pattern)
         {
-            try
-            {
-                if (!ValidateFilename(pattern)) { return null; };
+            ValidateFilename(pattern);
 
-                byte[] request = new byte[22];
-                request[0] = 0x01;
-                request[1] = (byte)MessageCommand.FindFirst;
-                Encoding.ASCII.GetBytes(pattern).CopyTo(request, 2);
+            byte[] request = new byte[22];
+            request[0] = 0x01;
+            request[1] = (byte)MessageCommand.FindFirst;
+            Encoding.ASCII.GetBytes(pattern).CopyTo(request, 2);
 
-                return Parse_FindFile(request);
-            }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return null;
-            }
+            return Parse_FindFile(request);
         }
 
         /// <summary>
@@ -1889,7 +1300,7 @@ namespace NXTLib
         /// </summary>
         /// <param name="handle">The handle found in FindFirst.</param>
         /// <returns>The nullable structure FileTypeReply.  Returns null if an error occurs.</returns>
-        public FindFileReply? FindNext(byte handle)
+        public FindFileReply FindNext(byte handle)
         {
             byte[] request = new byte[] {
                 0x01,
@@ -1900,50 +1311,18 @@ namespace NXTLib
             return Parse_FindFile(request);
         }
 
-        private FindFileReply? Parse_FindFile(byte[] request)
+        private FindFileReply Parse_FindFile(byte[] request)
         {
-            byte[] reply;
             FindFileReply result;
+            byte[] reply = CompleteRequest(request);
+            result.fileFound = true;
+            result.handle = reply[3];
+            result.filename = Encoding.ASCII.GetString(reply, 4, 20).TrimEnd('\0');
+            result.fileSize = GetUInt32(reply, 24);
 
-            try
+            if (result.filename == "")
             {
-                if (Send(request) == false)
-                {
-                    return null;
-                }
-
-                reply = RecieveReply();
-
-                if (reply == null)
-                {
-                    throw new Exception(error);
-                }
-            
-                result.fileFound = true;
-                result.handle = reply[3];
-                result.fileName = Encoding.ASCII.GetString(reply, 4, 20).TrimEnd('\0');
-                result.fileSize = GetUInt32(reply, 24);
-
-                if (result.fileName == "")
-                {
-                    throw new Exception("[NXT] File not found.");
-                }
-
-            }
-            catch (Exception ex)
-            {
-                if (ex.Message == "[NXT] File not found.")
-                {
-                    result.fileFound = false;
-                    result.handle = 0;
-                    result.fileName = "";
-                    result.fileSize = 0;
-                    return result;
-                }
-
-                // Rethrow if not a FileNotFound error.
-                error = ex.Message;
-                return null;
+                throw new NXTFileNotFound();
             }
 
             return result;
@@ -1954,42 +1333,21 @@ namespace NXTLib
         /// </summary>
         /// <param name="buffer">The buffer number.  Either 0x00 (Poll) or 0x01 (High Speed).</param>
         /// <returns>The number of bytes for the command ready in the buffer (0 = no command ready).</returns>
-        public byte? PollCommandLength(byte buffer)
+        public byte PollCommandLength(byte buffer)
         {
-            try
-            {
-                byte[] request = new byte[] {
-                0x01,
-                (byte) MessageCommand.PollCommandLength,
-                buffer
-                };
+            byte[] request = new byte[] {
+            0x01,
+            (byte) MessageCommand.PollCommandLength,
+            buffer
+            };
 
-                if (Send(request) == false)
-                {
-                    return null;
-                }
-                byte[] reply = RecieveReply();
-                if (reply == null)
-                {
-                    return null;
-                }
-                if (reply[2] != 0x00)
-                {
-                    error = LookupError(reply[2]);
-                    return null;
-                }
-                byte bufferNoOut = reply[3];
-                if (bufferNoOut != buffer)
-                    throw new Exception("[NXTLib] There was a problem with the reply.");
+            byte[] reply = CompleteRequest(request);
+            byte bufferNoOut = reply[3];
+            if (bufferNoOut != buffer)
+                throw new NXTReplyIncorrect();
 
-                byte bytesReady = reply[4];
-                return bytesReady;
-            }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return null;
-            }
+            byte bytesReady = reply[4];
+            return bytesReady;
         }
 
 #endregion
@@ -2039,35 +1397,26 @@ namespace NXTLib
         /// <param name="box">The mailbox to send the message to.</param>
         /// <param name="message">The message to send, as a string.
         ///   The string must not be longer than 57 characters.</param>
-        ///   <returns>Returns true if operation was a success, false otherwise.  If false, check LastError.</returns>
-        public bool MessageWrite(Mailbox box, string message)
+        public void MessageWrite(Mailbox box, string message)
         {
-            try
+            if (!message.EndsWith("\0"))
+                message += '\0';
+
+            int messageSize = message.Length;
+            if (messageSize > 59)
             {
-                if (!message.EndsWith("\0"))
-                    message += '\0';
-
-                int messageSize = message.Length;
-                if (messageSize > 59)
-                {
-                    error = "[NXTLib] Message may not exceed 57 characters.";
-                    return false;
-                }
-
-                byte[] request = new byte[4 + messageSize];
-                request[0] = (byte)(0x00);
-                request[1] = (byte)DirectCommand.MessageWrite;
-                request[2] = (byte)box;
-                request[3] = (byte)messageSize;
-                Encoding.ASCII.GetBytes(message).CopyTo(request, 4);
-
-                return CompleteRequest(request);                
+                throw new NXTException("Message may not exceed 57 characters.");
             }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return false;
-            }
+
+            byte[] request = new byte[4 + messageSize];
+            request[0] = (byte)(0x00);
+            request[1] = (byte)DirectCommand.MessageWrite;
+            request[2] = (byte)box;
+            request[3] = (byte)messageSize;
+            Encoding.ASCII.GetBytes(message).CopyTo(request, 4);
+            CompleteRequest(request);
+
+            return;             
         }
 
         /// <summary> 
@@ -2076,33 +1425,24 @@ namespace NXTLib
         /// <param name="box">The mailbox to send the message to.</param>
         /// <param name="message">The message to send, as a byte array.
         ///   The array must not be longer than 59 characters and must conclude with '/0'.</param>
-        ///   <returns>Returns true if operation was a success, false otherwise.  If false, check LastError.</returns>
-        public bool MessageWrite(Mailbox box, byte[] message)
+        public void MessageWrite(Mailbox box, byte[] message)
         {
-            try
+            int messageSize = message.Length + 1;  // Add 1 for the 0-byte at the end.
+            if (messageSize > 59)
             {
-                int messageSize = message.Length + 1;  // Add 1 for the 0-byte at the end.
-                if (messageSize > 59)
-                {
-                    error = "[NXTLib] Message may not exceed 59 characters.";
-                    return false;
-                }
-
-                byte[] request = new byte[4 + messageSize];
-                request[0] = (byte)(0x00);
-                request[1] = (byte)DirectCommand.MessageWrite;
-                request[2] = (byte)box;
-                request[3] = (byte)messageSize;
-                message.CopyTo(request, 4);
-                request[request.Length - 1] = 0;
-
-                return CompleteRequest(request);
+                throw new NXTException("Message may not exceed 59 characters.");
             }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return false;
-            }
+
+            byte[] request = new byte[4 + messageSize];
+            request[0] = (byte)(0x00);
+            request[1] = (byte)DirectCommand.MessageWrite;
+            request[2] = (byte)box;
+            request[3] = (byte)messageSize;
+            message.CopyTo(request, 4);
+            request[request.Length - 1] = 0;
+
+            CompleteRequest(request);
+            return;
         }
 
         /// <summary> 
@@ -2114,47 +1454,23 @@ namespace NXTLib
         /// <returns>Returns the messagebox's contents, as a string.</returns>
         public string MessageRead(MailboxExtended remoteInboxNo, Mailbox localInboxNo, bool remove)
         {
-            try
+            byte[] request = new byte[] {
+            0x00,
+            (byte) DirectCommand.MessageRead,
+            (byte) remoteInboxNo,
+            (byte) localInboxNo,
+            (byte) (remove ? 0xFF : 0x00)
+            };
+
+            byte[] reply = CompleteRequest(request);
+            if (reply[3] != (byte)localInboxNo)
             {
-                byte[] request = new byte[] {
-                0x00,
-                (byte) DirectCommand.MessageRead,
-                (byte) remoteInboxNo,
-                (byte) localInboxNo,
-                (byte) (remove ? 0xFF : 0x00)
-                };
-
-                if (Send(request) == false)
-                {
-                    return null;
-                }
-                byte[] reply = RecieveReply();
-                if (reply == null)
-                {
-                    return null;
-                }
-                if (reply[3] != (byte)localInboxNo)
-                {
-                    error = "[NXTLib] The reply was incorrect.";
-                    return null;
-                }
-                if (reply[2] != 0x00)
-                {
-                    error = LookupError(reply[2]);
-                    return null;
-                }
-                byte localInboxNoOut = reply[3];
-
-                byte messageSize = reply[4];
-
-                string message = Encoding.ASCII.GetString(reply, 5, messageSize).TrimEnd('\0');
-                return message;
+                throw new NXTReplyIncorrect();
             }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return null;
-            }
+            byte localInboxNoOut = reply[3];
+            byte messageSize = reply[4];
+            string message = Encoding.ASCII.GetString(reply, 5, messageSize).TrimEnd('\0');
+            return message;
         }
 
 #endregion
@@ -2185,108 +1501,92 @@ namespace NXTLib
             //BluetoothFactoryReset and Boot may only be accepted by USB
         }
 
-        internal bool CompleteRequest(byte[] request)
+        internal byte[] CompleteRequest(byte[] request)
         {
-            try
+            Send(request);
+            byte[] reply = RecieveReply();
+            if (reply == null)
             {
-                if (Send(request) == false)
-                {
-                    return false;
-                }
-                byte[] reply = RecieveReply();
-                if (reply == null)
-                {
-                    return false;
-                }
-                if (reply[2] != 0x00)
-                {
-                    error = LookupError(reply[2]);
-                    return false;
-                }
-                return true;
+                throw new NXTException("No reply recieved.");
             }
-            catch (Exception ex)
+            if (reply[2] != 0x00)
             {
-                error = ex.Message;
-                return false;
+                ThrowError(reply[2]);
             }
+            return reply;
         }
 
-        internal bool ValidateFilename(string fileName)
+        internal void ValidateFilename(string filename)
         {
-            if (fileName.Length > 19)
+            if (filename.Length > 19)
             {
-                error = "Filename cannot be larger than 19 characters.";
-                return false;
+                throw new NXTException("Filename cannot be larger than 19 characters.");
             }
-            return true;
+            return;
         }
 
-        internal bool ValidateFilename(string fileName, string[] possible_extensions)
+        internal void ValidateFilename(string filename, string[] possible_extensions)
         {
-            if (fileName.Length > 19)
+            if (filename.Length > 19)
             {
-                error = "[NXTLib] Filename cannot be larger than 19 characters.";
-                return false;
+                throw new NXTException("Filename cannot be larger than 19 characters.");
             }
-            if (fileName.Contains(".") == false)
+            if (filename.Contains(".") == false)
             {
-                error = "[NXTLib] Filename MUST include a valid extension.  The valid extensions are: ";
+                string error = "Filename MUST include a valid extension.  The valid extensions are: ";
                 for (int i = 0; i < possible_extensions.Length; i++)
                 {
                     error += possible_extensions[i] + " ";
                 }
-                return false;
+                throw new NXTException(error);
             }
             bool valid = false;
             for (int i = 0; i < possible_extensions.Length; i++)
 			{
-			    if (fileName.EndsWith(possible_extensions[i]))
+			    if (filename.EndsWith(possible_extensions[i]))
                 {
                     valid = true;
                 }
 			}
             if (valid == false)
             {
-                error = "[NXTLib] Filename MUST include a valid extension.  The valid extensions are: ";
+                string error = "Filename MUST include a valid extension.  The valid extensions are: ";
                 for (int i = 0; i < possible_extensions.Length; i++)
                 {
                     error += possible_extensions[i] + " ";
                 }
+                throw new NXTException(error);
             }
-            return valid;
+            return;
         }
 
         internal enum FileType { Program = 0, Internal_Program = 1, TryMe = 2, Image = 3, Sound = 4, System = 5, Sensor = 6, TXT = 7, LOG = 8, Firmware = 9 };
 
-        internal string ValidateFilename(string fileName, FileType filetype, bool appendifmissing)
+        internal string ValidateFilename(string filename, FileType filetype, bool appendifmissing)
         {
-            string name = fileName;
+            string name = filename;
             String[] FileTypes = new String[] { ".rxe", ".rpg", ".rtm", ".ric", ".rso", ".sys", ".cal", ".txt", ".log", ".rfw" };
             string type = FileTypes[(int)(filetype)];
-            if (fileName.Length > 19)
+            if (filename.Length > 19)
             {
-                error = "[NXTLib] Filename cannot be larger than 19 characters.";
-                return null;
+                throw new NXTException("Filename cannot be larger than 19 characters.");
             }
             if (appendifmissing == false)
             {
-                if (fileName.Contains(type) == false)
+                if (filename.Contains(type) == false)
                 {
-                    error = "[NXTLib] Filename must end with '" + type + "' extension.";
-                    return null;
+                    throw new NXTException("Filename must end with '" + type + "' extension.");
                 }
             }
             else
             {
-                if ((fileName.Contains(type) == false) && (fileName.Contains(".")))
+                if ((filename.Contains(type) == false) && (filename.Contains(".")))
                 {
-                    error = "[NXTLib] Filename must end with '" + type + "' extension.";
-                    return null;
+                    throw new NXTException("Filename must end with '" + type + "' extension.");
                 }
                 else
                 {
-                    if ((fileName.Contains(type) == true))
+                    if ((filename.Contains(type) == true))
                     {
 
                     }
@@ -2372,155 +1672,155 @@ namespace NXTLib
             };
         }
 
-        internal string LookupError(byte error)
+        internal void ThrowError(byte error)
         {
             if (error == 0x20)
             {
-                return "[NXT] Pending communication transaction in progress.";
+                throw new NXTException("Pending communication transaction in progress.", error);
             }
             if (error == 0x40)
             {
-                return "[NXT] Specified mailbox queue is empty.";
+                throw new NXTException("Specified mailbox queue is empty.", error);
             }
             if (error == 0xBD)
             {
-                return "[NXT] Request failed.";
+                throw new NXTException("Request failed.", error);
             }
             if (error == 0xBE)
             {
-                return "[NXT] Unknown command opcode.";
+                throw new NXTException("Unknown command opcode.", error);
             }
             if (error == 0xBF)
             {
-                return "[NXT] Insane packet.";
+                throw new NXTException("Insane packet.", error);
             }
             if (error == 0xC0)
             {
-                return "[NXT] Data contains out-of-range values.";
+                throw new NXTDataOutOfRange();
             }
             if (error == 0xDD)
             {
-                return "[NXT] Communication bus error.";
+                throw new NXTException("Communication bus error.", error);
             }
             if (error == 0xDE)
             {
-                return "[NXT] No free memory in communtication buffer.";
+                throw new NXTException("No free memory in communication buffer.", error);
             }
             if (error == 0xDF)
             {
-                return "[NXT] Specified channel/connection is not valid.";
+                throw new NXTException("Specified channel/connection is not valid.", error);
             }
             if (error == 0xE0)
             {
-                return "[NXT] Specified channel/connection is not configured or busy.";
+                throw new NXTException("Specified channel/connection is not configured or busy.", error);
             }
             if (error == 0xEC)
             {
-                return "[NXT] No active program.";
+                throw new NXTNoActiveProgram();
             }
             if (error == 0xED)
             {
-                return "[NXT] Illegal size specified.";
+                throw new NXTException("Illegal size specified.", error);
             }
             if (error == 0xEE)
             {
-                return "[NXT] Illegal mailbox queue ID specified.";
+                throw new NXTException("Illegal mailbox queue ID specified.", error);
             }
             if (error == 0xEF)
             {
-                return "[NXT] Attempted to access invalid field of a structure.";
+                throw new NXTException("Attempted to access invalid field of a structure.", error);
             }
             if (error == 0xF0)
             {
-                return "[NXT] Bad input or output specified.";
+                throw new NXTException("Bad input or output specified.", error);
             }
             if (error == 0xFB)
             {
-                return "[NXT] Insufficient memory available.";
+                throw new NXTInsufficientMemory();
             }
             if (error == 0xFF)
             {
-                return "[NXT] Bad arguments.";
+                throw new NXTException("Bad arguments.", error);
             }
 
             //Message Commands
             if (error == 0x81)
             {
-                return "[NXT] No more handles.";
+                throw new NXTException("No more handles.", error);
             }
             if (error == 0x82)
             {
-                return "[NXT] No space.";
+                throw new NXTException("No space.", error);
             }
             if (error == 0x83)
             {
-                return "[NXT] No more files.";
+                throw new NXTNoMoreFiles();
             }
             if (error == 0x84)
             {
-                return "[NXT] End of file expected.";
+                throw new NXTException("End of file expected.", error);
             }
             if (error == 0x85)
             {
-                return "[NXT] End of file.";
+                throw new NXTEndOfFile();
             }
             if (error == 0x86)
             {
-                return "[NXT] Not a linear file.";
+                throw new NXTException("Not a linear file.", error);
             }
             if (error == 0x87)
             {
-                return "[NXT] File not found.";
+                throw new NXTFileNotFound();
             }
             if (error == 0x88)
             {
-                return "[NXT] Handle already closed.";
+                throw new NXTHandleAlreadyClosed();
             }
             if (error == 0x89)
             {
-                return "[NXT] Not linear space.";
+                throw new NXTException("Not linear space.", error);
             }
             if (error == 0x8A)
             {
-                return "[NXT] Undefined error.";
+                throw new NXTException("Undefined error.", error);
             }
             if (error == 0x8B)
             {
-                return "[NXT] File is busy.";
+                throw new NXTFileBusy();
             }
             if (error == 0x8C)
             {
-                return "[NXT] No write buffers.";
+                throw new NXTException("No write buffers.", error);
             }
             if (error == 0x8D)
             {
-                return "[NXT] Append not possible.";
+                throw new NXTException("Append not possible.", error);
             }
             if (error == 0x8E)
             {
-                return "[NXT] File is full.";
+                throw new NXTException("File is full.", error);
             }
             if (error == 0x8F)
             {
-                return "[NXT] File exists.";
+                throw new NXTFileExists();
             }
             if (error == 0x90)
             {
-                return "[NXT] Module not found.";
+                throw new NXTException("Module not found.", error);
             }
             if (error == 0x91)
             {
-                return "[NXT] Out of boundary.";
+                throw new NXTException("Out of boundary.", error);
             }
             if (error == 0x92)
             {
-                return "[NXT] Illegal file name.";
+                throw new NXTException("Illegal file name.", error);
             }
             if (error == 0x93)
             {
-                return "[NXT] Illegal handle.";
+                throw new NXTException("Illegal handle.", error);
             }
-            return "[NXT] Unspecified internal NXT error.";
+            throw new NXTException("Unspecified internal NXT error.", error);
         }
 
 #endregion
