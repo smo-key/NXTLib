@@ -64,5 +64,5 @@ The main test project has a dependency on NUnit.
     FIX: Do "Unload Project" on the three native projects in the Widcomm folder.
 They depend on the Widcomm SDK to be present which most people won't have.
 
-Of course, if the dependencies are present for any of the above, then the ‘fix’ 
+Of course, if the dependencies are present for any of the above, then the ï¿½fixï¿½ 
 need not be applied.
