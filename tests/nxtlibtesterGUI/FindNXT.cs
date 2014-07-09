@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Threading;
 using NXTLib;
 
 namespace NXTLibTesterGUI
@@ -47,6 +48,7 @@ namespace NXTLibTesterGUI
             {
                 WriteMessage("Error while connecting to brick:");
                 WriteMessage(ex.Message);
+                Disconnect_Click(null, null);
                 return;
             }
 
@@ -71,6 +73,7 @@ namespace NXTLibTesterGUI
             {
                 WriteMessage("Error while disconnecting from brick:");
                 WriteMessage(ex.Message);
+                Disconnect_Click(null, null);
                 return;
             }
 
@@ -80,18 +83,25 @@ namespace NXTLibTesterGUI
             Disconnect.Enabled = true;
             Search.Enabled = true;
         }
-
-        private void SearchForNXT()
+        private void StartSearch()
         {
             Console.Items.Clear();
             List.Controls.Clear();
             SearchVia.Enabled = false;
             Search.Enabled = false;
             Time.Enabled = false;
-            USB usb = new USB();
+
+            Thread thread = new Thread(SearchForNXT);
+            thread.Start();
+        }
+
+        private void SearchForNXT()
+        {
+            
             List<Brick> usbbricks = new List<Brick>();
-            Bluetooth blue = new Bluetooth();
             List<Brick> bluebricks = new List<Brick>();
+            USB usb = new USB();
+            Bluetooth blue = new Bluetooth();
 
             try
             {
@@ -106,15 +116,21 @@ namespace NXTLibTesterGUI
                 WriteMessage("Error while searching via USB:\r\n");
                 WriteMessage(ex.Message);
             }
+
+            int index = 0;
+            SearchVia.Invoke(new MethodInvoker(delegate { index = SearchVia.SelectedIndex; }));
+            int timeindex = 0;
+            Time.Invoke(new MethodInvoker(delegate { timeindex = Time.SelectedIndex; }));
             
-            if (SearchVia.SelectedIndex == 1)
+            if (index == 1)
             {
                 try
                 {
                     WriteMessage("Searching for bricks via Bluetooth...");
-                    blue.wirelessTimeout = new TimeSpan(0, 0, 5 * (Time.SelectedIndex + 1));
-                    List<Brick> list = blue.Search();
-                    bluebricks = list;
+                    blue.Initialize();
+                    blue.wirelessTimeout = new TimeSpan(0, 0, 5 * (timeindex + 1));
+                    List<Brick> list2 = blue.Search();
+                    bluebricks = list2;
                     WriteMessage("Bricks found via Bluetooth!");
                 }
                 catch (NXTNoBricksFound) { WriteMessage("No bricks found via Bluetooth."); }
@@ -138,14 +154,16 @@ namespace NXTLibTesterGUI
                 }
             }
 
-            SearchVia.Enabled = true;
-            Search.Enabled = true;
-            Time.Enabled = true;
+            this.Invoke(new MethodInvoker(delegate {
+                SearchVia.Enabled = true;
+                Search.Enabled = true;
+                Time.Enabled = true; 
+            }));
         }
 
         private void WriteMessage(string message)
         {
-            Console.Items.Add(message);
+            Console.Invoke(new MethodInvoker(delegate { Console.Items.Add(message); }));
         }
 
         private void Item_Click(object sender, EventArgs e)
@@ -180,6 +198,7 @@ namespace NXTLibTesterGUI
             {
                 WriteMessage("Error while connecting to brick:");
                 WriteMessage(ex.Message);
+                Disconnect_Click(null, null);
                 return;
             }
             myBrick = brick;
@@ -213,19 +232,21 @@ namespace NXTLibTesterGUI
             button.FlatAppearance.MouseOverBackColor = SystemColors.ControlLightLight;
             button.FlatAppearance.MouseDownBackColor = SystemColors.HotTrack;
             button.AutoEllipsis = false;
-            button.Image = global::NXTLibTesterGUI.Properties.Resources.field_16xLG;
+            if (linktype == LinkType.USB) { button.Image = global::NXTLibTesterGUI.Properties.Resources.usb2; }
+            if (linktype == LinkType.Bluetooth) { button.Image = global::NXTLibTesterGUI.Properties.Resources.bluetooth; }
             button.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             button.Location = new System.Drawing.Point(3, 0);
             if (linktype == LinkType.USB) { button.Name = "USB"; }
             if (linktype == LinkType.Bluetooth) { button.Name = "BLU" + Utils.AddressByte2String(connection.brickinfo.address); }
             button.Size = new System.Drawing.Size(259, 20);
+            button.Margin = new System.Windows.Forms.Padding(0, 0, 0, 0);
             button.TabIndex = 1;
             button.Text = "       " + connection.brickinfo.name;
             button.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             button.MouseDown += Button_MouseDown;
             button.MouseClick += Item_Click;
             button.MouseUp += Button_MouseUp;
-            List.Controls.Add(button);
+            List.Invoke(new MethodInvoker(delegate { List.Controls.Add(button); }));
         }
 
         private void Item_MouseDown(object sender, MouseEventArgs e)
@@ -254,7 +275,7 @@ namespace NXTLibTesterGUI
         private void Search_Click(object sender, EventArgs e)
         {
             Button s = (Button)sender;
-            if (s.Text == " Search for NXT") { SearchForNXT(); }
+            if (s.Text == " Search for NXT") { StartSearch(); }
             if (s.Text == " Update Version Info") { UpdateBrick(); }
         }
 

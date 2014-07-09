@@ -46,6 +46,8 @@ namespace NXTLib
         public abstract void Send(byte[] request);
         public abstract byte[] RecieveReply();
         internal SerialPort link { get; set; }
+        public abstract void Initialize();
+        public bool IsInitialized { get; internal set; }
         public abstract bool IsConnected { get; }
         public abstract bool IsSupported { get; }
 

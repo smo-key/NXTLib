@@ -24,7 +24,11 @@ namespace NXTLib
         /// </summary>
         public USB()
         {
-            
+            Initialize();
+        }
+        public override void Initialize()
+        {
+            IsInitialized = true;
         }
 
         /// <summary>

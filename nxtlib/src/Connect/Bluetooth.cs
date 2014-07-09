@@ -7,6 +7,8 @@ using NXTLib.BluetoothWrapper;
 using NXTLib.BluetoothWrapper.Sockets;
 using NXTLib.BluetoothWrapper.Bluetooth;
 using System.IO;
+using System.Threading;
+using System.Net.Sockets;
 
 namespace NXTLib
 {
@@ -14,7 +16,6 @@ namespace NXTLib
     {
         private static readonly Guid NXT_GUID = BluetoothService.SerialPort;
         private static BluetoothClient client = null;
-        private bool initialized = false;
 
         /// <summary
         /// <para>The communication protocols specific to Bluetooth.</para>
@@ -24,9 +25,9 @@ namespace NXTLib
             
         }
 
-        private void Initialize()
+        public override void Initialize()
         {
-            if (initialized) { return; }
+            if (IsInitialized) { return; }
             try
             {
                 client = new BluetoothClient();
@@ -38,7 +39,7 @@ namespace NXTLib
             {
                 throw new NXTLinkNotSupported();
             }
-            initialized = true;
+            IsInitialized = true;
         }
 
         public BluetoothRadio radio { get { return BluetoothRadio.PrimaryRadio; } }
@@ -56,13 +57,24 @@ namespace NXTLib
         /// <returns>A list of brick information.</returns>
         public override List<Brick> Search()
         {
+            Thread thread = new Thread(_search);
+            thread.Start();
+            thread.Join();
+            if (_bricklist.Count == 0) { throw new NXTNoBricksFound(); }
+            return _bricklist;
+        }
+
+        private List<Brick> _bricklist = new List<Brick>();
+        private void _search()
+        {
             Initialize();
 
+            _bricklist = new List<Brick>();
             List<Brick> bricks = new List<Brick>();
             lock (commLock)
             {
                 BluetoothDeviceInfo[] peers = client.DiscoverDevicesInRange();
-                    
+
                 foreach (BluetoothDeviceInfo info in peers)
                 {
                     if (info.ClassOfDevice.Value != 2052) { continue; }
@@ -76,8 +88,8 @@ namespace NXTLib
                     bricks.Add(brick);
                 }
             }
-            if (bricks.Count == 0) { throw new NXTNoBricksFound(); }
-            return bricks;
+            _bricklist = bricks;
+            return;
         }
 
         /// <summary> 
@@ -92,12 +104,13 @@ namespace NXTLib
                 {
                     BluetoothAddress adr = new BluetoothAddress(brick.brickinfo.address);
                     BluetoothDeviceInfo device = new BluetoothDeviceInfo(adr);
+                    BluetoothSecurity.PairRequest(adr, "1234");
+
+                    client.Connect(adr, NXT_GUID);
 
                     //BluetoothSecurity.RevokePin(adr);
                     //BluetoothSecurity.RemoveDevice(adr);
 
-                    BluetoothSecurity.PairRequest(adr, "1234");
-                    client.Connect(adr, NXT_GUID);
                 }
                 if (!IsConnected) { throw new NXTNotConnected(); }
             }
@@ -112,6 +125,9 @@ namespace NXTLib
             lock (commLock)
             {
                 client.Close();
+                //client.Dispose();
+                client = null;
+                client = new BluetoothClient();
             }
             return;
         }
