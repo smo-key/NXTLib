@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NXTLibTester", "tests\nxtli
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NXTLib.BluetoothWrapper", "include\InTheHand.Net.Personal\NXTLib.BluetoothWrapper.csproj", "{98BDDE14-8F8C-40CC-9E45-5BAC73573EF4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NXTLibTesterGUI", "tests\nxtlibtesterGUI\NXTLibTesterGUI.csproj", "{580F7F2F-8A32-429B-A081-F6898EDB1AA7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,6 +32,10 @@ Global
 		{98BDDE14-8F8C-40CC-9E45-5BAC73573EF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{98BDDE14-8F8C-40CC-9E45-5BAC73573EF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{98BDDE14-8F8C-40CC-9E45-5BAC73573EF4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{580F7F2F-8A32-429B-A081-F6898EDB1AA7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{580F7F2F-8A32-429B-A081-F6898EDB1AA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{580F7F2F-8A32-429B-A081-F6898EDB1AA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{580F7F2F-8A32-429B-A081-F6898EDB1AA7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
