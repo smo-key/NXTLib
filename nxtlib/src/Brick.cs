@@ -17,9 +17,14 @@ namespace NXTLib
         public Brick(Protocol protocol, Protocol.BrickInfo brickinfo)
         {
             link = protocol;
+            this.brickinfo = brickinfo;
 
             if (link == null) { throw new NXTLinkNotSupported(); }
             if (!link.IsSupported) { throw new NXTLinkNotSupported(); }
+        }
+        public Brick()
+        {
+            
         }
         public Protocol link { get; internal set; }
 

@@ -137,6 +137,19 @@ namespace NXTLibTesterGUI
             DeactivateForm();
         }
 
+        public void Button_MouseDown(object sender, MouseEventArgs e)
+        {
+            Button s = (Button)sender;
+            s.ForeColor = Color.White;
+            s.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.HotTrack;
+        }
+        public void Button_MouseUp(object sender, MouseEventArgs e)
+        {
+            Button s = (Button)sender;
+            s.ForeColor = Color.FromArgb(64, 64, 64);
+            s.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ControlLightLight;
+        }
+
         private void Minimize_Click(object sender, EventArgs e)
         {
             WindowState = FormWindowState.Minimized;

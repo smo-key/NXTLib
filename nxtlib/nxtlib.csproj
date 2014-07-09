@@ -68,6 +68,7 @@
     <Compile Include="src\Sensors\SoundSensor.cs" />
     <Compile Include="src\Sensors\TouchSensor.cs" />
     <Compile Include="src\Sensors\UltrasonicSensor.cs" />
+    <Compile Include="src\Utils.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

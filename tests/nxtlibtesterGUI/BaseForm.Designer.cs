@@ -96,6 +96,8 @@
             this.ToolTips.SetToolTip(this.Minimize, "Minimize");
             this.Minimize.UseVisualStyleBackColor = false;
             this.Minimize.Click += new System.EventHandler(this.Minimize_Click);
+            this.Minimize.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Button_MouseDown);
+            this.Minimize.MouseUp += new System.Windows.Forms.MouseEventHandler(this.Button_MouseUp);
             // 
             // CloseForm
             // 
@@ -119,6 +121,8 @@
             this.ToolTips.SetToolTip(this.CloseForm, "Close");
             this.CloseForm.UseVisualStyleBackColor = false;
             this.CloseForm.Click += new System.EventHandler(this.CloseForm_Click);
+            this.CloseForm.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Button_MouseDown);
+            this.CloseForm.MouseUp += new System.Windows.Forms.MouseEventHandler(this.Button_MouseUp);
             // 
             // Title
             // 

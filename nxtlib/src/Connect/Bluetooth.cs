@@ -32,6 +32,7 @@ namespace NXTLib
                 client = new BluetoothClient();
                 if (radio == null) { throw new NXTLinkNotSupported(); }
                 radiomode = RadioMode.Discoverable;
+                wirelessTimeout = new TimeSpan(0, 0, 30);
             }
             catch
             {
@@ -42,6 +43,7 @@ namespace NXTLib
 
         public BluetoothRadio radio { get { return BluetoothRadio.PrimaryRadio; } }
         public RadioMode radiomode { get { return radio.Mode; } set { radio.Mode = value; } }
+        public TimeSpan wirelessTimeout { get { return client.InquiryLength; } set { client.InquiryLength = value; } }
 
         /// <summary>
         /// <para>Object to control mutex locking via Bluetooth.</para>
@@ -59,7 +61,6 @@ namespace NXTLib
             List<Brick> bricks = new List<Brick>();
             lock (commLock)
             {
-                client.InquiryLength = new TimeSpan(0, 0, 30);
                 BluetoothDeviceInfo[] peers = client.DiscoverDevicesInRange();
                     
                 foreach (BluetoothDeviceInfo info in peers)

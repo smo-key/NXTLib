@@ -239,6 +239,12 @@
   <ItemGroup>
     <None Include="Resources\WorkItem_32xLG.png" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\nxtlib\NXTLib.csproj">
+      <Project>{42c3d5d5-edfd-4917-a353-4a25b23d78cc}</Project>
+      <Name>NXTLib</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -28,7 +28,7 @@ namespace NXTLib
             public byte[] address
             {
                 get { return _adr; }
-                internal set
+                set
                 {
                     _adr = new byte[6];
                     for (int i = 0; i < 6; i++)
@@ -37,7 +37,7 @@ namespace NXTLib
                     }
                 }
             }
-            public string name { get; internal set; }
+            public string name { get; set; }
         }
 
         public abstract List<Brick> Search();
