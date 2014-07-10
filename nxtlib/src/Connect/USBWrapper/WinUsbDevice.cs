@@ -206,8 +206,6 @@ namespace NXTLib.USBWrapper
         ///    WinUsb_QueryPipe
         ///  </summary>
         ///  
-        ///  <param name="deviceHandle"> A handle obtained in a call to winusb_initialize. </param>
-        ///  
         ///  <returns>
         ///  True on success, False on failure.
         ///  </returns>
@@ -454,10 +452,9 @@ namespace NXTLib.USBWrapper
         ///  Attempts to read data from a bulk IN endpoint.
         ///  </summary>
         ///  
-        ///  <param name="InterfaceHandle"> Device interface handle. </param>
-        ///  <param name="PipeID"> Endpoint address. </param>
+        ///  <param name="pipeID"> Endpoint address. </param>
         ///  <param name="bytesToRead"> Number of bytes to read. </param>
-        ///  <param name="Buffer"> Buffer for storing the bytes read. </param>
+        ///  <param name="buffer"> Buffer for storing the bytes read. </param>
         ///  <param name="bytesRead"> Number of bytes read. </param>
         ///  <param name="success"> Success or failure status. </param>
         ///  
@@ -499,10 +496,9 @@ namespace NXTLib.USBWrapper
         ///  Attempts to read data from an interrupt IN endpoint. 
         ///  </summary>
         ///  
-        ///  <param name="InterfaceHandle"> Device interface handle. </param>
-        ///  <param name="PipeID"> Endpoint address. </param>
+        ///  <param name="pipeID"> Endpoint address. </param>
         ///  <param name="bytesToRead"> Number of bytes to read. </param>
-        ///  <param name="Buffer"> Buffer for storing the bytes read. </param>
+        ///  <param name="buffer"> Buffer for storing the bytes read. </param>
         ///  <param name="bytesRead"> Number of bytes read. </param>
         ///  <param name="success"> Success or failure status. </param>
         internal void ReadViaInterruptTransfer(Byte pipeID, UInt32 bytesToRead, ref Byte[] buffer, ref UInt32 bytesRead, ref Boolean success)

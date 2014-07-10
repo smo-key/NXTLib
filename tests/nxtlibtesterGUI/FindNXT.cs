@@ -89,7 +89,7 @@ namespace NXTLibTesterGUI
                 try
                 {
                     myBrick.link.KeepAlive();
-                    myBrick.UploadFile("lasa.ric", "lasa.ric");
+                    myBrick.UploadFile("version.ric", "version.ric");
                 }
                 catch (Exception ex)
                 {

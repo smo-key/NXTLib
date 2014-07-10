@@ -3,11 +3,10 @@ using System.Runtime.InteropServices;
 
 namespace NXTLib.USBWrapper
 {
-	///<summary >
+	///<summary>
 	// API declarations relating to device management (SetupDixxx and 
 	// RegisterDeviceNotification functions).   
-	/// </summary>
-
+	///</summary>
 	sealed internal partial class DeviceManagement
 	{
 		// from dbt.h
