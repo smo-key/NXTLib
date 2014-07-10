@@ -2,23 +2,41 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using NXTLib.BluetoothWrapper;
-using NXTLib.BluetoothWrapper.Sockets;
-using NXTLib.BluetoothWrapper.Bluetooth;
+using InTheHand.Net;
+using InTheHand.Net.Sockets;
+using InTheHand.Net.Bluetooth;
 
 namespace NXTLib
 {
     public static class Utils
     {
-        public static string AddressByte2String(byte[] address)
+        public static string AddressByte2String(byte[] address, bool withcolons)
         {
-            BluetoothAddress adr = new BluetoothAddress(address);
-            return adr.ToInt64().ToString();
+            //BluetoothAddress adr = new BluetoothAddress(address);
+            //string c = adr.ToString();
+
+            string[] str = new string[6];
+            for (int i = 0; i < 6; i++)
+                str[i] = address[5 - i].ToString("x2");
+
+            string sep = ":";
+            if (!withcolons) { sep = ""; }
+            string a = string.Join(sep, str);
+
+            return a;
         }
-        public static byte[] AddressString2Byte(string address)
+        public static byte[] AddressString2Byte(string address, bool withcolons)
         {
-            BluetoothAddress adr = new BluetoothAddress(GetValue(address));
-            return adr.ToByteArray();
+            byte[] a = new byte[6];
+            int sep = 3;
+            if (!withcolons) { sep = 2; }
+            for (int i = 0; i < 6; i++)
+            {
+                byte b = byte.Parse(address.Substring(i * sep, 2), System.Globalization.NumberStyles.HexNumber);
+                a[5 - i] = b;
+            }
+
+            return a;
         }
         public static List<Brick> Combine(List<Brick> bricks1, List<Brick> bricks2)
         {

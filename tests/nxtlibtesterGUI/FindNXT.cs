@@ -55,7 +55,7 @@ namespace NXTLibTesterGUI
             WriteMessage("Uploading file to brick...");
             try
             {
-                myBrick.UploadFile("version.ric", "version.ric");
+                myBrick.UploadFile("lasa.ric", "lasa.ric");
             }
             catch (Exception ex)
             {
@@ -184,7 +184,7 @@ namespace NXTLibTesterGUI
             {
                 Bluetooth blue = new Bluetooth();
                 Protocol.BrickInfo info = new Protocol.BrickInfo();
-                info.address = Utils.AddressString2Byte(s.Name.Substring(3));
+                info.address = Utils.AddressString2Byte(s.Name.Substring(3), true);
                 info.name = s.Text.Trim();
                 brick = new Brick(blue, info);
                 myLinkType = LinkType.Bluetooth;
@@ -216,7 +216,7 @@ namespace NXTLibTesterGUI
             NXTPanel.Visible = true;
             NXT.Text = "       Connected to " + myBrick.brickinfo.name;
             NXTConn.Text = "Connection Type: " + myLinkType.ToString();
-            if (myLinkType != LinkType.USB) { NXTAdd.Text = "Address: " + Utils.AddressByte2String(myBrick.brickinfo.address); }
+            if (myLinkType != LinkType.USB) { NXTAdd.Text = "Address: " + Utils.AddressByte2String(myBrick.brickinfo.address, true); }
             else { NXTAdd.Text = ""; }
 
             Search.Text = " Update Version Info";
@@ -237,7 +237,7 @@ namespace NXTLibTesterGUI
             button.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             button.Location = new System.Drawing.Point(3, 0);
             if (linktype == LinkType.USB) { button.Name = "USB"; }
-            if (linktype == LinkType.Bluetooth) { button.Name = "BLU" + Utils.AddressByte2String(connection.brickinfo.address); }
+            if (linktype == LinkType.Bluetooth) { button.Name = "BLU" + Utils.AddressByte2String(connection.brickinfo.address, true); }
             button.Size = new System.Drawing.Size(259, 20);
             button.Margin = new System.Windows.Forms.Padding(0, 0, 0, 0);
             button.TabIndex = 1;
