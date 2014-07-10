@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Threading;
 using NXTLib;
+using System.Net.Sockets;
 
 namespace NXTLibTesterGUI
 {
@@ -16,7 +17,7 @@ namespace NXTLibTesterGUI
     {
         private Brick myBrick = new Brick();
         private LinkType myLinkType = LinkType.Null;
-        private bool connected = false;
+        Thread searchthread;
 
         public FindNXT() : base()
         {
@@ -33,55 +34,108 @@ namespace NXTLibTesterGUI
             if (!blue.IsSupported) { SearchVia.Items.RemoveAt(1); }
         }
 
-        private void UpdateBrick()
+        private void UpdateStart()
         {
             Disconnect.Enabled = false;
             Search.Enabled = false;
-            bool success = true;
+            CloseForm.Enabled = false;
 
-            WriteMessage("Reconnecting to brick...");
+            Thread thread = new Thread(UpdateBrick);
+            thread.Start();
+        }
+
+        private void UpdateBrick()
+        {
             try
             {
-                myBrick.Connect();
+                bool success = true;
+                WriteMessage("Reconnecting to brick...");
+                try
+                {
+                    myBrick.Connect();
+                }
+                catch (SocketException)
+                {
+                    WriteMessage("Error while connecting to brick:");
+                    WriteMessage("Brick is busy!  Perform a soft reset by turning the brick off for a few seconds.");
+                    this.Invoke(new MethodInvoker(delegate
+                    {
+                        Disconnect_Click(null, null);
+                    }));
+                    return;
+                }
+                catch (Win32Exception)
+                {
+                    WriteMessage("Error while connecting to brick:");
+                    WriteMessage("Brick is busy!  Perform a soft reset by turning the brick off for a few seconds.");
+                    this.Invoke(new MethodInvoker(delegate
+                    {
+                        Disconnect_Click(null, null);
+                    }));
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    WriteMessage("Error while connecting to brick:");
+                    WriteMessage(ex.Message);
+                    this.Invoke(new MethodInvoker(delegate
+                    {
+                        Disconnect_Click(null, null);
+                    }));
+                    return;
+                }
+
+                WriteMessage("Uploading file to brick...");
+                try
+                {
+                    myBrick.link.KeepAlive();
+                    myBrick.UploadFile("lasa.ric", "lasa.ric");
+                }
+                catch (Exception ex)
+                {
+                    WriteMessage("Error while writing to brick:");
+                    WriteMessage(ex.Message);
+                    success = false;
+                }
+
+                WriteMessage("Disconnecting from brick...");
+                try
+                {
+                    myBrick.Disconnect();
+                }
+                catch (Exception ex)
+                {
+                    WriteMessage("Error while disconnecting from brick:");
+                    WriteMessage(ex.Message);
+                    this.Invoke(new MethodInvoker(delegate
+                    {
+                        Disconnect_Click(null, null);
+                    }));
+                    return;
+                }
+
+                if (success) { WriteMessage("Update successful!"); }
+                else { WriteMessage("Update failed!"); }
+
+                this.Invoke(new MethodInvoker(delegate
+                {
+                    Disconnect.Enabled = true;
+                    Search.Enabled = true;
+                    CloseForm.Enabled = true;
+                }));
             }
-            catch (Exception ex)
+            catch (InvalidOperationException) //Result when form closed while running
             {
-                WriteMessage("Error while connecting to brick:");
-                WriteMessage(ex.Message);
-                Disconnect_Click(null, null);
+                try
+                {
+                    myBrick.Disconnect();
+                }
+                catch (Exception)
+                {
+                    return;
+                }
                 return;
             }
-
-            WriteMessage("Uploading file to brick...");
-            try
-            {
-                myBrick.UploadFile("lasa.ric", "lasa.ric");
-            }
-            catch (Exception ex)
-            {
-                WriteMessage("Error while writing to brick:");
-                WriteMessage(ex.Message);
-                success = false;
-            }
-
-            WriteMessage("Disconnecting from brick...");
-            try
-            {
-                myBrick.Disconnect();
-            }
-            catch (Exception ex)
-            {
-                WriteMessage("Error while disconnecting from brick:");
-                WriteMessage(ex.Message);
-                Disconnect_Click(null, null);
-                return;
-            }
-
-            if (success) { WriteMessage("Update successful!"); }
-            else { WriteMessage("Update failed!"); }
-
-            Disconnect.Enabled = true;
-            Search.Enabled = true;
         }
         private void StartSearch()
         {
@@ -90,9 +144,14 @@ namespace NXTLibTesterGUI
             SearchVia.Enabled = false;
             Search.Enabled = false;
             Time.Enabled = false;
+            List.Enabled = false;
+            Disconnect.Enabled = true;
+            Disconnect.Text = " Stop Now";
+            Disconnect.Width = 90;
 
-            Thread thread = new Thread(SearchForNXT);
-            thread.Start();
+            searchthread = new Thread(SearchForNXT);
+            searchthread.IsBackground = true;
+            searchthread.Start();
         }
 
         private void SearchForNXT()
@@ -109,6 +168,10 @@ namespace NXTLibTesterGUI
                 List<Brick> list = usb.Search();
                 usbbricks = list;
                 WriteMessage("Brick found via USB!");
+                foreach (Brick item in usbbricks)
+                {
+                    AddItem(item, LinkType.USB);
+                }
             }
             catch (NXTNoBricksFound) { WriteMessage("No bricks found via USB."); }
             catch (Exception ex)
@@ -132,6 +195,10 @@ namespace NXTLibTesterGUI
                     List<Brick> list2 = blue.Search();
                     bluebricks = list2;
                     WriteMessage("Bricks found via Bluetooth!");
+                    foreach (Brick item in bluebricks)
+                    {
+                        AddItem(item, LinkType.Bluetooth);
+                    }
                 }
                 catch (NXTNoBricksFound) { WriteMessage("No bricks found via Bluetooth."); }
                 catch (Exception ex)
@@ -142,22 +209,15 @@ namespace NXTLibTesterGUI
             }
 
             if ((usbbricks.Count == 0) && (bluebricks.Count == 0)) { WriteMessage("No bricks found!"); }
-            else
-            {
-                foreach (Brick item in usbbricks)
-                {
-                    AddItem(item, LinkType.USB);
-                }
-                foreach (Brick item in bluebricks)
-                {
-                    AddItem(item, LinkType.Bluetooth);
-                }
-            }
 
             this.Invoke(new MethodInvoker(delegate {
                 SearchVia.Enabled = true;
                 Search.Enabled = true;
-                Time.Enabled = true; 
+                Time.Enabled = true;
+                List.Enabled = true;
+                Disconnect.Enabled = false;
+                Disconnect.Text = " Disconnect";
+                Disconnect.Width = 93;
             }));
         }
 
@@ -203,7 +263,6 @@ namespace NXTLibTesterGUI
             }*/
             myBrick = brick;
             
-            connected = true;
             Disconnect.Enabled = true;
             s.Enabled = true;
             List.Controls.Clear();
@@ -276,19 +335,36 @@ namespace NXTLibTesterGUI
         {
             Button s = (Button)sender;
             if (s.Text == " Search for NXT") { StartSearch(); }
-            if (s.Text == " Update Version Info") { UpdateBrick(); }
+            if (s.Text == " Update Version Info") { UpdateStart(); }
         }
 
         private void Disconnect_Click(object sender, EventArgs e)
         {
+            if (sender != null)
+            {
+                Button s = (Button)sender;
+                if (s.Text == " Stop Now")
+                {
+                    searchthread.Abort();
+                    s.Width = 93;
+                    s.Enabled = false;
+                    s.Text = " Disconnect";
+                    SearchVia.Enabled = true;
+                    Search.Enabled = true;
+                    Time.Enabled = true;
+                    List.Enabled = true;
+                    WriteMessage("Aborted search!");
+                    return;
+                }
+            }
             myBrick = new Brick();
-            connected = false;
             Disconnect.Enabled = false;
             List.Visible = true;
             SearchVia.Enabled = true;
             Time.Enabled = true;
             Search.Enabled = true;
             NXTPanel.Visible = false;
+            CloseForm.Enabled = true;
             Search.Image = global::NXTLibTesterGUI.Properties.Resources.StatusAnnotations_Play_32xLG_color;
             Search.Text = " Search for NXT";
             WriteMessage("Disconnected successfully!");
