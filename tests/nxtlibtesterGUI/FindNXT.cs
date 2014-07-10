@@ -189,7 +189,7 @@ namespace NXTLibTesterGUI
                 brick = new Brick(blue, info);
                 myLinkType = LinkType.Bluetooth;
             }
-            try
+            /*try
             {
                 brick.Connect();
                 brick.Disconnect();
@@ -200,7 +200,7 @@ namespace NXTLibTesterGUI
                 WriteMessage(ex.Message);
                 Disconnect_Click(null, null);
                 return;
-            }
+            }*/
             myBrick = brick;
             
             connected = true;
