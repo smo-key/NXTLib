@@ -84,8 +84,8 @@
             // 
             // Title
             // 
-            this.Title.Size = new System.Drawing.Size(100, 17);
-            this.Title.Text = "Connect to NXT";
+            this.Title.Size = new System.Drawing.Size(133, 17);
+            this.Title.Text = "NXT Version Updater";
             // 
             // CloseForm
             // 
@@ -106,7 +106,7 @@
             // 
             // IconBox
             // 
-            this.IconBox.Image = global::NXTLibTesterGUI.Properties.Resources.magnifier_16xLG;
+            this.IconBox.Image = global::NXTLibTesterGUI.Properties.Resources.ASCube_16xLG;
             // 
             // Search
             // 
@@ -362,7 +362,7 @@
             this.ClientSize = new System.Drawing.Size(656, 412);
             this.Name = "FindNXT";
             this.Text = "FindNXT";
-            this.title = "Connect to NXT";
+            this.title = "NXT Version Updater";
             this.Border.ResumeLayout(false);
             this.Border.PerformLayout();
             this.TopPanel.ResumeLayout(false);
