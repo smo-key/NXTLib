@@ -54,6 +54,7 @@
             // 
             // IconBox
             // 
+            this.IconBox.BackColor = System.Drawing.Color.Transparent;
             this.IconBox.Image = global::NXTLibTesterGUI.Properties.Resources.StatusAnnotations_Play_16xLG;
             this.IconBox.Location = new System.Drawing.Point(6, 6);
             this.IconBox.Name = "IconBox";

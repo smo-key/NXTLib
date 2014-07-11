@@ -35,22 +35,26 @@
             this.SearchVia = new System.Windows.Forms.ComboBox();
             this.Time = new System.Windows.Forms.ComboBox();
             this.Console = new System.Windows.Forms.ListBox();
-            this.label2 = new System.Windows.Forms.Label();
             this.Disconnect = new System.Windows.Forms.Button();
             this.ClearLog = new System.Windows.Forms.Button();
             this.NXTPanel = new System.Windows.Forms.Panel();
             this.NXTAdd = new System.Windows.Forms.Label();
             this.NXTConn = new System.Windows.Forms.Label();
             this.NXT = new System.Windows.Forms.Label();
+            this.Status = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.BottomPanel = new System.Windows.Forms.Panel();
             this.Border.SuspendLayout();
             this.TopPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.IconBox)).BeginInit();
             this.List.SuspendLayout();
             this.NXTPanel.SuspendLayout();
+            this.BottomPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // Border
             // 
+            this.Border.Controls.Add(this.BottomPanel);
             this.Border.Controls.Add(this.NXTPanel);
             this.Border.Controls.Add(this.ClearLog);
             this.Border.Controls.Add(this.Disconnect);
@@ -60,18 +64,19 @@
             this.Border.Controls.Add(this.SearchVia);
             this.Border.Controls.Add(this.List);
             this.Border.Controls.Add(this.Search);
-            this.Border.Size = new System.Drawing.Size(656, 400);
+            this.Border.Size = new System.Drawing.Size(656, 412);
             this.Border.Controls.SetChildIndex(this.Search, 0);
             this.Border.Controls.SetChildIndex(this.List, 0);
             this.Border.Controls.SetChildIndex(this.SearchVia, 0);
             this.Border.Controls.SetChildIndex(this.Console, 0);
             this.Border.Controls.SetChildIndex(this.Time, 0);
-            this.Border.Controls.SetChildIndex(this.TopPanel, 0);
-            this.Border.Controls.SetChildIndex(this.IconBox, 0);
             this.Border.Controls.SetChildIndex(this.label2, 0);
             this.Border.Controls.SetChildIndex(this.Disconnect, 0);
             this.Border.Controls.SetChildIndex(this.ClearLog, 0);
             this.Border.Controls.SetChildIndex(this.NXTPanel, 0);
+            this.Border.Controls.SetChildIndex(this.TopPanel, 0);
+            this.Border.Controls.SetChildIndex(this.IconBox, 0);
+            this.Border.Controls.SetChildIndex(this.BottomPanel, 0);
             // 
             // TopPanel
             // 
@@ -139,7 +144,7 @@
             this.List.Location = new System.Drawing.Point(6, 115);
             this.List.Margin = new System.Windows.Forms.Padding(0);
             this.List.Name = "List";
-            this.List.Size = new System.Drawing.Size(286, 277);
+            this.List.Size = new System.Drawing.Size(286, 264);
             this.List.TabIndex = 27;
             this.List.WrapContents = false;
             // 
@@ -213,19 +218,10 @@
             this.Console.Location = new System.Drawing.Point(307, 76);
             this.Console.Name = "Console";
             this.Console.SelectionMode = System.Windows.Forms.SelectionMode.None;
-            this.Console.Size = new System.Drawing.Size(340, 316);
+            this.Console.Size = new System.Drawing.Size(340, 303);
             this.Console.TabIndex = 29;
             this.Console.TabStop = false;
             this.Console.UseTabStops = false;
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(308, 61);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(45, 13);
-            this.label2.TabIndex = 31;
-            this.label2.Text = "Console";
             // 
             // Disconnect
             // 
@@ -283,7 +279,7 @@
             this.NXTPanel.Controls.Add(this.NXT);
             this.NXTPanel.Location = new System.Drawing.Point(12, 116);
             this.NXTPanel.Name = "NXTPanel";
-            this.NXTPanel.Size = new System.Drawing.Size(283, 274);
+            this.NXTPanel.Size = new System.Drawing.Size(283, 263);
             this.NXTPanel.TabIndex = 34;
             this.NXTPanel.Visible = false;
             // 
@@ -327,11 +323,43 @@
             this.NXT.Text = "       Connected to NXT Name";
             this.NXT.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
+            // Status
+            // 
+            this.Status.AutoSize = true;
+            this.Status.BackColor = System.Drawing.Color.Transparent;
+            this.Status.ForeColor = System.Drawing.Color.DodgerBlue;
+            this.Status.Image = global::NXTLibTesterGUI.Properties.Resources.StatusAnnotations_Help_and_inconclusive_16xLG_color;
+            this.Status.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.Status.Location = new System.Drawing.Point(3, 6);
+            this.Status.MinimumSize = new System.Drawing.Size(0, 14);
+            this.Status.Name = "Status";
+            this.Status.Size = new System.Drawing.Size(130, 14);
+            this.Status.TabIndex = 35;
+            this.Status.Text = "       Please pair to a brick.";
+            this.Status.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(308, 61);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(45, 13);
+            this.label2.TabIndex = 31;
+            this.label2.Text = "Console";
+            // 
+            // BottomPanel
+            // 
+            this.BottomPanel.Controls.Add(this.Status);
+            this.BottomPanel.Location = new System.Drawing.Point(-1, 384);
+            this.BottomPanel.Name = "BottomPanel";
+            this.BottomPanel.Size = new System.Drawing.Size(656, 26);
+            this.BottomPanel.TabIndex = 36;
+            // 
             // FindNXT
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(656, 400);
+            this.ClientSize = new System.Drawing.Size(656, 412);
             this.Name = "FindNXT";
             this.Text = "FindNXT";
             this.title = "Connect to NXT";
@@ -342,6 +370,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.IconBox)).EndInit();
             this.List.ResumeLayout(false);
             this.NXTPanel.ResumeLayout(false);
+            this.BottomPanel.ResumeLayout(false);
+            this.BottomPanel.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -355,12 +385,14 @@
         private System.Windows.Forms.ComboBox SearchVia;
         private System.Windows.Forms.ComboBox Time;
         private System.Windows.Forms.ListBox Console;
-        private System.Windows.Forms.Label label2;
         protected System.Windows.Forms.Button Disconnect;
         protected System.Windows.Forms.Button ClearLog;
         private System.Windows.Forms.Panel NXTPanel;
         private System.Windows.Forms.Label NXTAdd;
         private System.Windows.Forms.Label NXTConn;
         private System.Windows.Forms.Label NXT;
+        private System.Windows.Forms.Label Status;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Panel BottomPanel;
     }
 }

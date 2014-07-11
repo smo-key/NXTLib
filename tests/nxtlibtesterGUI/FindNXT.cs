@@ -10,6 +10,8 @@ using System.Windows.Forms;
 using System.Threading;
 using NXTLib;
 using System.Net.Sockets;
+using System.IO.Pipes;
+using System.IO;
 
 namespace NXTLibTesterGUI
 {
@@ -17,6 +19,7 @@ namespace NXTLibTesterGUI
     {
         private Brick myBrick = new Brick();
         private LinkType myLinkType = LinkType.Null;
+        internal static bool updatewaiting;
         Thread searchthread;
 
         public FindNXT() : base()
@@ -26,12 +29,88 @@ namespace NXTLibTesterGUI
             CheckCompat();
             SearchVia.SelectedIndex = 0;
             Time.SelectedIndex = 2;
+
+            CheckUpdateStatus();
+            Thread thread = new Thread(CheckUpdate);
+            thread.Name = "Check for Update Thread";
+            thread.IsBackground = true;
+            thread.Start();
         }
 
         private void CheckCompat()
         {
             Bluetooth blue = new Bluetooth();
             if (!blue.IsSupported) { SearchVia.Items.RemoveAt(1); }
+        }
+
+        private void CheckUpdate()
+        {
+            while (true)
+            {
+                NamedPipeServerStream pipe = new NamedPipeServerStream("NXTLibTesterGUI_forceupdatepipe", PipeDirection.In);
+                pipe.WaitForConnection(); //wait for connection
+                StreamReader sr = new StreamReader(pipe);
+                if (sr.ReadLine() != "Force Update Now!") { continue; } //read sent bytes
+                WriteMessage("Update forced from command line!");
+                updatewaiting = true;
+                this.Invoke(new MethodInvoker(delegate { CheckUpdateStatus(); }));
+                sr.Close();
+                sr.Dispose();
+                try
+                {
+                    pipe.Disconnect();
+                }
+                catch (ObjectDisposedException)
+                {
+
+                }
+            }
+        }
+
+        private bool CheckUpdateStatus()
+        {
+            //If not paired
+            try
+            {
+                this.TopMost = true;
+                Application.DoEvents();
+                if (NXTPanel.Visible == false)
+                {
+                    if (updatewaiting)
+                    {
+                        Status.Image = null;
+                        Status.Text = "Update Waiting!  Please pair to a brick now!";
+                        Status.ForeColor = Color.White;
+                        BottomPanel.BackColor = Color.Firebrick;
+                    }
+                    else
+                    {
+                        Status.Image = global::NXTLibTesterGUI.Properties.Resources.StatusAnnotations_Help_and_inconclusive_16xLG_color;
+                        Status.Text = "       Please pair to a brick.";
+                        Status.ForeColor = Color.DodgerBlue;
+                        BottomPanel.BackColor = SystemColors.Control;
+                    }
+                }
+                else //if paired
+                {
+                    Status.Image = global::NXTLibTesterGUI.Properties.Resources.StatusAnnotations_Complete_and_ok_16xLG_color;
+                    Status.Text = "       Paired and ready!";
+                    Status.ForeColor = Color.Green;
+                    BottomPanel.BackColor = SystemColors.Control;
+                    if (updatewaiting)
+                    {
+                        WriteMessage("Running automatic update!");
+                        UpdateStart();
+                    }
+                }
+            }
+            catch (InvalidOperationException) //when resources are accessed twice
+            {
+                this.TopMost = false;
+                return false;
+            }
+            this.TopMost = false;
+            return true;
         }
 
         private void UpdateStart()
@@ -41,6 +120,7 @@ namespace NXTLibTesterGUI
             CloseForm.Enabled = false;
 
             Thread thread = new Thread(UpdateBrick);
+            thread.Name = "Update Brick Thread";
             thread.Start();
         }
 
@@ -122,7 +202,12 @@ namespace NXTLibTesterGUI
                     Disconnect.Enabled = true;
                     Search.Enabled = true;
                     CloseForm.Enabled = true;
+                    if (updatewaiting && !success)
+                    {
+                        Disconnect_Click(null, null);
+                    }
                 }));
+                updatewaiting = false;
             }
             catch (InvalidOperationException) //Result when form closed while running
             {
@@ -131,11 +216,8 @@ namespace NXTLibTesterGUI
                     myBrick.Disconnect();
                 }
                 catch (Exception)
-                {
-                    return;
-                }
-                return;
-            }
+                { }
+            }            
         }
         private void StartSearch()
         {
@@ -151,6 +233,7 @@ namespace NXTLibTesterGUI
 
             searchthread = new Thread(SearchForNXT);
             searchthread.IsBackground = true;
+            searchthread.Name = "Search Thread";
             searchthread.Start();
         }
 
@@ -278,6 +361,7 @@ namespace NXTLibTesterGUI
             if (myLinkType != LinkType.USB) { NXTAdd.Text = "Address: " + Utils.AddressByte2String(myBrick.brickinfo.address, true); }
             else { NXTAdd.Text = ""; }
 
+            CheckUpdateStatus();
             Search.Text = " Update Version Info";
             WriteMessage("Connection successful!");
         }
@@ -365,7 +449,21 @@ namespace NXTLibTesterGUI
             Search.Enabled = true;
             NXTPanel.Visible = false;
             CloseForm.Enabled = true;
+            if (updatewaiting)
+            {
+                Status.Image = global::NXTLibTesterGUI.Properties.Resources.StatusAnnotations_Stop_16xLG_color;
+                Status.Text = "       Update Waiting!  Please pair to a brick now!";
+                this.TopMost = true;
+                Application.DoEvents();
+                this.TopMost = false;
+            }
+            else
+            {
+                Status.Image = global::NXTLibTesterGUI.Properties.Resources.StatusAnnotations_Help_and_inconclusive_16xLG_color;
+                Status.Text = "       Please pair to a brick.";
+            }
             Search.Image = global::NXTLibTesterGUI.Properties.Resources.StatusAnnotations_Play_32xLG_color;
+            CheckUpdateStatus();
             Search.Text = " Search for NXT";
             WriteMessage("Disconnected successfully!");
         }
@@ -373,6 +471,11 @@ namespace NXTLibTesterGUI
         private void ClearLog_Click(object sender, EventArgs e)
         {
             Console.Items.Clear();
+        }
+
+        private void Minimize_Click(object sender, EventArgs e)
+        {
+
         }
 
     }
