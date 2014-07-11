@@ -67,8 +67,7 @@ namespace NXTLib
         private List<Brick> _bricklist = new List<Brick>();
         private void _search()
         {
-            Initialize();
-
+            if (!IsInitialized) { throw new NXTLinkNotInitialized(); }
             _bricklist = new List<Brick>();
             List<Brick> bricks = new List<Brick>();
             lock (commLock)

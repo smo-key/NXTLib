@@ -48,6 +48,7 @@ namespace NXTLibTester
                 {
                     //Try Connecting via Bluetooth
                     Console.WriteLine("Searching for bricks via Bluetooth...");
+                    blueLink.Initialize(); //required to prepare link, must be done BEFORE other functions
                     List<Brick> bricks = blueLink.Search();
                     Console.WriteLine("Connecting to brick via Bluetooth...");
                     bricks[0].Connect();
@@ -59,9 +60,15 @@ namespace NXTLibTester
                     Error_NoBricks();
                     return;
                 }
-                catch (Exception)
+                catch (NXTLinkNotSupported)
                 {
-                    Console.WriteLine(ex.Message);
+                    Console.WriteLine("Bluetooth not supported on this machine!");
+                    Error_NoBricks();
+                    return;
+                }
+                catch (Exception exc)
+                {
+                    Console.WriteLine(exc.Message);
                     Error_NoBricks();
                     return;
                 }

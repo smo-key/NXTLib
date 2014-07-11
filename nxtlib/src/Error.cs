@@ -102,6 +102,11 @@ namespace NXTLib
         public override string Message
         { get { return "Link type not supported on this machine!"; } }
     }
+    public class NXTLinkNotInitialized : NXTCommException
+    {
+        public override string Message
+        { get { return "Link not initialized!  Run Initialize() before any other function!"; } }
+    }
     #endregion
     
 }
