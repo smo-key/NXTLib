@@ -61,6 +61,8 @@
             this.IconBox.Size = new System.Drawing.Size(16, 16);
             this.IconBox.TabIndex = 24;
             this.IconBox.TabStop = false;
+            this.IconBox.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Control_MouseDown);
+            this.IconBox.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Control_MouseMove);
             // 
             // TopPanel
             // 
