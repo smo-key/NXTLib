@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("nxtlibtester")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("NXTLib File Upload Test")]
+[assembly: AssemblyDescription("Commandline Test Application for NXTLib")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("nxtlibtester")]
+[assembly: AssemblyProduct("NXTLibTester")]
 [assembly: AssemblyCopyright("Copyright © 2014 Arthur Pachachura")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

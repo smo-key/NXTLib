@@ -44,6 +44,7 @@
             this.Status = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.BottomPanel = new System.Windows.Forms.Panel();
+            this.Copyright = new System.Windows.Forms.Label();
             this.Border.SuspendLayout();
             this.TopPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.IconBox)).BeginInit();
@@ -84,8 +85,8 @@
             // 
             // Title
             // 
-            this.Title.Size = new System.Drawing.Size(133, 17);
-            this.Title.Text = "NXT Version Updater";
+            this.Title.Size = new System.Drawing.Size(150, 17);
+            this.Title.Text = "NXTLib Version Updater";
             // 
             // CloseForm
             // 
@@ -349,11 +350,26 @@
             // 
             // BottomPanel
             // 
+            this.BottomPanel.Controls.Add(this.Copyright);
             this.BottomPanel.Controls.Add(this.Status);
             this.BottomPanel.Location = new System.Drawing.Point(-1, 384);
             this.BottomPanel.Name = "BottomPanel";
             this.BottomPanel.Size = new System.Drawing.Size(656, 26);
             this.BottomPanel.TabIndex = 36;
+            // 
+            // Copyright
+            // 
+            this.Copyright.AutoSize = true;
+            this.Copyright.BackColor = System.Drawing.Color.Transparent;
+            this.Copyright.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.Copyright.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.Copyright.Location = new System.Drawing.Point(420, 6);
+            this.Copyright.MinimumSize = new System.Drawing.Size(0, 14);
+            this.Copyright.Name = "Copyright";
+            this.Copyright.Size = new System.Drawing.Size(228, 14);
+            this.Copyright.TabIndex = 36;
+            this.Copyright.Text = "NXTLib Copyright (C) 2014 Arthur Pachachura.";
+            this.Copyright.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // FindNXT
             // 
@@ -362,7 +378,7 @@
             this.ClientSize = new System.Drawing.Size(656, 412);
             this.Name = "FindNXT";
             this.Text = "FindNXT";
-            this.title = "NXT Version Updater";
+            this.title = "NXTLib Version Updater";
             this.Border.ResumeLayout(false);
             this.Border.PerformLayout();
             this.TopPanel.ResumeLayout(false);
@@ -394,5 +410,6 @@
         private System.Windows.Forms.Label Status;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Panel BottomPanel;
+        private System.Windows.Forms.Label Copyright;
     }
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using NXTLib;
 using System.IO;
 
-namespace nxtlibtester
+namespace NXTLibTester
 {
     class Program
     {
@@ -20,7 +20,7 @@ namespace nxtlibtester
 
         static void Main(string[] args)
         {
-            Console.WriteLine("File Upload Test\r\n");
+            Console.WriteLine("NXTLib File Upload Test\r\n");
 
             string filename = "version.ric"; //filename on disk (locally)
             string filenameonbrick = "version.ric"; //filename on remote NXT

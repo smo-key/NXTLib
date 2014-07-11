@@ -5,8 +5,8 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("NXTLibTesterGUI")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("NXTLib Testing GUI")]
+[assembly: AssemblyDescription("Windows Forms Demo for NXTLib")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("NXTLibTesterGUI")]

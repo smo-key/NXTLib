@@ -7,8 +7,8 @@
     <ProjectGuid>{990F29FB-F518-4973-87CF-4ADAB3663DF6}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>nxtlibtester</RootNamespace>
-    <AssemblyName>nxtlibtester</AssemblyName>
+    <RootNamespace>NXTLibTester</RootNamespace>
+    <AssemblyName>NXTLibTester</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <IsWebBootstrapper>false</IsWebBootstrapper>
@@ -51,7 +51,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\nxtlibtester.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\NXTLibTester.xml</DocumentationFile>
     <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
   </PropertyGroup>
   <PropertyGroup>
@@ -76,7 +76,7 @@
     <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>nxtlibtester.Program</StartupObject>
+    <StartupObject>NXTLibTester.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />

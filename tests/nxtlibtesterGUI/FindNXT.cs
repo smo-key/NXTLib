@@ -81,6 +81,7 @@ namespace NXTLibTesterGUI
                         Status.Image = null;
                         Status.Text = "Update Waiting!  Please pair to a brick now!";
                         Status.ForeColor = Color.White;
+                        Copyright.ForeColor = Color.FromArgb(225, 225, 225);
                         BottomPanel.BackColor = Color.Firebrick;
                     }
                     else
@@ -89,6 +90,7 @@ namespace NXTLibTesterGUI
                         Status.Text = "       Please pair to a brick.";
                         Status.ForeColor = Color.DodgerBlue;
                         BottomPanel.BackColor = SystemColors.Control;
+                        Copyright.ForeColor = Color.FromArgb(64, 64, 64);
                     }
                 }
                 else //if paired
@@ -96,6 +98,7 @@ namespace NXTLibTesterGUI
                     Status.Image = global::NXTLibTesterGUI.Properties.Resources.StatusAnnotations_Complete_and_ok_16xLG_color;
                     Status.Text = "       Paired and ready!";
                     Status.ForeColor = Color.Green;
+                    Copyright.ForeColor = Color.FromArgb(64, 64, 64);
                     BottomPanel.BackColor = SystemColors.Control;
                     if (updatewaiting)
                     {
