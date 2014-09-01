@@ -40,6 +40,7 @@ namespace NXTLibTesterGUI
         {
             TopPanel.Width = this.Width;
             Border.Size = this.Size;
+            int curx = TopPanel.Width - 4;
             
             SortedDictionary<int, Button> sorted = new SortedDictionary<int, Button>();
             foreach (Button item in TopPanel.Controls.OfType<Button>())
@@ -48,7 +49,8 @@ namespace NXTLibTesterGUI
             }
             for (int i = sorted.Count() - 1; i > -1; i--)
             {
-                int x = TopPanel.Width - 4 - (24 * (sorted.Count() - i));
+                int x = curx - (sorted.Values.ElementAt(i).Width);
+                curx = x;
                 Point p = new Point(x, sorted.Values.ElementAt(i).Location.Y);
                 sorted.Values.ElementAt(i).Location = p;
             } 

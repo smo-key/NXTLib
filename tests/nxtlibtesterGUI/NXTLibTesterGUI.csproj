@@ -35,6 +35,9 @@
     <StartupObject>NXTLibTesterGUI.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Ionic.Zip">
+      <HintPath>..\..\include\Ionic.Zip.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -53,6 +56,18 @@
     <Compile Include="BaseForm.Designer.cs">
       <DependentUpon>BaseForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="UploadImage.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UploadImage.Designer.cs">
+      <DependentUpon>UploadImage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DownloadImage.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DownloadImage.Designer.cs">
+      <DependentUpon>DownloadImage.cs</DependentUpon>
+    </Compile>
     <Compile Include="FindNXT.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -63,6 +78,12 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="BaseForm.resx">
       <DependentUpon>BaseForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UploadImage.resx">
+      <DependentUpon>UploadImage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DownloadImage.resx">
+      <DependentUpon>DownloadImage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FindNXT.resx">
       <DependentUpon>FindNXT.cs</DependentUpon>

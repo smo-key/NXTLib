@@ -338,7 +338,7 @@ namespace NXTLib
 
             Send(request);
             if (waitfor)
-                System.Threading.Thread.Sleep(5000);
+                System.Threading.Thread.Sleep(10000);
             return;
         }
 
@@ -1141,27 +1141,37 @@ namespace NXTLib
         /// [Native] Reads data from the NXT.
         /// </summary>
         /// <param name="handle">The handle, located in the OpenRead command.</param>
-        /// <param name="bytesToRead">The number of bytes to be read.</param>
+        /// <param name="bytesToRead">The number of bytes to be read, from the OpenRead command.</param>
         /// <returns>The requested data from NXT flash memory.</returns>
         public byte[] Read(byte handle, UInt16 bytesToRead)
         {
-            byte[] request = new byte[5];
-            request[0] = 0x01;
-            request[1] = (byte)MessageCommand.Read;
-            request[2] = handle;
-            SetUInt16(bytesToRead, request, 3);
-
-            byte[] reply = CompleteRequest(request);
-            if (reply[3] != handle)
+            UInt16 bytesReadTotal = 0;
+            int n = 0;
+            byte[] data = new byte[] { };
+            while (bytesReadTotal < data.Length)
             {
-                throw new NXTReplyIncorrect();
+                System.Threading.Thread.Sleep(7);
+
+                byte[] request = new byte[5];
+                request[0] = 0x01;
+                request[1] = (byte)MessageCommand.Read;
+                request[2] = handle;
+                SetUInt16(bytesToRead, request, 3);
+
+                byte[] reply = CompleteRequest(request);
+                if (reply[3] != handle)
+                {
+                    throw new NXTReplyIncorrect();
+                }
+                UInt16 bytesRead = GetUInt16(reply, 4);
+                byte[] response = new byte[bytesRead];
+                Array.Copy(reply, 6, response, 0, bytesRead);
+
+                bytesRead += GetUInt16(reply, 4);
+                n++;
             }
 
-            UInt16 bytesRead = GetUInt16(reply, 4);
-            byte[] response = new byte[bytesRead];
-            Array.Copy(reply, 6, response, 0, bytesRead);
-
-            return response;
+            return data;
         }
 
         /// <summary>
@@ -1520,7 +1530,7 @@ namespace NXTLib
             return reply;
         }
 
-        internal void ValidateFilename(string filename)
+        internal static void ValidateFilename(string filename)
         {
             if (filename.Length > 19)
             {
@@ -1529,7 +1539,7 @@ namespace NXTLib
             return;
         }
 
-        internal void ValidateFilename(string filename, string[] possible_extensions)
+        internal static void ValidateFilename(string filename, string[] possible_extensions)
         {
             if (filename.Length > 19)
             {
@@ -1564,9 +1574,12 @@ namespace NXTLib
             return;
         }
 
-        internal enum FileType { Program = 0, Internal_Program = 1, TryMe = 2, Image = 3, Sound = 4, System = 5, Sensor = 6, TXT = 7, LOG = 8, Firmware = 9 };
+        /// <summary>
+        /// NXT Native Filetypes
+        /// </summary>
+        public enum FileType { Program = 0, OnBrickProgram = 1, TryMe = 2, Image = 3, Sound = 4, System = 5, SensorCalibration = 6, TextFile = 7, LogFile = 8, Firmware = 9 };
 
-        internal string ValidateFilename(string filename, FileType filetype, bool appendifmissing)
+        internal static string ValidateFilename(string filename, FileType filetype, bool appendifmissing)
         {
             string name = filename;
             String[] FileTypes = new String[] { ".rxe", ".rpg", ".rtm", ".ric", ".rso", ".sys", ".cal", ".txt", ".log", ".rfw" };
@@ -1676,7 +1689,7 @@ namespace NXTLib
             };
         }
 
-        internal void ThrowError(byte error)
+        internal static void ThrowError(byte error)
         {
             if (error == 0x20)
             {

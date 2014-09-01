@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -220,7 +221,13 @@ namespace NXTLib
 
     #region Files
 
-        private string[] FindFiles(string fileMask)
+        /// <summary>
+        /// Find all files matching a pattern.
+        /// </summary>
+        /// <param name="fileMask">Pattern, can use wildcards (*).  Acceptable formations are
+        /// "filename.extention", "filename.*", "*.extension", and "*.*".</param> 
+        /// <returns></returns>
+        public string[] FindFiles(string fileMask)
         {
             List<string> fileArr = new List<string>();
 
@@ -236,6 +243,65 @@ namespace NXTLib
             catch (NXTFileNotFound) { }
 
             return fileArr.ToArray();
+        }
+
+        /// <summary>
+        /// Gets the extension of an NXT file type.
+        /// </summary>
+        /// <param name="filetype">The filetype extension, as enumerated by FileType.</param>
+        /// <returns>The extension of an NXT file type.</returns>
+        public static string FormFilename(Protocol.FileType filetype)
+        {
+            return Protocol.ValidateFilename("", filetype, true);
+        }
+
+        /// <summary>
+        /// Forms a valid filename from a name and type.
+        /// </summary>
+        /// <param name="filename">The filename, without an extension.</param>
+        /// <param name="filetype">The filetype extension, as enumerated by FileType.</param>
+        /// <returns>The valid filename with extension or an NXTException.</returns>
+        public static string FormFilename(string filename, Protocol.FileType filetype)
+        {
+            return Protocol.ValidateFilename(filename, filetype, true);
+        }
+
+        /// <summary>
+        /// Downloads a file from the NXT to a local location.
+        /// </summary>
+        /// <param name="filenameonbrick">The target file to upload to, with expension.</param>
+        /// <param name="filenamelocal">The name of the file to read from local disk.</param>
+        public void DownloadFile(string filenameonbrick, string filenamelocal)
+        {
+            //Delete File, if Exists
+            if (File.Exists(filenamelocal))
+            {
+                File.Delete(filenamelocal);
+            }
+            File.Create(filenamelocal);
+
+            //Check if file exists
+            if (!link.DoesExist(filenameonbrick)) { throw new NXTFileNotFound(); }
+
+            //Prepare NXT for reading
+            Protocol.NXTOpenReadReply reply = link.OpenRead(filenameonbrick);
+            byte[] contents = link.Read(reply.handle, (ushort)reply.fileSize);
+
+            //Close Remote Files
+            link.Close(reply.handle);
+
+            //Write byte array to local file
+            using (var stream = System.IO.File.OpenWrite(filenamelocal))
+            {
+                int offset = 0;
+                while (offset < contents.Length)
+                {
+                    stream.Write(contents, offset, contents.Length - offset);
+                }
+                stream.Close();
+            }
+
+            return;
         }
 
         /// <summary>
@@ -260,7 +326,7 @@ namespace NXTLib
                 while (offset < localcontents.Length)
                 {
                     int chunk = stream.Read(localcontents, offset, localcontents.Length - offset);
-                    if (chunk == 0) { throw new NXTException("Not all bytes written!"); }
+                    if (chunk == 0) { throw new IOException("Not all bytes written!"); }
                     offset += chunk;
                 }
                 stream.Close();

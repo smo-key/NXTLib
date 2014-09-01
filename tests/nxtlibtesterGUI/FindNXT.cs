@@ -476,9 +476,58 @@ namespace NXTLibTesterGUI
             Console.Items.Clear();
         }
 
-        private void Minimize_Click(object sender, EventArgs e)
+        private void DownloadImage_Click(object sender, EventArgs e)
         {
+            this.Enabled = false;
+            DownloadImage form = new DownloadImage(myBrick);
+            try
+            {
+                form.ShowDialog();
+            }
+            catch (ObjectDisposedException) { } //error raised if failed during initialization
 
+            if (form.returnerror != null) 
+            {
+                Status.Image = global::NXTLibTesterGUI.Properties.Resources.StatusAnnotations_Critical_16xLG_color;
+                Status.Text = "       " + form.returnerror;
+                Status.ForeColor = Color.Firebrick;
+                WriteMessage(form.returnerror);
+            }
+            else
+            {
+                Status.Image = global::NXTLibTesterGUI.Properties.Resources.StatusAnnotations_Complete_and_ok_16xLG_color;
+                Status.Text = "       Successfully downloaded image!";
+                Status.ForeColor = Color.Green;
+                WriteMessage("Successfully downloaded image!");
+            }
+            this.Enabled = true;
+        }
+
+        private void RestoreImage_Click(object sender, EventArgs e)
+        {
+            this.Enabled = false;
+            UploadImage form = new UploadImage(myBrick);
+            try
+            {
+                form.ShowDialog();
+            }
+            catch (ObjectDisposedException) { } //error raised if failed during initialization
+
+            if (form.returnerror != null)
+            {
+                Status.Image = global::NXTLibTesterGUI.Properties.Resources.StatusAnnotations_Critical_16xLG_color;
+                Status.Text = "       " + form.returnerror;
+                Status.ForeColor = Color.Firebrick;
+                WriteMessage(form.returnerror);
+            }
+            else
+            {
+                Status.Image = global::NXTLibTesterGUI.Properties.Resources.StatusAnnotations_Complete_and_ok_16xLG_color;
+                Status.Text = "       Successfully imaged NXT!";
+                Status.ForeColor = Color.Green;
+                WriteMessage("Successfully imaged NXT!");
+            }
+            this.Enabled = true;
         }
 
     }

@@ -48,17 +48,19 @@
             this.Border.Controls.Add(this.IconBox);
             this.Border.Controls.Add(this.TopPanel);
             this.Border.Location = new System.Drawing.Point(0, 0);
+            this.Border.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Border.Name = "Border";
-            this.Border.Size = new System.Drawing.Size(300, 400);
+            this.Border.Size = new System.Drawing.Size(399, 492);
             this.Border.TabIndex = 25;
             // 
             // IconBox
             // 
             this.IconBox.BackColor = System.Drawing.Color.Transparent;
             this.IconBox.Image = global::NXTLibTesterGUI.Properties.Resources.StatusAnnotations_Play_16xLG;
-            this.IconBox.Location = new System.Drawing.Point(6, 6);
+            this.IconBox.Location = new System.Drawing.Point(8, 7);
+            this.IconBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.IconBox.Name = "IconBox";
-            this.IconBox.Size = new System.Drawing.Size(16, 16);
+            this.IconBox.Size = new System.Drawing.Size(21, 21);
             this.IconBox.TabIndex = 24;
             this.IconBox.TabStop = false;
             this.IconBox.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Control_MouseDown);
@@ -71,8 +73,9 @@
             this.TopPanel.Controls.Add(this.CloseForm);
             this.TopPanel.Controls.Add(this.Title);
             this.TopPanel.Location = new System.Drawing.Point(-1, -1);
+            this.TopPanel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.TopPanel.Name = "TopPanel";
-            this.TopPanel.Size = new System.Drawing.Size(300, 30);
+            this.TopPanel.Size = new System.Drawing.Size(400, 37);
             this.TopPanel.TabIndex = 23;
             this.TopPanel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Control_MouseDown);
             this.TopPanel.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Control_MouseMove);
@@ -90,9 +93,10 @@
             this.Minimize.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.Minimize.Image = global::NXTLibTesterGUI.Properties.Resources.type_16xLG;
             this.Minimize.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.Minimize.Location = new System.Drawing.Point(242, 3);
+            this.Minimize.Location = new System.Drawing.Point(323, 4);
+            this.Minimize.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Minimize.Name = "Minimize";
-            this.Minimize.Size = new System.Drawing.Size(24, 24);
+            this.Minimize.Size = new System.Drawing.Size(32, 30);
             this.Minimize.TabIndex = 24;
             this.Minimize.TabStop = false;
             this.Minimize.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -115,9 +119,10 @@
             this.CloseForm.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.CloseForm.Image = global::NXTLibTesterGUI.Properties.Resources.Symbols_Critical_16xLG;
             this.CloseForm.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.CloseForm.Location = new System.Drawing.Point(271, 3);
+            this.CloseForm.Location = new System.Drawing.Point(361, 4);
+            this.CloseForm.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.CloseForm.Name = "CloseForm";
-            this.CloseForm.Size = new System.Drawing.Size(24, 24);
+            this.CloseForm.Size = new System.Drawing.Size(32, 30);
             this.CloseForm.TabIndex = 23;
             this.CloseForm.TabStop = false;
             this.CloseForm.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -134,9 +139,10 @@
             this.Title.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.Title.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Title.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
-            this.Title.Location = new System.Drawing.Point(26, 6);
+            this.Title.Location = new System.Drawing.Point(35, 7);
+            this.Title.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.Title.Name = "Title";
-            this.Title.Size = new System.Drawing.Size(32, 17);
+            this.Title.Size = new System.Drawing.Size(42, 23);
             this.Title.TabIndex = 6;
             this.Title.Text = "Title";
             this.Title.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Control_MouseDown);
@@ -148,12 +154,13 @@
             // 
             // BaseForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(300, 400);
+            this.ClientSize = new System.Drawing.Size(400, 492);
             this.Controls.Add(this.Border);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "BaseForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Activated += new System.EventHandler(this.PopupBase_Activated);

@@ -38,6 +38,8 @@
             this.Disconnect = new System.Windows.Forms.Button();
             this.ClearLog = new System.Windows.Forms.Button();
             this.NXTPanel = new System.Windows.Forms.Panel();
+            this.RestoreImage = new System.Windows.Forms.Button();
+            this.DownloadImage = new System.Windows.Forms.Button();
             this.NXTAdd = new System.Windows.Forms.Label();
             this.NXTConn = new System.Windows.Forms.Label();
             this.NXT = new System.Windows.Forms.Label();
@@ -65,7 +67,8 @@
             this.Border.Controls.Add(this.SearchVia);
             this.Border.Controls.Add(this.List);
             this.Border.Controls.Add(this.Search);
-            this.Border.Size = new System.Drawing.Size(656, 412);
+            this.Border.Margin = new System.Windows.Forms.Padding(7, 6, 7, 6);
+            this.Border.Size = new System.Drawing.Size(875, 507);
             this.Border.Controls.SetChildIndex(this.Search, 0);
             this.Border.Controls.SetChildIndex(this.List, 0);
             this.Border.Controls.SetChildIndex(this.SearchVia, 0);
@@ -81,12 +84,14 @@
             // 
             // TopPanel
             // 
-            this.TopPanel.Size = new System.Drawing.Size(656, 30);
+            this.TopPanel.Margin = new System.Windows.Forms.Padding(7, 6, 7, 6);
+            this.TopPanel.Size = new System.Drawing.Size(875, 37);
             // 
             // Title
             // 
-            this.Title.Size = new System.Drawing.Size(150, 17);
-            this.Title.Text = "NXTLib Version Updater";
+            this.Title.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.Title.Size = new System.Drawing.Size(171, 23);
+            this.Title.Text = "NXT Version Updater";
             // 
             // CloseForm
             // 
@@ -94,7 +99,8 @@
             this.CloseForm.FlatAppearance.CheckedBackColor = System.Drawing.SystemColors.ControlLightLight;
             this.CloseForm.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.HotTrack;
             this.CloseForm.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ControlLightLight;
-            this.CloseForm.Location = new System.Drawing.Point(628, 3);
+            this.CloseForm.Location = new System.Drawing.Point(839, 4);
+            this.CloseForm.Margin = new System.Windows.Forms.Padding(7, 6, 7, 6);
             this.ToolTips.SetToolTip(this.CloseForm, "Close");
             // 
             // Minimize
@@ -103,11 +109,14 @@
             this.Minimize.FlatAppearance.CheckedBackColor = System.Drawing.SystemColors.ControlLightLight;
             this.Minimize.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.HotTrack;
             this.Minimize.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ControlLightLight;
-            this.Minimize.Location = new System.Drawing.Point(604, 3);
+            this.Minimize.Location = new System.Drawing.Point(807, 4);
+            this.Minimize.Margin = new System.Windows.Forms.Padding(7, 6, 7, 6);
             // 
             // IconBox
             // 
             this.IconBox.Image = global::NXTLibTesterGUI.Properties.Resources.ASCube_16xLG;
+            this.IconBox.Margin = new System.Windows.Forms.Padding(5);
+            this.IconBox.Size = new System.Drawing.Size(28, 25);
             // 
             // Search
             // 
@@ -122,9 +131,10 @@
             this.Search.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.Search.Image = global::NXTLibTesterGUI.Properties.Resources.StatusAnnotations_Play_32xLG_color;
             this.Search.ImageAlign = System.Drawing.ContentAlignment.TopLeft;
-            this.Search.Location = new System.Drawing.Point(6, 35);
+            this.Search.Location = new System.Drawing.Point(8, 43);
+            this.Search.Margin = new System.Windows.Forms.Padding(4);
             this.Search.Name = "Search";
-            this.Search.Size = new System.Drawing.Size(286, 41);
+            this.Search.Size = new System.Drawing.Size(381, 50);
             this.Search.TabIndex = 25;
             this.Search.TabStop = false;
             this.Search.Text = " Search for NXT";
@@ -142,10 +152,10 @@
             this.List.Controls.Add(this.label1);
             this.List.Controls.Add(this.label5);
             this.List.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
-            this.List.Location = new System.Drawing.Point(6, 115);
+            this.List.Location = new System.Drawing.Point(8, 142);
             this.List.Margin = new System.Windows.Forms.Padding(0);
             this.List.Name = "List";
-            this.List.Size = new System.Drawing.Size(286, 264);
+            this.List.Size = new System.Drawing.Size(381, 325);
             this.List.TabIndex = 27;
             this.List.WrapContents = false;
             // 
@@ -156,9 +166,10 @@
             this.label1.ForeColor = System.Drawing.Color.White;
             this.label1.Image = global::NXTLibTesterGUI.Properties.Resources.field_16xLG;
             this.label1.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.label1.Location = new System.Drawing.Point(3, 0);
+            this.label1.Location = new System.Drawing.Point(4, 0);
+            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(259, 18);
+            this.label1.Size = new System.Drawing.Size(345, 22);
             this.label1.TabIndex = 1;
             this.label1.Text = "       NXT Name";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -172,9 +183,10 @@
             this.label5.ForeColor = System.Drawing.SystemColors.ControlText;
             this.label5.Image = global::NXTLibTesterGUI.Properties.Resources.field_16xLG;
             this.label5.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.label5.Location = new System.Drawing.Point(3, 18);
+            this.label5.Location = new System.Drawing.Point(4, 22);
+            this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(259, 18);
+            this.label5.Size = new System.Drawing.Size(345, 22);
             this.label5.TabIndex = 3;
             this.label5.Text = "       Mecabot";
             this.label5.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -187,9 +199,10 @@
             this.SearchVia.Items.AddRange(new object[] {
             "Search via USB",
             "Search via USB & Bluetooth"});
-            this.SearchVia.Location = new System.Drawing.Point(12, 84);
+            this.SearchVia.Location = new System.Drawing.Point(16, 103);
+            this.SearchVia.Margin = new System.Windows.Forms.Padding(4);
             this.SearchVia.Name = "SearchVia";
-            this.SearchVia.Size = new System.Drawing.Size(163, 21);
+            this.SearchVia.Size = new System.Drawing.Size(216, 24);
             this.SearchVia.TabIndex = 28;
             this.SearchVia.TabStop = false;
             // 
@@ -205,9 +218,10 @@
             "20 second search",
             "25 second search",
             "30 second search"});
-            this.Time.Location = new System.Drawing.Point(181, 84);
+            this.Time.Location = new System.Drawing.Point(241, 103);
+            this.Time.Margin = new System.Windows.Forms.Padding(4);
             this.Time.Name = "Time";
-            this.Time.Size = new System.Drawing.Size(111, 21);
+            this.Time.Size = new System.Drawing.Size(147, 24);
             this.Time.TabIndex = 30;
             this.Time.TabStop = false;
             // 
@@ -216,10 +230,12 @@
             this.Console.BackColor = System.Drawing.Color.WhiteSmoke;
             this.Console.FormattingEnabled = true;
             this.Console.HorizontalScrollbar = true;
-            this.Console.Location = new System.Drawing.Point(307, 76);
+            this.Console.ItemHeight = 16;
+            this.Console.Location = new System.Drawing.Point(409, 94);
+            this.Console.Margin = new System.Windows.Forms.Padding(4);
             this.Console.Name = "Console";
             this.Console.SelectionMode = System.Windows.Forms.SelectionMode.None;
-            this.Console.Size = new System.Drawing.Size(340, 303);
+            this.Console.Size = new System.Drawing.Size(452, 372);
             this.Console.TabIndex = 29;
             this.Console.TabStop = false;
             this.Console.UseTabStops = false;
@@ -237,9 +253,10 @@
             this.Disconnect.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.Disconnect.Image = global::NXTLibTesterGUI.Properties.Resources.StatusAnnotations_Critical_16xLG_color;
             this.Disconnect.ImageAlign = System.Drawing.ContentAlignment.TopLeft;
-            this.Disconnect.Location = new System.Drawing.Point(551, 44);
+            this.Disconnect.Location = new System.Drawing.Point(735, 54);
+            this.Disconnect.Margin = new System.Windows.Forms.Padding(4);
             this.Disconnect.Name = "Disconnect";
-            this.Disconnect.Size = new System.Drawing.Size(93, 26);
+            this.Disconnect.Size = new System.Drawing.Size(124, 32);
             this.Disconnect.TabIndex = 32;
             this.Disconnect.TabStop = false;
             this.Disconnect.Text = " Disconnect";
@@ -262,9 +279,10 @@
             this.ClearLog.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.ClearLog.Image = global::NXTLibTesterGUI.Properties.Resources.document_16xLG;
             this.ClearLog.ImageAlign = System.Drawing.ContentAlignment.TopLeft;
-            this.ClearLog.Location = new System.Drawing.Point(463, 44);
+            this.ClearLog.Location = new System.Drawing.Point(617, 54);
+            this.ClearLog.Margin = new System.Windows.Forms.Padding(4);
             this.ClearLog.Name = "ClearLog";
-            this.ClearLog.Size = new System.Drawing.Size(85, 26);
+            this.ClearLog.Size = new System.Drawing.Size(113, 32);
             this.ClearLog.TabIndex = 33;
             this.ClearLog.TabStop = false;
             this.ClearLog.Text = " Clear Log";
@@ -275,14 +293,65 @@
             // 
             // NXTPanel
             // 
+            this.NXTPanel.Controls.Add(this.RestoreImage);
+            this.NXTPanel.Controls.Add(this.DownloadImage);
             this.NXTPanel.Controls.Add(this.NXTAdd);
             this.NXTPanel.Controls.Add(this.NXTConn);
             this.NXTPanel.Controls.Add(this.NXT);
-            this.NXTPanel.Location = new System.Drawing.Point(12, 116);
+            this.NXTPanel.Location = new System.Drawing.Point(16, 143);
+            this.NXTPanel.Margin = new System.Windows.Forms.Padding(4);
             this.NXTPanel.Name = "NXTPanel";
-            this.NXTPanel.Size = new System.Drawing.Size(283, 263);
+            this.NXTPanel.Size = new System.Drawing.Size(377, 324);
             this.NXTPanel.TabIndex = 34;
             this.NXTPanel.Visible = false;
+            // 
+            // RestoreImage
+            // 
+            this.RestoreImage.BackColor = System.Drawing.Color.Transparent;
+            this.RestoreImage.FlatAppearance.BorderSize = 0;
+            this.RestoreImage.FlatAppearance.CheckedBackColor = System.Drawing.SystemColors.ControlLightLight;
+            this.RestoreImage.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.HotTrack;
+            this.RestoreImage.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ControlLightLight;
+            this.RestoreImage.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.RestoreImage.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.RestoreImage.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.RestoreImage.Image = global::NXTLibTesterGUI.Properties.Resources.Event_594_exp;
+            this.RestoreImage.ImageAlign = System.Drawing.ContentAlignment.TopLeft;
+            this.RestoreImage.Location = new System.Drawing.Point(24, 148);
+            this.RestoreImage.Margin = new System.Windows.Forms.Padding(4);
+            this.RestoreImage.Name = "RestoreImage";
+            this.RestoreImage.Size = new System.Drawing.Size(269, 32);
+            this.RestoreImage.TabIndex = 38;
+            this.RestoreImage.TabStop = false;
+            this.RestoreImage.Text = " Restore NXT Image";
+            this.RestoreImage.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.RestoreImage.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.RestoreImage.UseVisualStyleBackColor = false;
+            this.RestoreImage.Click += new System.EventHandler(this.RestoreImage_Click);
+            // 
+            // DownloadImage
+            // 
+            this.DownloadImage.BackColor = System.Drawing.Color.Transparent;
+            this.DownloadImage.FlatAppearance.BorderSize = 0;
+            this.DownloadImage.FlatAppearance.CheckedBackColor = System.Drawing.SystemColors.ControlLightLight;
+            this.DownloadImage.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.HotTrack;
+            this.DownloadImage.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ControlLightLight;
+            this.DownloadImage.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.DownloadImage.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.DownloadImage.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.DownloadImage.Image = global::NXTLibTesterGUI.Properties.Resources.build_Solution_16xLG;
+            this.DownloadImage.ImageAlign = System.Drawing.ContentAlignment.TopLeft;
+            this.DownloadImage.Location = new System.Drawing.Point(24, 117);
+            this.DownloadImage.Margin = new System.Windows.Forms.Padding(4);
+            this.DownloadImage.Name = "DownloadImage";
+            this.DownloadImage.Size = new System.Drawing.Size(269, 32);
+            this.DownloadImage.TabIndex = 37;
+            this.DownloadImage.TabStop = false;
+            this.DownloadImage.Text = " Download NXT Backup Image";
+            this.DownloadImage.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.DownloadImage.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.DownloadImage.UseVisualStyleBackColor = false;
+            this.DownloadImage.Click += new System.EventHandler(this.DownloadImage_Click);
             // 
             // NXTAdd
             // 
@@ -290,9 +359,10 @@
             this.NXTAdd.BackColor = System.Drawing.SystemColors.Control;
             this.NXTAdd.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
             this.NXTAdd.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.NXTAdd.Location = new System.Drawing.Point(21, 47);
+            this.NXTAdd.Location = new System.Drawing.Point(28, 58);
+            this.NXTAdd.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.NXTAdd.Name = "NXTAdd";
-            this.NXTAdd.Size = new System.Drawing.Size(259, 16);
+            this.NXTAdd.Size = new System.Drawing.Size(345, 20);
             this.NXTAdd.TabIndex = 4;
             this.NXTAdd.Text = "Address: 00:00:00:00:00:00";
             this.NXTAdd.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -303,9 +373,10 @@
             this.NXTConn.BackColor = System.Drawing.SystemColors.Control;
             this.NXTConn.ForeColor = System.Drawing.SystemColors.ControlText;
             this.NXTConn.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.NXTConn.Location = new System.Drawing.Point(21, 31);
+            this.NXTConn.Location = new System.Drawing.Point(28, 38);
+            this.NXTConn.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.NXTConn.Name = "NXTConn";
-            this.NXTConn.Size = new System.Drawing.Size(259, 16);
+            this.NXTConn.Size = new System.Drawing.Size(345, 20);
             this.NXTConn.TabIndex = 3;
             this.NXTConn.Text = "Connection Type: USB";
             this.NXTConn.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -318,8 +389,9 @@
             this.NXT.Image = global::NXTLibTesterGUI.Properties.Resources.field_16xLG;
             this.NXT.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.NXT.Location = new System.Drawing.Point(0, 0);
+            this.NXT.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.NXT.Name = "NXT";
-            this.NXT.Size = new System.Drawing.Size(283, 27);
+            this.NXT.Size = new System.Drawing.Size(377, 33);
             this.NXT.TabIndex = 2;
             this.NXT.Text = "       Connected to NXT Name";
             this.NXT.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -331,10 +403,11 @@
             this.Status.ForeColor = System.Drawing.Color.DodgerBlue;
             this.Status.Image = global::NXTLibTesterGUI.Properties.Resources.StatusAnnotations_Help_and_inconclusive_16xLG_color;
             this.Status.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.Status.Location = new System.Drawing.Point(3, 6);
-            this.Status.MinimumSize = new System.Drawing.Size(0, 14);
+            this.Status.Location = new System.Drawing.Point(4, 7);
+            this.Status.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.Status.MinimumSize = new System.Drawing.Size(0, 17);
             this.Status.Name = "Status";
-            this.Status.Size = new System.Drawing.Size(130, 14);
+            this.Status.Size = new System.Drawing.Size(173, 17);
             this.Status.TabIndex = 35;
             this.Status.Text = "       Please pair to a brick.";
             this.Status.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -342,9 +415,10 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(308, 61);
+            this.label2.Location = new System.Drawing.Point(411, 75);
+            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(45, 13);
+            this.label2.Size = new System.Drawing.Size(59, 17);
             this.label2.TabIndex = 31;
             this.label2.Text = "Console";
             // 
@@ -352,9 +426,10 @@
             // 
             this.BottomPanel.Controls.Add(this.Copyright);
             this.BottomPanel.Controls.Add(this.Status);
-            this.BottomPanel.Location = new System.Drawing.Point(-1, 384);
+            this.BottomPanel.Location = new System.Drawing.Point(-1, 473);
+            this.BottomPanel.Margin = new System.Windows.Forms.Padding(4);
             this.BottomPanel.Name = "BottomPanel";
-            this.BottomPanel.Size = new System.Drawing.Size(656, 26);
+            this.BottomPanel.Size = new System.Drawing.Size(875, 32);
             this.BottomPanel.TabIndex = 36;
             // 
             // Copyright
@@ -363,22 +438,24 @@
             this.Copyright.BackColor = System.Drawing.Color.Transparent;
             this.Copyright.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.Copyright.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.Copyright.Location = new System.Drawing.Point(420, 6);
-            this.Copyright.MinimumSize = new System.Drawing.Size(0, 14);
+            this.Copyright.Location = new System.Drawing.Point(560, 7);
+            this.Copyright.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.Copyright.MinimumSize = new System.Drawing.Size(0, 17);
             this.Copyright.Name = "Copyright";
-            this.Copyright.Size = new System.Drawing.Size(228, 14);
+            this.Copyright.Size = new System.Drawing.Size(305, 17);
             this.Copyright.TabIndex = 36;
             this.Copyright.Text = "NXTLib Copyright (C) 2014 Arthur Pachachura.";
             this.Copyright.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // FindNXT
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(656, 412);
+            this.ClientSize = new System.Drawing.Size(875, 507);
+            this.Margin = new System.Windows.Forms.Padding(5);
             this.Name = "FindNXT";
             this.Text = "FindNXT";
-            this.title = "NXTLib Version Updater";
+            this.title = "NXT Version Updater";
             this.Border.ResumeLayout(false);
             this.Border.PerformLayout();
             this.TopPanel.ResumeLayout(false);
@@ -411,5 +488,7 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Panel BottomPanel;
         private System.Windows.Forms.Label Copyright;
+        protected System.Windows.Forms.Button DownloadImage;
+        protected System.Windows.Forms.Button RestoreImage;
     }
 }
