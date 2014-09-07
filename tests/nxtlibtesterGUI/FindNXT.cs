@@ -494,21 +494,20 @@ namespace NXTLibTesterGUI
             }
             catch (ObjectDisposedException) { } //error raised if failed during initialization
 
-            if (form.returnerror != null && !form.returnwarning)
+            if (form.returnerror != null)
             {
                 Status.Image = global::NXTLibTesterGUI.Properties.Resources.StatusAnnotations_Critical_16xLG_color;
                 Status.Text = "       " + form.returnerror;
                 Status.ForeColor = Color.Firebrick;
                 WriteMessage(form.returnerror);
-                Disconnect_Click(sender, e);
+                if (!form.returnwarning) { Disconnect_Click(sender, e); }
             }
             else
             {
                 Status.Image = global::NXTLibTesterGUI.Properties.Resources.StatusAnnotations_Complete_and_ok_16xLG_color;
-                if (!form.returnwarning) { Status.Text = "       Successfully downloaded image!"; } else
-                { Status.Text = "       " + form.returnerror; }
-                Status.ForeColor = Color.Green;
+                Status.Text = "       Successfully downloaded image!"; 
                 WriteMessage("Successfully downloaded image!");
+                Status.ForeColor = Color.Green;
             }
             this.Enabled = true;
         }

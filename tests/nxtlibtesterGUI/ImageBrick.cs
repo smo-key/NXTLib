@@ -163,7 +163,7 @@ namespace NXTLibTesterGUI
                 if (vaultfiles != null)
                 {
                     System.Net.WebClient webs = new System.Net.WebClient();
-                    webs.DownloadFile("http://ehsandev.com/robotics/" + image, vaultdir + image);
+                    webs.DownloadFile("http://ehsandev.com/robotics/images/" + image, vaultdir + image);
                 }
 
                 //load zip
@@ -231,8 +231,12 @@ namespace NXTLibTesterGUI
 
         private void CloseOnError(string error)
         {
-            returnerror = error;
-            this.Invoke(new MethodInvoker(delegate { this.Close(); }));
+            try
+            {
+                returnerror = error;
+                this.Invoke(new MethodInvoker(delegate { this.Close(); }));
+            }
+            catch { }
         }
 
         private void SetStatus(string status)

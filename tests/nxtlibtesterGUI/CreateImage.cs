@@ -12,6 +12,7 @@ using System.Threading;
 using System.IO;
 using System.Net.Sockets;
 using Ionic.Zip;
+using System.Net;
 
 namespace NXTLibTesterGUI
 {
@@ -23,7 +24,9 @@ namespace NXTLibTesterGUI
         private Brick mybrick;
         private String[] filelist;
         private string tempdir = "tmp";
+        private string vaultdir = "vault/";
         private string image;
+        private string password = null;
 
         public CreateImage(Brick brick)
         {
@@ -32,8 +35,6 @@ namespace NXTLibTesterGUI
             mybrick = brick;
             ProgressPanel.Visible = false;
             PasswordPanel.Visible = true;
-
-            
         }
 
         private void StartDownloading()
@@ -62,27 +63,14 @@ namespace NXTLibTesterGUI
             { CloseOnError(ex.Message); return; }
         }
 
-        private void CheckPassword()
-        {
-            PasswordPanel.Enabled = false;
-            System.Net.WebClient webs = new System.Net.WebClient();
-            
-
-
-            PasswordPanel.Visible = false;
-            ProgressPanel.Visible = true;
-            StartDownloading();
-        }
-
         private void PrepareDownload()
         {
-            //open a save file dialog
-            DialogResult result = saveDialog.ShowDialog();
-            if (result != DialogResult.OK) { CloseOnError("Failed to save the image."); return; }
-            image = saveDialog.FileName;
-
             //connect to brick
             ConnectToBrick();
+
+            //prepare web vault
+            SetStatus("Connecting to Vault...");
+            if (!IsConnected()) { CloseOnError("Not connected to the Vault!"); return; }
 
             try
             {
@@ -109,6 +97,22 @@ namespace NXTLibTesterGUI
             //create UI elements
             this.Invoke(new MethodInvoker(delegate { CreateList(); }));
 
+        }
+
+        private bool IsConnected()
+        {
+            try
+            {
+                WebClient client = new WebClient();
+                using (var stream = client.OpenRead("http://ehsandev.com/"))
+                {
+                    return true;
+                }
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         private void CreateList()
@@ -167,8 +171,9 @@ namespace NXTLibTesterGUI
             try 
             {
                 //create zip
-                File.Delete(image);
-                ZipFile zip = new ZipFile(image);
+                if (!Directory.Exists(vaultdir)) { Directory.CreateDirectory(vaultdir); }
+                if (File.Exists(vaultdir + image)) { File.Delete(vaultdir + image); }
+                ZipFile zip = new ZipFile(vaultdir + image);
 
                 //load UI elements
                 this.Invoke(new MethodInvoker(delegate { LoadList(); }));
@@ -178,6 +183,7 @@ namespace NXTLibTesterGUI
 
                 string[] files = filelist;
                 Progress.Invoke(new MethodInvoker(delegate{ Progress.Maximum = files.Length + 2; }));
+
                 //download files
                 foreach (string file in files)
 	            {
@@ -206,16 +212,40 @@ namespace NXTLibTesterGUI
                     zip.AddFile(tempdir + "/" + file, "");
                 }
 
-                zip.Save(image);
+                zip.Save(vaultdir + image);
                 Directory.Delete(tempdir, true);
             }
             catch (Exception ex)
             { CloseOnError(ex.Message); return; }
 
-            //return successfully
-            returnwarning = !gotallfiles;
-            if (gotallfiles) { CloseOnError(null); } else { CloseOnError("Not all files could be recieved, but we created the image anyway."); }
+            if (UploadToVault())
+            {
+                //return successfully
+                returnwarning = !gotallfiles;
+                if (gotallfiles) { CloseOnError(null); } else { CloseOnError("Not all files could be recieved, but we created the image anyway."); }
+            }
 
+        }
+
+        private bool UploadToVault()
+        {
+            System.Net.WebClient webs = new System.Net.WebClient();
+            SetStatus("Uploading to Vault...");
+            try
+            {
+                byte[] response = webs.UploadFile("http://ehsandev.com/robotics/upload.php?password=" + password, "POST", vaultdir + image);
+                string str = System.Text.Encoding.Default.GetString(response);
+                if (str != "true")
+                {
+                    CloseOnError("Vault error: " + str);
+                    return false;
+                }
+            }
+            catch (WebException)
+            {
+                CloseOnError("Cannot access the Vault."); return false;
+            }
+            return true;
         }
 
         private void LoadList()
@@ -230,8 +260,12 @@ namespace NXTLibTesterGUI
 
         private void CloseOnError(string error)
         {
-            returnerror = error;
-            this.Invoke(new MethodInvoker(delegate { this.Close(); }));
+            try
+            {
+                returnerror = error;
+                this.Invoke(new MethodInvoker(delegate { this.Close(); }));
+            }
+            catch { }
         }
 
         private void SetStatus(string status)
@@ -278,7 +312,25 @@ namespace NXTLibTesterGUI
 
         private void Go_Click(object sender, EventArgs e)
         {
-            CheckPassword();
+            if (Go.Name != "NameIt")
+            {
+                //password entry
+                password = Entry.Text;
+                Entry.Clear();
+                Entry.ClearUndo();
+                Entry.UseSystemPasswordChar = false;
+                TextTitle.Text = "Enter image name.";
+                Go.Name = "NameIt";
+            }
+            else
+            {
+                //name entry
+                if (Entry.Text == null || Entry.Text.Trim() == "") { CloseOnError("No image name entered, you idiot!"); return; }
+                image = Entry.Text + ".rim";
+                PasswordPanel.Visible = false;
+                ProgressPanel.Visible = true;
+                StartDownloading();
+            }
         }
     }
 }

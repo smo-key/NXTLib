@@ -39,8 +39,8 @@
             this.MakeImage = new System.Windows.Forms.Button();
             this.PasswordPanel = new System.Windows.Forms.Panel();
             this.Go = new System.Windows.Forms.Button();
-            this.textBox1 = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
+            this.Entry = new System.Windows.Forms.TextBox();
+            this.TextTitle = new System.Windows.Forms.Label();
             this.Border.SuspendLayout();
             this.TopPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.IconBox)).BeginInit();
@@ -212,8 +212,8 @@
             // PasswordPanel
             // 
             this.PasswordPanel.Controls.Add(this.Go);
-            this.PasswordPanel.Controls.Add(this.textBox1);
-            this.PasswordPanel.Controls.Add(this.label1);
+            this.PasswordPanel.Controls.Add(this.Entry);
+            this.PasswordPanel.Controls.Add(this.TextTitle);
             this.PasswordPanel.Location = new System.Drawing.Point(8, 43);
             this.PasswordPanel.Name = "PasswordPanel";
             this.PasswordPanel.Size = new System.Drawing.Size(379, 91);
@@ -241,27 +241,27 @@
             this.Go.UseVisualStyleBackColor = false;
             this.Go.Click += new System.EventHandler(this.Go_Click);
             // 
-            // textBox1
+            // Entry
             // 
-            this.textBox1.Location = new System.Drawing.Point(30, 53);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(297, 22);
-            this.textBox1.TabIndex = 26;
-            this.textBox1.UseSystemPasswordChar = true;
+            this.Entry.Location = new System.Drawing.Point(30, 53);
+            this.Entry.Name = "Entry";
+            this.Entry.Size = new System.Drawing.Size(297, 22);
+            this.Entry.TabIndex = 26;
+            this.Entry.UseSystemPasswordChar = true;
             // 
-            // label1
+            // TextTitle
             // 
-            this.label1.AutoSize = true;
-            this.label1.BackColor = System.Drawing.Color.Transparent;
-            this.label1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.label1.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
-            this.label1.Location = new System.Drawing.Point(26, 11);
-            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(231, 23);
-            this.label1.TabIndex = 25;
-            this.label1.Text = "Enter programmer password.";
+            this.TextTitle.AutoSize = true;
+            this.TextTitle.BackColor = System.Drawing.Color.Transparent;
+            this.TextTitle.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.TextTitle.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.TextTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.TextTitle.Location = new System.Drawing.Point(26, 11);
+            this.TextTitle.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.TextTitle.Name = "TextTitle";
+            this.TextTitle.Size = new System.Drawing.Size(231, 23);
+            this.TextTitle.TabIndex = 25;
+            this.TextTitle.Text = "Enter programmer password.";
             // 
             // CreateImage
             // 
@@ -296,8 +296,8 @@
         private System.Windows.Forms.CheckBox checkBox4;
         protected System.Windows.Forms.Button MakeImage;
         private System.Windows.Forms.Panel PasswordPanel;
-        protected System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox textBox1;
+        protected System.Windows.Forms.Label TextTitle;
+        private System.Windows.Forms.TextBox Entry;
         protected System.Windows.Forms.Button Go;
 
     }
