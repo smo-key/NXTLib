@@ -15,7 +15,7 @@ using Ionic.Zip;
 
 namespace NXTLibTesterGUI
 {
-    public partial class DownloadImage : BaseForm
+    public partial class CreateImage : BaseForm
     {
         public string returnerror { get; private set; }
         public bool returnwarning { get; private set; }
@@ -25,12 +25,19 @@ namespace NXTLibTesterGUI
         private string tempdir = "tmp";
         private string image;
 
-        public DownloadImage(Brick brick)
+        public CreateImage(Brick brick)
         {
             InitializeComponent();
             returnerror = null;
             mybrick = brick;
+            ProgressPanel.Visible = false;
+            PasswordPanel.Visible = true;
 
+            
+        }
+
+        private void StartDownloading()
+        {
             Thread downloadthread = new Thread(PrepareDownload);
             downloadthread.Name = "PrepareDownloadThread";
             downloadthread.IsBackground = true;
@@ -53,6 +60,18 @@ namespace NXTLibTesterGUI
             { CloseOnError("Not connected to a brick!"); return; }
             catch (Exception ex)
             { CloseOnError(ex.Message); return; }
+        }
+
+        private void CheckPassword()
+        {
+            PasswordPanel.Enabled = false;
+            System.Net.WebClient webs = new System.Net.WebClient();
+            
+
+
+            PasswordPanel.Visible = false;
+            ProgressPanel.Visible = true;
+            StartDownloading();
         }
 
         private void PrepareDownload()
@@ -97,7 +116,7 @@ namespace NXTLibTesterGUI
             this.Height = this.Height * 464 / 145;
             this.FileList.Controls.Clear();
             FileList.Visible = true;
-            CreateImage.Visible = true;
+            MakeImage.Visible = true;
             ProgressPanel.Visible = false;
 
             foreach (string item in filelist)
@@ -235,11 +254,18 @@ namespace NXTLibTesterGUI
 
         }
 
+        internal override void CloseForm_Click(object sender, EventArgs e)
+        {
+            //return cancelled error
+            returnwarning = true;
+            CloseOnError("Cancelled by user.");
+        }
+
         private void CreateImage_Click(object sender, EventArgs e)
         {
             CloseForm.Visible = false;
             FileList.Visible = false;
-            CreateImage.Visible = false;
+            MakeImage.Visible = false;
             ProgressPanel.Visible = true;
             this.Height = this.Height * 145 / 464;
 
@@ -248,6 +274,11 @@ namespace NXTLibTesterGUI
             downloadthread.IsBackground = true;
             downloadthread.SetApartmentState(ApartmentState.STA);
             downloadthread.Start();
+        }
+
+        private void Go_Click(object sender, EventArgs e)
+        {
+            CheckPassword();
         }
     }
 }

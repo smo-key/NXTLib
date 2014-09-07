@@ -12,24 +12,34 @@ using System.Threading;
 using System.IO;
 using System.Net.Sockets;
 using Ionic.Zip;
+using System.Net;
 
 namespace NXTLibTesterGUI
 {
-    public partial class UploadImage : BaseForm
+    public partial class ImageBrick : BaseForm
     {
         public string returnerror { get; private set; }
         
-        private Thread uploadthread;
         private Brick mybrick;
+        string vaultdir = "vault/";
+        string[] vaultfiles = null;
 
-        public UploadImage(Brick brick)
+        public ImageBrick(Brick brick)
         {
             InitializeComponent();
             returnerror = null;
             mybrick = brick;
             ResizeRedraw = true;
-            ProgressPanel.Visible = false;
-            StartPanel.Visible = true;
+            PrepareVault();
+        }
+
+        private void PrepareVault() 
+        {
+            Thread uploadthread = new Thread(SyncVault);
+            uploadthread.Name = "PrepareVaultThread";
+            uploadthread.IsBackground = true;
+            uploadthread.SetApartmentState(ApartmentState.STA);
+            uploadthread.Start();
         }
 
         private void StartUpload()
@@ -38,20 +48,93 @@ namespace NXTLibTesterGUI
             ProgressPanel.Visible = true;
             CloseForm.Visible = false;
 
-            uploadthread = new Thread(Upload);
+            Thread uploadthread = new Thread(Upload);
             uploadthread.Name = "UploadThread";
             uploadthread.IsBackground = true;
             uploadthread.SetApartmentState(ApartmentState.STA);
             uploadthread.Start();
         }
 
+        private void SyncVault()
+        {
+            System.Threading.Thread.Sleep(100);
+
+            SetStatus("Syncing Vault...");
+            System.Net.WebClient webs = new System.Net.WebClient();
+            try
+            {
+                if (!IsConnected()) { throw new WebException(); }
+                string list = webs.DownloadString("http://ehsandev.com/robotics/listversions.php");
+
+                //get file list
+                string[] files = list.Split(',');
+                vaultfiles = files;
+            } 
+            catch (WebException)
+            {
+                vaultfiles = null;
+            }
+
+            this.Invoke(new MethodInvoker(delegate { UpdateUISync(); }));
+        }
+
+        private void UpdateUISync()
+        {
+            StartPanel.Visible = true;
+            ProgressPanel.Visible = false;
+
+            string[] files = new string[] { };
+
+            //find files
+            if (vaultfiles != null)
+            {
+                IconBox.BackColor = TopPanel.BackColor = Color.DodgerBlue;
+                Title.ForeColor = Color.White;
+                Title.Text = "Restore NXT from Vault";
+
+                files = vaultfiles;
+            }
+            else
+            {
+                if (Directory.Exists(vaultdir))
+                {
+                    string[] unparsedfiles = Directory.GetFiles(vaultdir, "*.rim", SearchOption.TopDirectoryOnly);
+                    List<string> filelist = new List<string>();
+                    foreach (string item in unparsedfiles)
+                    {
+                        FileInfo file = new FileInfo(item);
+                        filelist.Add(file.Name);
+                    }
+                    files = filelist.ToArray();
+                }
+            }
+
+            //list all versions from vault
+            foreach (string version in files)
+            {
+                if (version == null) { continue; }
+                if (version.Trim() == "") { continue; }
+                if (!version.EndsWith(".rim")) { continue; }
+
+                string parsed = version.Substring(0, version.Length - 4);
+
+                ImageList.Items.Add(parsed);
+            }
+
+            ImageList.SelectedIndex = 0;
+            
+        }
+
         private void Upload()
         {
-            //open an open file dialog
-            DialogResult result = openDialog.ShowDialog();
-            if (result != DialogResult.OK) { CloseOnError("Failed to find an image."); return; }
-            String image = openDialog.FileName;
-
+            //get file name
+            string image = null;
+            this.Invoke(new MethodInvoker(delegate
+            { 
+                if (ImageList.SelectedIndex == 0) { CloseOnError("You need to select a version!"); return; }
+                image = ImageList.Items[ImageList.SelectedIndex] + ".rim";
+            }));
+            
             //connect to brick
             try
             {
@@ -73,8 +156,18 @@ namespace NXTLibTesterGUI
                 if (Directory.Exists(temp)) { Directory.Delete(temp, true); }
                 Directory.CreateDirectory(temp);
 
+                //create vault directory
+                if (!Directory.Exists(vaultdir)) { Directory.CreateDirectory(vaultdir); }
+
+                //download file, if need to
+                if (vaultfiles != null)
+                {
+                    System.Net.WebClient webs = new System.Net.WebClient();
+                    webs.DownloadFile("http://ehsandev.com/robotics/" + image, vaultdir + image);
+                }
+
                 //load zip
-                ZipFile zip = new ZipFile(image);
+                ZipFile zip = new ZipFile(vaultdir + image);
                 ZipEntry[] files = zip.ToArray();
                 Progress.Invoke(new MethodInvoker(delegate { Progress.Maximum = files.Length + 2; }));
 
@@ -105,6 +198,22 @@ namespace NXTLibTesterGUI
 
             //return successfully
             CloseOnError(null);
+        }
+
+        private bool IsConnected()
+        {
+            try
+            {
+                WebClient client = new WebClient();
+                using (var stream = client.OpenRead("http://ehsandev.com/"))
+                {
+                    return true;
+                }
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         private void WipeBrick()

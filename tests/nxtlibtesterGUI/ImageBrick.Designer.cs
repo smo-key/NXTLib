@@ -1,6 +1,6 @@
 ﻿namespace NXTLibTesterGUI
 {
-    partial class UploadImage
+    partial class ImageBrick
     {
         /// <summary>
         /// Required designer variable.
@@ -33,8 +33,10 @@
             this.ProgressPanel = new System.Windows.Forms.Panel();
             this.label1 = new System.Windows.Forms.Label();
             this.StartPanel = new System.Windows.Forms.Panel();
+            this.ImageList = new System.Windows.Forms.ComboBox();
             this.ImageNow = new System.Windows.Forms.Button();
             this.openDialog = new System.Windows.Forms.OpenFileDialog();
+            this.label2 = new System.Windows.Forms.Label();
             this.Border.SuspendLayout();
             this.TopPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.IconBox)).BeginInit();
@@ -46,11 +48,11 @@
             // 
             this.Border.Controls.Add(this.ProgressPanel);
             this.Border.Controls.Add(this.StartPanel);
-            this.Border.Size = new System.Drawing.Size(400, 145);
-            this.Border.Controls.SetChildIndex(this.TopPanel, 0);
-            this.Border.Controls.SetChildIndex(this.IconBox, 0);
+            this.Border.Size = new System.Drawing.Size(400, 169);
             this.Border.Controls.SetChildIndex(this.StartPanel, 0);
             this.Border.Controls.SetChildIndex(this.ProgressPanel, 0);
+            this.Border.Controls.SetChildIndex(this.TopPanel, 0);
+            this.Border.Controls.SetChildIndex(this.IconBox, 0);
             // 
             // Title
             // 
@@ -103,7 +105,7 @@
             // 
             this.ProgressPanel.Controls.Add(this.Progress);
             this.ProgressPanel.Controls.Add(this.Status);
-            this.ProgressPanel.Location = new System.Drawing.Point(10, 45);
+            this.ProgressPanel.Location = new System.Drawing.Point(10, 55);
             this.ProgressPanel.Name = "ProgressPanel";
             this.ProgressPanel.Size = new System.Drawing.Size(379, 91);
             this.ProgressPanel.TabIndex = 27;
@@ -118,18 +120,35 @@
             this.label1.Location = new System.Drawing.Point(50, 65);
             this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(311, 19);
+            this.label1.Size = new System.Drawing.Size(254, 19);
             this.label1.TabIndex = 29;
-            this.label1.Text = "This will delete ALL user created data on the NXT!";
+            this.label1.Text = "ALL USER DATA WILL BE OBLITERATED!";
             // 
             // StartPanel
             // 
+            this.StartPanel.Controls.Add(this.label2);
+            this.StartPanel.Controls.Add(this.ImageList);
             this.StartPanel.Controls.Add(this.ImageNow);
             this.StartPanel.Controls.Add(this.label1);
             this.StartPanel.Location = new System.Drawing.Point(-1, 36);
             this.StartPanel.Name = "StartPanel";
-            this.StartPanel.Size = new System.Drawing.Size(400, 87);
+            this.StartPanel.Size = new System.Drawing.Size(400, 131);
             this.StartPanel.TabIndex = 36;
+            this.StartPanel.Visible = false;
+            // 
+            // ImageList
+            // 
+            this.ImageList.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.ImageList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.ImageList.FormattingEnabled = true;
+            this.ImageList.Items.AddRange(new object[] {
+            "Select a Version..."});
+            this.ImageList.Location = new System.Drawing.Point(113, 88);
+            this.ImageList.Margin = new System.Windows.Forms.Padding(4);
+            this.ImageList.Name = "ImageList";
+            this.ImageList.Size = new System.Drawing.Size(251, 24);
+            this.ImageList.TabIndex = 37;
+            this.ImageList.TabStop = false;
             // 
             // ImageNow
             // 
@@ -163,12 +182,26 @@
             this.openDialog.Filter = "Robot Images|*.rim";
             this.openDialog.Title = "Open NXT Image";
             // 
-            // UploadImage
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.BackColor = System.Drawing.Color.Transparent;
+            this.label2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.label2.Font = new System.Drawing.Font("Segoe UI", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.label2.Location = new System.Drawing.Point(50, 90);
+            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(55, 19);
+            this.label2.TabIndex = 38;
+            this.label2.Text = "Version";
+            // 
+            // ImageBrick
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(400, 145);
-            this.Name = "UploadImage";
+            this.ClientSize = new System.Drawing.Size(400, 169);
+            this.Name = "ImageBrick";
             this.Text = "DownloadImage";
             this.title = "Restore NXT from Image";
             this.Border.ResumeLayout(false);
@@ -192,6 +225,8 @@
         private System.Windows.Forms.Panel StartPanel;
         private System.Windows.Forms.OpenFileDialog openDialog;
         protected System.Windows.Forms.Button ImageNow;
+        private System.Windows.Forms.ComboBox ImageList;
+        protected System.Windows.Forms.Label label2;
 
     }
 }

@@ -487,7 +487,7 @@ namespace NXTLibTesterGUI
         private void DownloadImage_Click(object sender, EventArgs e)
         {
             this.Enabled = false;
-            DownloadImage form = new DownloadImage(myBrick);
+            CreateImage form = new CreateImage(myBrick);
             try
             {
                 form.ShowDialog();
@@ -516,7 +516,7 @@ namespace NXTLibTesterGUI
         private void RestoreImage_Click(object sender, EventArgs e)
         {
             this.Enabled = false;
-            UploadImage form = new UploadImage(myBrick);
+            ImageBrick form = new ImageBrick(myBrick);
             try
             {
                 form.ShowDialog();

@@ -56,17 +56,17 @@
     <Compile Include="BaseForm.Designer.cs">
       <DependentUpon>BaseForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="UploadImage.cs">
+    <Compile Include="ImageBrick.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UploadImage.Designer.cs">
-      <DependentUpon>UploadImage.cs</DependentUpon>
+    <Compile Include="ImageBrick.Designer.cs">
+      <DependentUpon>ImageBrick.cs</DependentUpon>
     </Compile>
-    <Compile Include="DownloadImage.cs">
+    <Compile Include="CreateImage.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="DownloadImage.Designer.cs">
-      <DependentUpon>DownloadImage.cs</DependentUpon>
+    <Compile Include="CreateImage.Designer.cs">
+      <DependentUpon>CreateImage.cs</DependentUpon>
     </Compile>
     <Compile Include="FindNXT.cs">
       <SubType>Form</SubType>
@@ -79,11 +79,11 @@
     <EmbeddedResource Include="BaseForm.resx">
       <DependentUpon>BaseForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UploadImage.resx">
-      <DependentUpon>UploadImage.cs</DependentUpon>
+    <EmbeddedResource Include="ImageBrick.resx">
+      <DependentUpon>ImageBrick.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="DownloadImage.resx">
-      <DependentUpon>DownloadImage.cs</DependentUpon>
+    <EmbeddedResource Include="CreateImage.resx">
+      <DependentUpon>CreateImage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FindNXT.resx">
       <DependentUpon>FindNXT.cs</DependentUpon>
