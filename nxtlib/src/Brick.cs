@@ -230,10 +230,10 @@ namespace NXTLib
         public string[] FindFiles(string fileMask)
         {
             List<string> fileArr = new List<string>();
-
-            Protocol.FindFileReply reply = link.FindFirst(fileMask);
+            
             try
             {
+                Protocol.FindFileReply reply = link.FindFirst(fileMask);
                 while (reply.fileFound)
                 {
                     fileArr.Add(reply.filename);

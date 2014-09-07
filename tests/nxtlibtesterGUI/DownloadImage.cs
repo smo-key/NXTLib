@@ -82,7 +82,10 @@ namespace NXTLibTesterGUI
 
             }
             catch (Exception ex)
-            { CloseOnError(ex.Message); return; }
+            { 
+                CloseOnError(ex.Message);
+                return; 
+            }
 
             //create UI elements
             this.Invoke(new MethodInvoker(delegate { CreateList(); }));
@@ -178,7 +181,7 @@ namespace NXTLibTesterGUI
                 AddProgress(1);
                 foreach (string file in files)
                 {
-                    zip.AddFile(tempdir + "/" + file);
+                    zip.AddFile(tempdir + "/" + file, "");
                 }
 
                 zip.Save(image);

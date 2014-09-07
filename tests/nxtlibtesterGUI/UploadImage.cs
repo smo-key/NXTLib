@@ -90,15 +90,18 @@ namespace NXTLibTesterGUI
                     AddProgress(1);
                     SetStatus("Extracting " + file.FileName + "...");
                     file.Extract(temp + "/", ExtractExistingFileAction.OverwriteSilently);
-                    SetStatus("Uploading " + file + "...");
+                    SetStatus("Uploading " + file.FileName + "...");
                     mybrick.UploadFile(temp + "/" + file.FileName, file.FileName);
 	            }
 
                 //clean up
-                Directory.Delete(temp);
+                Directory.Delete(temp, true);
             }
             catch (Exception ex)
-            { CloseOnError(ex.Message); return; }
+            { 
+                CloseOnError(ex.Message);
+                return;
+            }
 
             //return successfully
             CloseOnError(null);
@@ -107,7 +110,13 @@ namespace NXTLibTesterGUI
         private void WipeBrick()
         {
             SetStatus("Wiping NXT...");
-            mybrick.link.DeleteUserFlash(true);
+            String[] list = mybrick.FindFiles(Brick.FormFilename("*", Protocol.FileType.Program));
+            list = list.Concat(mybrick.FindFiles(Brick.FormFilename("*", Protocol.FileType.Image))).ToArray();
+            list = list.Concat(mybrick.FindFiles(Brick.FormFilename("*", Protocol.FileType.TextFile))).ToArray();
+            foreach (string file in list)
+            {
+                mybrick.link.Delete(file);
+            }
         }
 
         private void CloseOnError(string error)
