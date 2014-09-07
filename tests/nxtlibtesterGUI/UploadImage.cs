@@ -111,6 +111,7 @@ namespace NXTLibTesterGUI
         {
             SetStatus("Wiping NXT...");
             String[] list = mybrick.FindFiles(Brick.FormFilename("*", Protocol.FileType.Program));
+            list = list.Concat(mybrick.FindFiles(Brick.FormFilename("*", Protocol.FileType.TryMe))).ToArray();
             list = list.Concat(mybrick.FindFiles(Brick.FormFilename("*", Protocol.FileType.Image))).ToArray();
             list = list.Concat(mybrick.FindFiles(Brick.FormFilename("*", Protocol.FileType.TextFile))).ToArray();
             foreach (string file in list)
@@ -138,6 +139,12 @@ namespace NXTLibTesterGUI
         private void SetProgress(int value)
         {
             Progress.Invoke(new MethodInvoker(delegate { Progress.Value = value; }));
+        }
+
+        internal override void CloseForm_Click(object sender, EventArgs e)
+        {
+            //return cancelled error
+            CloseOnError("Cancelled by user.");
         }
 
         private void ImageNow_Click(object sender, EventArgs e)

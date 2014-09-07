@@ -70,12 +70,12 @@ namespace NXTLibTesterGUI
                 //prepare file system
                 if (Directory.Exists(tempdir)) { Directory.Delete(tempdir, true); }
                 Directory.CreateDirectory(tempdir);
-                File.Delete(image);
 
                 //get file list
                 SetStatus("Getting file list...");
                 mybrick.link.KeepAlive();
                 string[] files = mybrick.FindFiles(Brick.FormFilename("*", Protocol.FileType.Program));
+                files = files.Concat(mybrick.FindFiles(Brick.FormFilename("*", Protocol.FileType.TryMe))).ToArray();
                 files = files.Concat(mybrick.FindFiles(Brick.FormFilename("*", Protocol.FileType.TextFile))).ToArray();
                 files = files.Concat(mybrick.FindFiles(Brick.FormFilename("*", Protocol.FileType.Image))).ToArray();
                 filelist = files;
@@ -117,24 +117,26 @@ namespace NXTLibTesterGUI
             item.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             item.UseVisualStyleBackColor = true;
 
-            string type = "Program: ";
-            Bitmap image = global::NXTLibTesterGUI.Properties.Resources.StatusAnnotations_Play_16xLG;
+            Bitmap image = global::NXTLibTesterGUI.Properties.Resources.StatusAnnotations_Play_16xLG_color;
             item.Checked = true;
 
+            if (file.Contains(Brick.FormFilename("", Protocol.FileType.TryMe)))
+            {
+                image = global::NXTLibTesterGUI.Properties.Resources.StatusAnnotations_Play_16xLG;
+                item.Checked = false;
+            }
             if (file.Contains(Brick.FormFilename("", Protocol.FileType.Image)))
             {
-                type = "Image: ";
                 image = global::NXTLibTesterGUI.Properties.Resources.resource_16xLG;
                 item.Checked = false;
             }
             if (file.Contains(Brick.FormFilename("", Protocol.FileType.TextFile)))
             {
-                type = "Text File: ";
                 image = global::NXTLibTesterGUI.Properties.Resources.pencil_005_16xLG;
                 item.Checked = false;
             }
 
-            item.Text = type + file;
+            item.Text = file;
             item.Image = image;
             this.FileList.Controls.Add(item);
         }
@@ -146,6 +148,7 @@ namespace NXTLibTesterGUI
             try 
             {
                 //create zip
+                File.Delete(image);
                 ZipFile zip = new ZipFile(image);
 
                 //load UI elements
