@@ -444,6 +444,14 @@ namespace NXTLibTesterGUI
                     return;
                 }
             }
+
+            try
+            {
+                myBrick.Disconnect();
+            }
+            catch (NXTNotConnected)
+            { }
+
             myBrick = new Brick();
             Disconnect.Enabled = false;
             List.Visible = true;
@@ -486,17 +494,19 @@ namespace NXTLibTesterGUI
             }
             catch (ObjectDisposedException) { } //error raised if failed during initialization
 
-            if (form.returnerror != null) 
+            if (form.returnerror != null && !form.returnwarning)
             {
                 Status.Image = global::NXTLibTesterGUI.Properties.Resources.StatusAnnotations_Critical_16xLG_color;
                 Status.Text = "       " + form.returnerror;
                 Status.ForeColor = Color.Firebrick;
                 WriteMessage(form.returnerror);
+                Disconnect_Click(sender, e);
             }
             else
             {
                 Status.Image = global::NXTLibTesterGUI.Properties.Resources.StatusAnnotations_Complete_and_ok_16xLG_color;
-                Status.Text = "       Successfully downloaded image!";
+                if (!form.returnwarning) { Status.Text = "       Successfully downloaded image!"; } else
+                { Status.Text = "       " + form.returnerror; }
                 Status.ForeColor = Color.Green;
                 WriteMessage("Successfully downloaded image!");
             }
@@ -519,6 +529,7 @@ namespace NXTLibTesterGUI
                 Status.Text = "       " + form.returnerror;
                 Status.ForeColor = Color.Firebrick;
                 WriteMessage(form.returnerror);
+                Disconnect_Click(sender, e);
             }
             else
             {

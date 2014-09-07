@@ -28,16 +28,13 @@ namespace NXTLibTesterGUI
             returnerror = null;
             mybrick = brick;
             ResizeRedraw = true;
+            ProgressPanel.Visible = false;
+            StartPanel.Visible = true;
         }
 
         private void StartUpload()
         {
-            if (!Programs.Checked && !Images.Checked && !Textfiles.Checked && !Flags.Checked && !Wipe.Checked)
-            {
-                CloseOnError("No options selected!");
-            }
             StartPanel.Visible = false;
-            this.Height = this.Height * 145 / 289;
             ProgressPanel.Visible = true;
             CloseForm.Visible = false;
 
@@ -71,16 +68,9 @@ namespace NXTLibTesterGUI
 
             try
             {
-                if (!Programs.Checked && !Images.Checked && !Textfiles.Checked && !Flags.Checked && Wipe.Checked)
-                {
-                    //if only wipe checked
-                    WipeBrick();
-                    return;
-                }
-
                 //create temporary directory
                 string temp = "tmp";
-                if (Directory.Exists(temp)) { Directory.Delete(temp); }
+                if (Directory.Exists(temp)) { Directory.Delete(temp, true); }
                 Directory.CreateDirectory(temp);
 
                 //load zip
@@ -92,23 +82,16 @@ namespace NXTLibTesterGUI
                 mybrick.link.KeepAlive();
 
                 //remove all NXT user files
-                if (Wipe.Checked)
-                {
-                    WipeBrick();
-                    mybrick.link.KeepAlive();
-                }
+                WipeBrick();
 
                 //download files
                 foreach (ZipEntry file in files)
 	            {
                     AddProgress(1);
-                    if (TestFile(file.FileName))
-                    {
-                        SetStatus("Extracting " + file.FileName + "...");
-                        file.Extract(temp + "/", ExtractExistingFileAction.OverwriteSilently);
-                        SetStatus("Uploading " + file + "...");
-                        mybrick.UploadFile(temp + "/" + file.FileName, file.FileName);
-                    }
+                    SetStatus("Extracting " + file.FileName + "...");
+                    file.Extract(temp + "/", ExtractExistingFileAction.OverwriteSilently);
+                    SetStatus("Uploading " + file + "...");
+                    mybrick.UploadFile(temp + "/" + file.FileName, file.FileName);
 	            }
 
                 //clean up
@@ -119,22 +102,6 @@ namespace NXTLibTesterGUI
 
             //return successfully
             CloseOnError(null);
-        }
-
-        private bool TestFile(string filename)
-        {
-            if (Programs.Checked && filename.Contains(Brick.FormFilename(".", Protocol.FileType.Program))) { return true; }
-            if (Images.Checked &&
-                (filename.Contains(Brick.FormFilename(".", Protocol.FileType.Image)) ||
-                 filename.Contains(Brick.FormFilename(".", Protocol.FileType.Sound)))) { return true; }
-            if (Textfiles.Checked &&
-                (filename.Contains(Brick.FormFilename(".", Protocol.FileType.LogFile)) ||
-                 filename.Contains(Brick.FormFilename(".", Protocol.FileType.TextFile)))) { return true; }
-            if (Flags.Checked &&
-                (filename.Contains(Brick.FormFilename(".", Protocol.FileType.OnBrickProgram)) ||
-                 filename.Contains(Brick.FormFilename(".", Protocol.FileType.SensorCalibration)) ||
-                 filename.Contains(Brick.FormFilename(".", Protocol.FileType.TryMe)))) { return true; }
-            return false;
         }
 
         private void WipeBrick()

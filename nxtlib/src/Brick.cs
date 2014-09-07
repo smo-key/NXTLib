@@ -278,7 +278,7 @@ namespace NXTLib
             {
                 File.Delete(filenamelocal);
             }
-            File.Create(filenamelocal);
+            //File.Create(filenamelocal);
 
             //Check if file exists
             if (!link.DoesExist(filenameonbrick)) { throw new NXTFileNotFound(); }
@@ -288,16 +288,13 @@ namespace NXTLib
             byte[] contents = link.Read(reply.handle, (ushort)reply.fileSize);
 
             //Close Remote Files
+            System.Threading.Thread.Sleep(100);
             link.Close(reply.handle);
 
             //Write byte array to local file
             using (var stream = System.IO.File.OpenWrite(filenamelocal))
             {
-                int offset = 0;
-                while (offset < contents.Length)
-                {
-                    stream.Write(contents, offset, contents.Length - offset);
-                }
+                stream.Write(contents, 0, contents.Length);
                 stream.Close();
             }
 

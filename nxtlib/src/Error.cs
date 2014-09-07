@@ -55,6 +55,12 @@ namespace NXTLib
         { get { return "Handle already closed."; } }
         public override byte ErrorByte { get { return 0x88; } }
     }
+    public class NXTNoHandles : NXTException
+    {
+        public override string Message
+        { get { return "No more handles.  Please turn off and on the brick."; } }
+        public override byte ErrorByte { get { return 0x81; } }
+    }
     public class NXTFileBusy : NXTException
     {
         public override string Message

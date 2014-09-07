@@ -18,9 +18,12 @@ namespace NXTLibTesterGUI
     public partial class DownloadImage : BaseForm
     {
         public string returnerror { get; private set; }
+        public bool returnwarning { get; private set; }
         
-        private Thread downloadthread;
         private Brick mybrick;
+        private String[] filelist;
+        private string tempdir = "tmp";
+        private string image;
 
         public DownloadImage(Brick brick)
         {
@@ -28,70 +31,176 @@ namespace NXTLibTesterGUI
             returnerror = null;
             mybrick = brick;
 
-            downloadthread = new Thread(Download);
-            downloadthread.Name = "DownloadThread";
+            Thread downloadthread = new Thread(PrepareDownload);
+            downloadthread.Name = "PrepareDownloadThread";
             downloadthread.IsBackground = true;
             downloadthread.SetApartmentState(ApartmentState.STA);
             downloadthread.Start();
         }
 
-        private void Download()
+        private void ConnectToBrick()
         {
-            //open a save file dialog
-            DialogResult result = saveDialog.ShowDialog();
-            if (result != DialogResult.OK) { CloseOnError("Failed to save the image."); return; }
-            String image = saveDialog.FileName;
-
             //connect to brick
             try
             {
                 if (!mybrick.Connect()) { throw new NXTNotConnected(); }
             }
             catch (SocketException)
-            { CloseOnError("Brick is busy!  Perform a soft reset by turning the brick off for a few seconds.");  return; }
+            { CloseOnError("Brick is busy!  Perform a soft reset by turning the brick off for a few seconds."); return; }
             catch (Win32Exception)
-            { CloseOnError("Brick is busy!  Perform a soft reset by turning the brick off for a few seconds.");  return; }
+            { CloseOnError("Brick is busy!  Perform a soft reset by turning the brick off for a few seconds."); return; }
             catch (NullReferenceException)
             { CloseOnError("Not connected to a brick!"); return; }
             catch (Exception ex)
             { CloseOnError(ex.Message); return; }
+        }
+
+        private void PrepareDownload()
+        {
+            //open a save file dialog
+            DialogResult result = saveDialog.ShowDialog();
+            if (result != DialogResult.OK) { CloseOnError("Failed to save the image."); return; }
+            image = saveDialog.FileName;
+
+            //connect to brick
+            ConnectToBrick();
 
             try
             {
                 //prepare file system
-                string temp = "tmp";
-                if (Directory.Exists(temp)) { Directory.Delete(temp); }
-                Directory.CreateDirectory(temp);
-
-                //create zip
-                ZipFile zip = new ZipFile(image);
+                if (Directory.Exists(tempdir)) { Directory.Delete(tempdir, true); }
+                Directory.CreateDirectory(tempdir);
+                File.Delete(image);
 
                 //get file list
                 SetStatus("Getting file list...");
                 mybrick.link.KeepAlive();
-                string[] files = mybrick.FindFiles("*.*");
-                Progress.Invoke(new MethodInvoker(delegate{ Progress.Maximum = files.Length + 2; }));
+                string[] files = mybrick.FindFiles(Brick.FormFilename("*", Protocol.FileType.Program));
+                files = files.Concat(mybrick.FindFiles(Brick.FormFilename("*", Protocol.FileType.TextFile))).ToArray();
+                files = files.Concat(mybrick.FindFiles(Brick.FormFilename("*", Protocol.FileType.Image))).ToArray();
+                filelist = files;
 
+            }
+            catch (Exception ex)
+            { CloseOnError(ex.Message); return; }
+
+            //create UI elements
+            this.Invoke(new MethodInvoker(delegate { CreateList(); }));
+
+        }
+
+        private void CreateList()
+        {
+            this.Height = this.Height * 464 / 145;
+            this.FileList.Controls.Clear();
+            FileList.Visible = true;
+            CreateImage.Visible = true;
+            ProgressPanel.Visible = false;
+
+            foreach (string item in filelist)
+            {
+                AddItem(item);
+            }
+        }
+
+        private void AddItem(string file)
+        {
+            CheckBox item = new System.Windows.Forms.CheckBox();
+            item.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            item.Location = new System.Drawing.Point(3, 3);
+            item.Name = file;
+            item.Size = new System.Drawing.Size(180, 24);
+            item.TabIndex = 37;
+            item.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            item.UseVisualStyleBackColor = true;
+
+            string type = "Program: ";
+            Bitmap image = global::NXTLibTesterGUI.Properties.Resources.StatusAnnotations_Play_16xLG;
+            item.Checked = true;
+
+            if (file.Contains(Brick.FormFilename("", Protocol.FileType.Image)))
+            {
+                type = "Image: ";
+                image = global::NXTLibTesterGUI.Properties.Resources.resource_16xLG;
+                item.Checked = false;
+            }
+            if (file.Contains(Brick.FormFilename("", Protocol.FileType.TextFile)))
+            {
+                type = "Text File: ";
+                image = global::NXTLibTesterGUI.Properties.Resources.pencil_005_16xLG;
+                item.Checked = false;
+            }
+
+            item.Text = type + file;
+            item.Image = image;
+            this.FileList.Controls.Add(item);
+        }
+
+        private void Download()
+        {
+            bool gotallfiles = true;
+
+            try 
+            {
+                //create zip
+                ZipFile zip = new ZipFile(image);
+
+                //load UI elements
+                this.Invoke(new MethodInvoker(delegate { LoadList(); }));
+
+                //prepare brick
+                mybrick.link.KeepAlive();
+
+                string[] files = filelist;
+                Progress.Invoke(new MethodInvoker(delegate{ Progress.Maximum = files.Length + 2; }));
                 //download files
                 foreach (string file in files)
 	            {
-                    AddProgress(1);
-                    SetStatus("Downloading " + file + "...");
-                    mybrick.DownloadFile(file, temp + "/" + file);
-                    SetStatus("Adding " + file + "...");
-                    zip.AddFile(temp + "/" + file);
+                    try
+                    {
+                        AddProgress(1);
+                        SetStatus("Downloading " + file + "...");
+                        mybrick.DownloadFile(file, tempdir + "/" + file);
+                    }
+                    catch (NXTNoHandles)
+                    {
+                        if (file.Contains(Brick.FormFilename("*", Protocol.FileType.Program))) { throw new NXTNoHandles(); }
+                        gotallfiles = false;
+                        break;
+                    }
 	            }
 
+                //close connection
+                mybrick.Disconnect();
+
+                //add files
                 SetStatus("Saving image...");
                 AddProgress(1);
-                zip.Save();
-                Directory.Delete(temp);
+                foreach (string file in files)
+                {
+                    zip.AddFile(tempdir + "/" + file);
+                }
+
+                zip.Save(image);
+                Directory.Delete(tempdir, true);
             }
             catch (Exception ex)
             { CloseOnError(ex.Message); return; }
 
             //return successfully
-            CloseOnError(null);
+            returnwarning = !gotallfiles;
+            if (gotallfiles) { CloseOnError(null); } else { CloseOnError("Not all files could be recieved, but we created the image anyway."); }
+
+        }
+
+        private void LoadList()
+        {
+            List<String> files = new List<String>();
+            foreach (CheckBox item in this.FileList.Controls)
+            {
+                if (item.Checked) { files.Add(item.Name); }
+            }
+            filelist = files.ToArray();
         }
 
         private void CloseOnError(string error)
@@ -113,6 +222,26 @@ namespace NXTLibTesterGUI
         private void SetProgress(int value)
         {
             Progress.Invoke(new MethodInvoker(delegate { Progress.Value = value; }));
+        }
+
+        private void checkBox5_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void CreateImage_Click(object sender, EventArgs e)
+        {
+            CloseForm.Visible = false;
+            FileList.Visible = false;
+            CreateImage.Visible = false;
+            ProgressPanel.Visible = true;
+            this.Height = this.Height * 145 / 464;
+
+            Thread downloadthread = new Thread(Download);
+            downloadthread.Name = "DownloadThread";
+            downloadthread.IsBackground = true;
+            downloadthread.SetApartmentState(ApartmentState.STA);
+            downloadthread.Start();
         }
     }
 }

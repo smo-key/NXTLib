@@ -347,7 +347,7 @@
             this.DownloadImage.Size = new System.Drawing.Size(269, 32);
             this.DownloadImage.TabIndex = 37;
             this.DownloadImage.TabStop = false;
-            this.DownloadImage.Text = " Download NXT Backup Image";
+            this.DownloadImage.Text = " Create NXT Backup Image";
             this.DownloadImage.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.DownloadImage.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.DownloadImage.UseVisualStyleBackColor = false;

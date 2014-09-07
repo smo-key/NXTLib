@@ -997,7 +997,7 @@ namespace NXTLib
         /// <returns>The reply as struct NXTOpenReadReply.</returns>
         public NXTOpenReadReply OpenRead(string filename)
         {
-            ValidateFilename(filename, new string[] { ".rxe", ".ric", ".rso", ".rdt", ".txt" });
+            ValidateFilename(filename);
 
             byte[] request = new byte[22];
             request[0] = 0x01;
@@ -1145,18 +1145,21 @@ namespace NXTLib
         /// <returns>The requested data from NXT flash memory.</returns>
         public byte[] Read(byte handle, UInt16 bytesToRead)
         {
-            UInt16 bytesReadTotal = 0;
             int n = 0;
             byte[] data = new byte[] { };
-            while (bytesReadTotal < data.Length)
+            while (data.Length < bytesToRead)
             {
                 System.Threading.Thread.Sleep(7);
+
+                int max = bytesToRead;
+                if ((58 * (n + 1)) < max) { max = (58 * (n + 1)); }
+                UInt16 bytesneeded = (ushort)(max - (58 * n));
 
                 byte[] request = new byte[5];
                 request[0] = 0x01;
                 request[1] = (byte)MessageCommand.Read;
                 request[2] = handle;
-                SetUInt16(bytesToRead, request, 3);
+                SetUInt16(bytesneeded, request, 3);
 
                 byte[] reply = CompleteRequest(request);
                 if (reply[3] != handle)
@@ -1167,7 +1170,7 @@ namespace NXTLib
                 byte[] response = new byte[bytesRead];
                 Array.Copy(reply, 6, response, 0, bytesRead);
 
-                bytesRead += GetUInt16(reply, 4);
+                data = data.Concat(response).ToArray();
                 n++;
             }
 
@@ -1229,8 +1232,27 @@ namespace NXTLib
             (byte) MessageCommand.Close,
             handle
             };
-            CompleteRequest(request);
 
+            byte[] reply = CompleteRequest(request);
+            byte handleOut = reply[3];
+            if (handleOut != handle)
+            {
+                throw new NXTReplyIncorrect();
+            }
+
+            return;
+        }
+
+        public void Defrag()
+        {
+            byte[] request = new byte[] {
+                0x81,
+                (byte) 0x21
+            };
+
+            Send(request);
+
+            //byte[] reply = CompleteRequest(request);
             return;
         }
 
@@ -1500,7 +1522,7 @@ namespace NXTLib
             ResetMotorPosition = 0x0A, GetBatteryLevel = 0x0B,
             StopSoundPlayback = 0x0C, KeepAlive = 0x0D, LSGetStatus = 0x0E,
             LSWrite = 0x0F, LSRead = 0x10, GetCurrentProgramName = 0x11,
-            MessageRead = 0x13
+            MessageRead = 0x13, Defrag = 0x21
         }
 
         internal enum MessageCommand
@@ -1763,7 +1785,7 @@ namespace NXTLib
             //Message Commands
             if (error == 0x81)
             {
-                throw new NXTException("No more handles.", error);
+                throw new NXTNoHandles();
             }
             if (error == 0x82)
             {
