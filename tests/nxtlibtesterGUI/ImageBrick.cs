@@ -90,7 +90,7 @@ namespace NXTLibTesterGUI
             {
                 IconBox.BackColor = TopPanel.BackColor = Color.DodgerBlue;
                 Title.ForeColor = Color.White;
-                Title.Text = "Restore NXT from Vault";
+                Title.Text = "Restore NXT from Online Vault";
 
                 files = vaultfiles;
             }
@@ -107,6 +107,7 @@ namespace NXTLibTesterGUI
                     }
                     files = filelist.ToArray();
                 }
+                Title.Text = "Restore NXT from Local Image";
             }
 
             //list all versions from vault
@@ -202,18 +203,7 @@ namespace NXTLibTesterGUI
 
         private bool IsConnected()
         {
-            try
-            {
-                WebClient client = new WebClient();
-                using (var stream = client.OpenRead("http://ehsandev.com/"))
-                {
-                    return true;
-                }
-            }
-            catch
-            {
-                return false;
-            }
+            return System.Net.NetworkInformation.NetworkInterface.GetIsNetworkAvailable();
         }
 
         private void WipeBrick()

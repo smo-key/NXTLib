@@ -101,18 +101,7 @@ namespace NXTLibTesterGUI
 
         private bool IsConnected()
         {
-            try
-            {
-                WebClient client = new WebClient();
-                using (var stream = client.OpenRead("http://ehsandev.com/"))
-                {
-                    return true;
-                }
-            }
-            catch
-            {
-                return false;
-            }
+            return System.Net.NetworkInformation.NetworkInterface.GetIsNetworkAvailable();
         }
 
         private void CreateList()
