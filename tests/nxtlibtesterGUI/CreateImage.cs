@@ -166,8 +166,6 @@ namespace NXTLibTesterGUI
 
         private void Download()
         {
-            bool gotallfiles = true;
-
             try 
             {
                 //create zip
@@ -187,18 +185,9 @@ namespace NXTLibTesterGUI
                 //download files
                 foreach (string file in files)
 	            {
-                    try
-                    {
-                        AddProgress(1);
-                        SetStatus("Downloading " + file + "...");
-                        mybrick.DownloadFile(file, tempdir + "/" + file);
-                    }
-                    catch (NXTNoHandles)
-                    {
-                        if (file.Contains(Brick.FormFilename("*", Protocol.FileType.Program))) { throw new NXTNoHandles(); }
-                        gotallfiles = false;
-                        break;
-                    }
+                    AddProgress(1);
+                    SetStatus("Downloading " + file + "...");
+                    mybrick.DownloadFile(file, tempdir + "/" + file);
 	            }
 
                 //close connection
@@ -221,9 +210,7 @@ namespace NXTLibTesterGUI
             if (UploadToVault())
             {
                 //return successfully
-                returnwarning = !gotallfiles;
-                if (gotallfiles) { CloseOnError(null); } else { CloseOnError("Not all files could be recieved, but we created the image anyway."); }
-            }
+                CloseOnError(null);         }
 
         }
 
